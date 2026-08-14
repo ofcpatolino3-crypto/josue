@@ -1,0 +1,6 @@
+{
+  "name": "Portal Concurso - Painel de Contatos",
+  "description": "Painel de gestão de leads e vendas com acompanhamento WhatsApp, radar de alertas de inatividade (3+ dias sem contato), monitoramento de vendedores, importação/distribuição de planilhas e IA de conversão.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "Contact": {
+      "title": "Contact",
+      "description": "Contato / lead do aluno interessado",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID único do contato" },
+        "nome": { "type": "string", "description": "Nome do contato" },
+        "whatsapp": { "type": "string", "description": "Número do WhatsApp" },
+        "email": { "type": "string", "description": "E-mail do contato" },
+        "curso": { "type": "string", "description": "Curso ou interesse" },
+        "temperatura": { "type": "string", "description": "Frio | Morno | Quente | Potencial | Pagou" },
+        "dataContato": { "type": "string", "description": "Data de cadastro YYYY-MM-DD" },
+        "ultimoContato": { "type": "string", "description": "Data do último contato YYYY-MM-DD" },
+        "proximoContato": { "type": "string", "description": "Data agendada YYYY-MM-DD" },
+        "status": { "type": "string", "description": "Status da abordagem" },
+        "observacao": { "type": "string", "description": "Notas e observações" },
+        "assignedTo": { "type": "string", "description": "UID do atendente responsável" },
+        "assignedToEmail": { "type": "string", "description": "Email do atendente responsável" },
+        "batchId": { "type": "string", "description": "ID do lote/planilha de importação" },
+        "batchName": { "type": "string", "description": "Nome do lote/planilha de importação" }
+      },
+      "required": ["id", "nome", "temperatura"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Perfil de usuário e controle de acesso e permissões",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "Email do usuário" },
+        "displayName": { "type": "string", "description": "Nome de exibição" },
+        "photoURL": { "type": "string", "description": "Foto de perfil" },
+        "role": { "type": "string", "enum": ["admin", "attendant"], "description": "Função no sistema" },
+        "status": { "type": "string", "enum": ["approved", "pending", "blocked"], "description": "Status de liberação do acesso" },
+        "createdAt": { "type": "number", "description": "Timestamp de criação" },
+        "approvedAt": { "type": "number", "description": "Timestamp de aprovação" },
+        "approvedBy": { "type": "string", "description": "Email do admin que aprovou" }
+      },
+      "required": ["uid", "email", "status", "role"]
+    },
+    "LeadBatch": {
+      "title": "LeadBatch",
+      "description": "Lote ou planilha importada pelo administrador para distribuição",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID único do lote" },
+        "name": { "type": "string", "description": "Nome da planilha ou lote" },
+        "totalLeads": { "type": "number", "description": "Total de contatos no lote" },
+        "distributedLeads": { "type": "number", "description": "Contatos já distribuídos" },
+        "createdAt": { "type": "number", "description": "Timestamp de criação" },
+        "createdBy": { "type": "string", "description": "Email do criador" }
+      },
+      "required": ["id", "name", "totalLeads"]
+    }
+  },
+  "firestore": {
+    "/user_profiles/{uid}": {
+      "schema": "UserProfile",
+      "description": "Perfis de usuários, cargos e status de liberação de acesso"
+    },
+    "/lead_batches/{batchId}": {
+      "schema": "LeadBatch",
+      "description": "Lotes de planilhas criadas pelo admin para distribuição"
+    },
+    "/global_contacts/{contactId}": {
+      "schema": "Contact",
+      "description": "Contatos globais gerenciados pelo admin e atribuídos aos atendentes"
+    },
+    "/users/{userId}/contacts/{contactId}": {
+      "schema": "Contact",
+      "description": "Contatos locais e sincronizados de cada usuário"
+    }
+  }
+}
