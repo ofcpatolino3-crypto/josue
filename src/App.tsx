@@ -1095,6 +1095,64 @@ export default function App() {
     addToast('Contato marcado como contatado hoje!', 'success');
   };
 
+  // Bulk mark multiple/all filtered contacts as contacted (useful for external WhatsApp/SMS blast campaigns)
+  const handleBulkMarkAsContacted = async (targetContacts: Contact[], labelDescription = 'todos os contatos visíveis') => {
+    if (!targetContacts || targetContacts.length === 0) {
+      addToast('Nenhum contato na lista para marcar.', 'info');
+      return;
+    }
+
+    const uncontacted = targetContacts.filter((c) => !c.ultimoContato);
+    const countToUpdate = uncontacted.length > 0 ? uncontacted.length : targetContacts.length;
+
+    const confirmed = window.confirm(
+      `Confirma marcar ${countToUpdate} contato(s) de "${labelDescription}" como CONTATADOS HOJE (${todayStr()})?\n\nIsso moverá os contatos para a aba "Contatados".`
+    );
+
+    if (!confirmed) return;
+
+    const today = todayStr();
+    const updatedIds = new Set(targetContacts.map((c) => c.id));
+
+    // Update state immediately
+    setContacts((prev) =>
+      prev.map((c) => {
+        if (updatedIds.has(c.id)) {
+          return {
+            ...c,
+            ultimoContato: today,
+            dataContato: c.dataContato || today,
+          };
+        }
+        return c;
+      })
+    );
+
+    // Save batch to cloud
+    try {
+      if (currentProfile?.uid) {
+        const batch = writeBatch(db);
+        targetContacts.forEach((c) => {
+          const contactRef = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
+          batch.set(
+            contactRef,
+            {
+              ...c,
+              ultimoContato: today,
+              dataContato: c.dataContato || today,
+            },
+            { merge: true }
+          );
+        });
+        await batch.commit();
+      }
+      addToast(`🎉 Sucesso! ${countToUpdate} contatos marcados como contatados hoje!`, 'success');
+    } catch (e: any) {
+      console.error('Error saving bulk contacts:', e);
+      addToast(`${countToUpdate} contatos atualizados localmente.`, 'info');
+    }
+  };
+
   const handleUndoContact = (id: string) => {
     const target = contacts.find((c) => c.id === id);
     if (target) {
@@ -1369,16 +1427,40 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Add Manual Contact Button */}
-                <button
-                  type="button"
-                  id="add-contact-btn"
-                  onClick={() => setShowAddForm(true)}
-                  className="flex items-center justify-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0"
-                >
-                  <UserPlus className="w-4 h-4 text-[#C9A227]" />
-                  <span>Novo Contato</span>
-                </button>
+                {/* Action Buttons: Marcar Todos Disparados + Novo Contato */}
+                <div className="flex items-center gap-2">
+                  {filteredContacts.length > 0 && (
+                    <button
+                      type="button"
+                      id="bulk-mark-contacted-btn"
+                      onClick={() =>
+                        handleBulkMarkAsContacted(
+                          filteredContacts,
+                          filterCurso
+                            ? `Curso: ${filterCurso} (${filteredContacts.length} contatos)`
+                            : tabFilter === 'pendente'
+                            ? `Pendentes (${filteredContacts.length} contatos)`
+                            : `Lista atual (${filteredContacts.length} contatos)`
+                        )
+                      }
+                      title="Marcar todos os contatos listados/filtrados como contatados hoje (ideal após disparos em massa no Saler)"
+                      className="flex items-center justify-center gap-1.5 bg-[#6E8F5C]/20 hover:bg-[#6E8F5C]/35 text-[#4ADE80] border border-[#6E8F5C]/40 font-semibold text-xs sm:text-sm px-3 py-2 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
+                      <span>Marcar Todos como Contatados ({filteredContacts.length})</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    id="add-contact-btn"
+                    onClick={() => setShowAddForm(true)}
+                    className="flex items-center justify-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0"
+                  >
+                    <UserPlus className="w-4 h-4 text-[#C9A227]" />
+                    <span>Novo Contato</span>
+                  </button>
+                </div>
               </div>
 
               {/* Filters Row: Curso, Temperatura, Ordenação */}
@@ -1497,15 +1579,35 @@ export default function App() {
                             </span>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() => setMessageModalContact(c)}
-                            className="text-[11px] font-semibold text-[#6E8F5C] hover:text-[#4ADE80] flex items-center gap-1 bg-[#101B2D] border border-[#6E8F5C]/40 px-2.5 py-1 rounded cursor-pointer transition-colors"
-                            title={`Iniciar disparos a partir deste curso`}
-                          >
-                            <Send className="w-3 h-3" />
-                            <span>Enviar a partir daqui</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const courseContacts = filteredContacts.filter(
+                                  (item) => (item.curso || '') === (c.curso || '')
+                                );
+                                handleBulkMarkAsContacted(
+                                  courseContacts,
+                                  `Curso: ${c.curso || 'Sem Curso'}`
+                                );
+                              }}
+                              className="text-[11px] font-semibold text-[#8C98B4] hover:text-[#4ADE80] flex items-center gap-1 bg-[#101B2D] border border-[#2B3D63] hover:border-[#6E8F5C]/50 px-2 py-1 rounded cursor-pointer transition-colors"
+                              title="Marcar todos os alunos deste curso como contatados após disparo"
+                            >
+                              <CheckCircle2 className="w-3 h-3 text-[#4ADE80]" />
+                              <span>Marcar este curso como contatado</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setMessageModalContact(c)}
+                              className="text-[11px] font-semibold text-[#6E8F5C] hover:text-[#4ADE80] flex items-center gap-1 bg-[#101B2D] border border-[#6E8F5C]/40 px-2.5 py-1 rounded cursor-pointer transition-colors"
+                              title={`Iniciar disparos a partir deste curso`}
+                            >
+                              <Send className="w-3 h-3" />
+                              <span>Enviar a partir daqui</span>
+                            </button>
+                          </div>
                         </div>
                       )}
 
