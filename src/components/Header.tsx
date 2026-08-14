@@ -21,7 +21,6 @@ interface HeaderProps {
   currentProfile: UserProfile | null;
   pendingApprovalsCount?: number;
   inactiveAlertsCount?: number;
-  onForceAdminMode?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,7 +32,6 @@ export const Header: React.FC<HeaderProps> = ({
   currentProfile,
   pendingApprovalsCount = 0,
   inactiveAlertsCount = 0,
-  onForceAdminMode,
 }) => {
   const isAdmin = currentProfile?.role === 'admin';
 
@@ -150,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({
           Planos
         </button>
 
-        {isAdmin ? (
+        {isAdmin && (
           <button
             id="nav-btn-admin"
             onClick={() => onSelectView('admin')}
@@ -181,18 +179,6 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             )}
           </button>
-        ) : (
-          onForceAdminMode && (
-            <button
-              id="nav-btn-switch-admin"
-              onClick={onForceAdminMode}
-              className="ml-auto my-auto flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#C9A227]/15 hover:bg-[#C9A227]/30 text-[#C9A227] border border-[#C9A227]/40 font-bold text-xs cursor-pointer transition-all shadow-xs shrink-0"
-              title="Ativar privilégios de Administrador Master"
-            >
-              <Shield className="w-3.5 h-3.5 text-[#C9A227]" />
-              Entrar como Admin
-            </button>
-          )
         )}
       </nav>
     </header>

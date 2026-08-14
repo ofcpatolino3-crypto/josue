@@ -112,30 +112,15 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_SESSION);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (
-          parsed.email?.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase() ||
-          parsed.username === 'admin' ||
-          parsed.uid === 'master_admin_root' ||
-          parsed.role === 'admin'
-        ) {
-          return {
-            ...parsed,
-            role: 'admin',
-            status: 'approved',
-            displayName: parsed.displayName || 'Administrador Master',
-          };
-        }
-        return parsed;
+        return JSON.parse(saved);
       }
     } catch (e) {
       console.error(e);
     }
-    // Auto-restore admin master profile by default so user is never locked out
-    return MASTER_ADMIN_PROFILE;
+    return null;
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [loginModalTab, setLoginModalTab] = useState<'login' | 'register' | 'admin'>('login');
+  const [loginModalTab, setLoginModalTab] = useState<'login' | 'register'>('login');
   const [authLoading, setAuthLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const initialCloudLoadDone = useRef(false);
@@ -210,6 +195,13 @@ export default function App() {
   const [salesAssistantContact, setSalesAssistantContact] = useState<Contact | null>(null);
   const [showAIChatAssistant, setShowAIChatAssistant] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Auto redirect if not admin trying to access admin tab
+  useEffect(() => {
+    if (activeView === 'admin' && currentProfile?.role !== 'admin') {
+      setActiveView('contatos');
+    }
+  }, [activeView, currentProfile]);
 
   // --- USER PROFILE & FIRESTORE LISTENERS ---
   // Always guarantee that Master Admin profile exists in Firestore and state
@@ -538,6 +530,13 @@ export default function App() {
         },
         { merge: true }
       );
+      setAllUsers((prev) =>
+        prev.map((u) =>
+          u.uid === uid
+            ? { ...u, status: 'approved', role, approvedAt: Date.now(), approvedBy: currentProfile?.email || 'admin' }
+            : u
+        )
+      );
       addToast('Acesso do usuário liberado com sucesso!', 'success');
     } catch (e: any) {
       addToast('Erro ao aprovar usuário: ' + e.message, 'error');
@@ -548,6 +547,9 @@ export default function App() {
     try {
       const userDocRef = doc(db, 'user_profiles', uid);
       await setDoc(userDocRef, { status: 'blocked' }, { merge: true });
+      setAllUsers((prev) =>
+        prev.map((u) => (u.uid === uid ? { ...u, status: 'blocked' } : u))
+      );
       addToast('Usuário bloqueado.', 'info');
     } catch (e: any) {
       addToast('Erro ao bloquear usuário: ' + e.message, 'error');
@@ -558,6 +560,9 @@ export default function App() {
     try {
       const userDocRef = doc(db, 'user_profiles', uid);
       await setDoc(userDocRef, { role }, { merge: true });
+      setAllUsers((prev) =>
+        prev.map((u) => (u.uid === uid ? { ...u, role } : u))
+      );
       addToast('Cargo do usuário alterado com sucesso!', 'success');
     } catch (e: any) {
       addToast('Erro ao alterar cargo: ' + e.message, 'error');
@@ -708,9 +713,10 @@ export default function App() {
         pass === storedMasterPass
       ) {
         const masterProfile: UserProfile = {
-          uid: 'admin_master_' + Date.now(),
+          uid: 'master_admin_root',
           email: MASTER_ADMIN_EMAIL,
-          displayName: 'Administrador Geral',
+          username: 'admin',
+          displayName: 'Administrador Master',
           role: 'admin',
           status: 'approved',
           createdAt: Date.now(),
@@ -721,10 +727,11 @@ export default function App() {
         localStorage.setItem(STORAGE_SESSION, JSON.stringify(masterProfile));
         // Also persist/update in Firestore
         try {
-          await setDoc(doc(db, 'user_profiles', 'master_admin'), masterProfile, { merge: true });
+          await setDoc(doc(db, 'user_profiles', 'master_admin_root'), masterProfile, { merge: true });
         } catch (e) {
           console.warn('Firestore write warning:', e);
         }
+        setActiveView('admin');
         addToast('Bem-vindo, Administrador! Painel liberado.', 'success');
         return true;
       }
@@ -834,52 +841,6 @@ export default function App() {
     } finally {
       setAuthLoading(false);
     }
-  };
-
-  const handleAdminQuickLogin = async (adminPass: string): Promise<boolean | string> => {
-    const storedMasterPass = localStorage.getItem(STORAGE_ADMIN_PASS) || DEFAULT_MASTER_PASSWORD;
-    if (adminPass === storedMasterPass || adminPass === 'admin123' || adminPass === 'admin@2025') {
-      const masterProf: UserProfile = {
-        uid: 'master_admin_root',
-        email: MASTER_ADMIN_EMAIL,
-        displayName: 'Administrador Master',
-        role: 'admin',
-        status: 'approved',
-        createdAt: Date.now(),
-        approvedAt: Date.now(),
-        approvedBy: 'system',
-      };
-      setCurrentProfile(masterProf);
-      localStorage.setItem(STORAGE_SESSION, JSON.stringify(masterProf));
-      setAllUsers((prev) => {
-        const withoutOld = prev.filter((u) => u.uid !== 'master_admin_root' && u.email !== MASTER_ADMIN_EMAIL);
-        return [masterProf, ...withoutOld];
-      });
-      try {
-        await setDoc(doc(db, 'user_profiles', 'master_admin_root'), masterProf, { merge: true });
-      } catch (e) {
-        console.warn('Firestore master init:', e);
-      }
-      addToast('Conta de Administrador Master restaurada e liberada!', 'success');
-      return true;
-    }
-    return 'Senha de administrador incorreta. (Dica padrão: admin123)';
-  };
-
-  const handleForceAdminMode = async () => {
-    setCurrentProfile(MASTER_ADMIN_PROFILE);
-    localStorage.setItem(STORAGE_SESSION, JSON.stringify(MASTER_ADMIN_PROFILE));
-    setActiveView('admin');
-    setAllUsers((prev) => {
-      const withoutOld = prev.filter((u) => u.uid !== 'master_admin_root' && u.email !== MASTER_ADMIN_EMAIL);
-      return [MASTER_ADMIN_PROFILE, ...withoutOld];
-    });
-    try {
-      await setDoc(doc(db, 'user_profiles', 'master_admin_root'), MASTER_ADMIN_PROFILE, { merge: true });
-    } catch (e) {
-      console.warn('Firestore set master:', e);
-    }
-    addToast('Modo Administrador Master ativado com sucesso!', 'success');
   };
 
   const handleCreateUserByAdmin = async (
@@ -1260,7 +1221,6 @@ export default function App() {
           currentProfile={currentProfile}
           pendingApprovalsCount={pendingApprovalsCount}
           inactiveAlertsCount={inactiveAlertsCount}
-          onForceAdminMode={handleForceAdminMode}
         />
 
         {/* Auth status & Login banner */}
@@ -1273,11 +1233,6 @@ export default function App() {
             setLoginModalTab('login');
             setShowLoginModal(true);
           }}
-          onOpenAdminLogin={() => {
-            setLoginModalTab('admin');
-            setShowLoginModal(true);
-          }}
-          onForceAdminMode={handleForceAdminMode}
           onSignOut={handleSignOut}
           contactsCount={contacts.length}
         />
@@ -1671,13 +1626,12 @@ export default function App() {
         />
       )}
 
-      {/* Login, Registration & Admin Access Modal */}
+      {/* Login & Registration Modal */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onLogin={handleDirectLogin}
         onRegister={handleDirectRegister}
-        onAdminQuickLogin={handleAdminQuickLogin}
         initialTab={loginModalTab}
       />
 

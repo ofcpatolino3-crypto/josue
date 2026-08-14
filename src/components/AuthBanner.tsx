@@ -8,8 +8,6 @@ interface AuthBannerProps {
   loading: boolean;
   syncing: boolean;
   onOpenLogin: () => void;
-  onOpenAdminLogin?: () => void;
-  onForceAdminMode?: () => void;
   onSignOut: () => void;
   contactsCount: number;
 }
@@ -20,8 +18,6 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
   loading,
   syncing,
   onOpenLogin,
-  onOpenAdminLogin,
-  onForceAdminMode,
   onSignOut,
   contactsCount,
 }) => {
@@ -88,17 +84,6 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            {onForceAdminMode && (
-              <button
-                type="button"
-                onClick={onForceAdminMode}
-                className="flex items-center gap-1.5 text-xs font-bold text-[#101B2D] bg-[#C9A227] hover:bg-[#d8b030] px-3.5 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer"
-                title="Ativar acesso de Administrador Master"
-              >
-                <Shield className="w-3.5 h-3.5" />
-                Sou o Administrador (Acesso Master)
-              </button>
-            )}
             <button
               type="button"
               onClick={onSignOut}
@@ -153,17 +138,6 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-          {!isAdmin && onForceAdminMode && (
-            <button
-              type="button"
-              onClick={onForceAdminMode}
-              className="flex items-center gap-1.5 text-xs font-bold text-[#EDE6D6] hover:text-[#C9A227] bg-[#101B2D] hover:bg-[#101B2D]/80 border border-[#C9A227]/40 hover:border-[#C9A227] px-3 py-1.5 rounded-lg transition-all shadow-xs cursor-pointer"
-              title="Ativar acesso de Administrador Master"
-            >
-              <Shield className="w-3.5 h-3.5 text-[#C9A227]" />
-              Mudar para Administrador Master
-            </button>
-          )}
           <button
             type="button"
             onClick={onSignOut}
@@ -199,17 +173,6 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        {onOpenAdminLogin && (
-          <button
-            type="button"
-            onClick={onOpenAdminLogin}
-            className="flex items-center justify-center gap-1.5 bg-[#101B2D] hover:bg-[#101B2D]/80 text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] hover:border-[#C9A227] font-semibold text-xs px-3 py-2 rounded-lg transition-all cursor-pointer shadow-xs"
-            title="Acessar com a senha mestra de Administrador"
-          >
-            <Shield className="w-3.5 h-3.5 text-[#C9A227]" />
-            Recuperar Admin
-          </button>
-        )}
         <button
           type="button"
           id="btn-simple-login"

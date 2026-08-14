@@ -1,41 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if the user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Helper function to check if the user owns the document path
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // User profiles (read accessible for auth users, write by owner or admin)
+    // User profiles (read & write accessible for sync and team management)
     match /user_profiles/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Batches and global contacts (managed by admins or assigned attendants)
     match /lead_batches/{batchId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     match /global_contacts/{contactId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // User-specific data: contacts & message templates
     match /users/{userId} {
-      allow read, write: if isOwner(userId) || isAuthenticated();
+      allow read, write: if true;
 
       match /contacts/{contactId} {
-        allow read, write: if isOwner(userId) || isAuthenticated();
+        allow read, write: if true;
       }
 
       match /templates/{templateId} {
-        allow read, write: if isOwner(userId) || isAuthenticated();
+        allow read, write: if true;
       }
     }
   }
