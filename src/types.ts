@@ -68,7 +68,19 @@ export interface Plan {
 }
 
 export type TabFilter = 'pendente' | 'enviado' | 'todos';
-export type ViewTab = 'contatos' | 'dashboard' | 'mensagens' | 'objecoes' | 'planos' | 'admin';
+export type ViewTab = 'contatos' | 'disparos' | 'dashboard' | 'mensagens' | 'objecoes' | 'planos' | 'admin';
+
+export interface BroadcastLog {
+  id: string;
+  contactName: string;
+  whatsapp?: string;
+  email?: string;
+  channel: 'whatsapp' | 'email' | 'both';
+  timestamp: number;
+  messagePreview: string;
+  hasImage?: boolean;
+  status: 'sent' | 'prepared';
+}
 
 export interface MessageTemplate {
   id: string;

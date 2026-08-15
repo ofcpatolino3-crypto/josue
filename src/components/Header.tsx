@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Bot,
   Shield,
+  Zap,
 } from 'lucide-react';
 import { ViewTab, UserProfile } from '../types';
 
@@ -93,6 +94,22 @@ export const Header: React.FC<HeaderProps> = ({
           Meus Contatos
           <span className="text-xs font-sans font-normal px-2 py-0.5 rounded-full bg-[#172644] text-[#8C98B4]">
             {contactsCount}
+          </span>
+        </button>
+
+        <button
+          id="nav-btn-disparos"
+          onClick={() => onSelectView('disparos')}
+          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            activeView === 'disparos'
+              ? 'text-[#4ADE80] border-[#4ADE80]'
+              : 'text-[#8C98B4] border-transparent hover:text-[#4ADE80]'
+          }`}
+        >
+          <Zap className="w-4 h-4 text-[#4ADE80]" />
+          Disparador (Zap & E-mail)
+          <span className="text-[10px] uppercase font-sans font-bold px-1.5 py-0.5 rounded bg-[#6E8F5C]/20 text-[#4ADE80]">
+            Rápido
           </span>
         </button>
 

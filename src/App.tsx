@@ -80,6 +80,7 @@ import { AIChatAssistant } from './components/AIChatAssistant';
 import { ObjectionsView } from './components/ObjectionsView';
 import { PlansView } from './components/PlansView';
 import { AdminPanel } from './components/AdminPanel';
+import { FastBroadcastView } from './components/FastBroadcastView';
 import { ToastContainer } from './components/Toast';
 
 const STORAGE_CONTACTS = 'contacts_v3';
@@ -1626,6 +1627,17 @@ export default function App() {
               )}
             </div>
           </div>
+        )}
+
+        {/* VIEW: DISPARADOR RÁPIDO WHATSAPP E E-MAIL */}
+        {activeView === 'disparos' && (
+          <FastBroadcastView
+            contacts={contacts}
+            templates={templates}
+            onAddContact={handleAddManualContact}
+            onMarkContacted={handleMarkToday}
+            onToast={addToast}
+          />
         )}
 
         {/* VIEW: DASHBOARD & MÉTRICAS */}
