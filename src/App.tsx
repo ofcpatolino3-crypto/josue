@@ -1483,6 +1483,7 @@ export default function App() {
               onDistributeEqually={handleDistributeEqually}
               onReassignSingleContact={handleReassignSingleContact}
               onBatchDeleteContacts={handleBatchDeleteGlobalContacts}
+              onImportSmartContacts={handleImportSmartContacts}
             />
           </div>
         )}
@@ -1496,6 +1497,7 @@ export default function App() {
               onClearAll={handleClearAll}
               hasContacts={contacts.length > 0}
               isAdmin={currentProfile?.role === 'admin'}
+              onOpenSmartImport={() => setShowAppSmartImport(true)}
             />
 
             {/* Quick Action & Search Controls */}
@@ -1900,6 +1902,19 @@ export default function App() {
           onToast={addToast}
         />
       )}
+
+      {/* Smart Import Modal for Leads (Excel, PDF, Images, Text via Gemini IA) */}
+      <SmartImportModal
+        isOpen={showAppSmartImport}
+        onClose={() => setShowAppSmartImport(false)}
+        onConfirmImport={async (res) => {
+          await handleImportSmartContacts(res);
+          setShowAppSmartImport(false);
+        }}
+        existingContacts={globalContacts.length > 0 ? globalContacts : contacts}
+        users={allUsers}
+        currentProfile={currentProfile}
+      />
 
       {/* Login & Registration Modal */}
       <LoginModal

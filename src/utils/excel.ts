@@ -137,6 +137,28 @@ export function setWhatsAppTargetMode(mode: WhatsAppTargetMode) {
   }
 }
 
+export function cleanPhone(tel: string): string {
+  const digits = (tel || '').replace(/\D/g, '');
+  if (!digits) return '';
+  // Se começar com 55 e tiver 12 ou 13 dígitos, remove o DDI para manter DDD+número
+  if (digits.startsWith('55') && (digits.length === 12 || digits.length === 13)) {
+    return digits.slice(2);
+  }
+  return digits;
+}
+
+export function formatPhoneDisplay(tel: string): string {
+  const digits = cleanPhone(tel);
+  if (!digits) return '';
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return digits;
+}
+
 export function waLink(tel: string): string | null {
   const digits = (tel || '').replace(/\D/g, '');
   if (!digits) return null;
