@@ -37,6 +37,7 @@ import {
   getDaysWithoutContact,
   formatDateBR,
   waLink,
+  openWhatsAppDirect,
   todayStr,
   exportSupervisorContactsToExcel,
 } from '../utils/excel';
@@ -749,15 +750,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <div className="flex items-center gap-1.5">
                               <span>{c.whatsapp}</span>
                               {c.whatsapp && (
-                                <a
-                                  href={waLink(c.whatsapp)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[#4ADE80] hover:text-white p-1 rounded hover:bg-[#4ADE80]/20 transition-all"
-                                  title="Abrir WhatsApp Web do Lead"
+                                <button
+                                  type="button"
+                                  onClick={() => openWhatsAppDirect(c.whatsapp)}
+                                  className="text-[#4ADE80] hover:text-white p-1 rounded hover:bg-[#4ADE80]/20 transition-all cursor-pointer"
+                                  title="Abrir WhatsApp do Aluno (Mesma aba / App)"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
+                                </button>
                               )}
                             </div>
                           </td>

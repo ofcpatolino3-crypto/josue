@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   FileSpreadsheet,
   Users,
@@ -10,8 +10,13 @@ import {
   Bot,
   Shield,
   Zap,
+  MessageCircle,
+  Monitor,
+  Globe,
+  ExternalLink,
 } from 'lucide-react';
 import { ViewTab, UserProfile } from '../types';
+import { getWhatsAppTargetMode, setWhatsAppTargetMode, WhatsAppTargetMode } from '../utils/excel';
 
 interface HeaderProps {
   activeView: ViewTab;
@@ -35,6 +40,12 @@ export const Header: React.FC<HeaderProps> = ({
   inactiveAlertsCount = 0,
 }) => {
   const isAdmin = currentProfile?.role === 'admin';
+  const [waMode, setWaMode] = useState<WhatsAppTargetMode>(() => getWhatsAppTargetMode());
+
+  const handleSwitchWaMode = (mode: WhatsAppTargetMode) => {
+    setWaMode(mode);
+    setWhatsAppTargetMode(mode);
+  };
 
   return (
     <header className="mb-5">
@@ -53,6 +64,58 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-2 self-start md:self-center flex-wrap">
+          {/* WhatsApp Mode Selector */}
+          <div
+            className="flex items-center bg-[#101B2D] border border-[#2B3D63] rounded-lg p-1 text-xs gap-1"
+            title="Escolha como o WhatsApp será aberto ao clicar em um contato"
+          >
+            <div className="flex items-center gap-1 px-1.5 text-[#8C98B4] font-medium text-[11px]">
+              <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+              <span className="hidden xl:inline">Zap:</span>
+            </div>
+            
+            <button
+              type="button"
+              onClick={() => handleSwitchWaMode('same_tab')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                waMode === 'same_tab'
+                  ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+              title="Abre e atualiza sempre na MESMA aba do WhatsApp Web (Sem abrir novas abas)"
+            >
+              <Globe className="w-3 h-3" />
+              <span>Web (1 Aba)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchWaMode('desktop_app')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                waMode === 'desktop_app'
+                  ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+              title="Abre direto no Aplicativo WhatsApp do Computador / Celular (ZERO abas no navegador!)"
+            >
+              <Monitor className="w-3 h-3" />
+              <span>App Desktop (0 Abas)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchWaMode('new_tab')}
+              className={`flex items-center gap-1 px-1.5 py-1 rounded text-[11px] transition-all cursor-pointer ${
+                waMode === 'new_tab'
+                  ? 'bg-[#2B3D63] text-white'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+              title="Abre em nova aba a cada contato"
+            >
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
+
           <button
             id="ai-assistant-btn"
             onClick={onOpenAIAssistant}

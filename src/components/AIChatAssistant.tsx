@@ -19,7 +19,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Contact, Objection, Plan } from '../types';
-import { waLinkWithMessage } from '../utils/excel';
+import { waLinkWithMessage, openWhatsAppDirect } from '../utils/excel';
 
 interface ChatMessage {
   id: string;
@@ -210,11 +210,8 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
       return;
     }
 
-    const url = waLinkWithMessage(currentContact.whatsapp, text);
-    if (url) {
-      window.open(url, '_blank');
-      onToast(`Mensagem enviada para ${currentContact.nome} no WhatsApp!`, 'success');
-    }
+    openWhatsAppDirect(currentContact.whatsapp, text);
+    onToast(`WhatsApp aberto para ${currentContact.nome}!`, 'success');
   };
 
   const handleClearChat = () => {

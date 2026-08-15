@@ -159,6 +159,8 @@ export function waLinkWithMessage(tel: string, message?: string): string | null 
  * Abre o WhatsApp sem criar abas infinitas quando no modo 'same_tab' (padrão),
  * ou diretamente no aplicativo Desktop quando no modo 'desktop_app'.
  */
+let waHubWindow: Window | null = null;
+
 export function openWhatsAppDirect(
   tel: string,
   message?: string,
@@ -171,9 +173,19 @@ export function openWhatsAppDirect(
   const msgParam = message && message.trim() ? `&text=${encodeURIComponent(message.trim())}` : '';
 
   if (mode === 'desktop_app') {
-    // Protocolo nativo do aplicativo desktop ou mobile
+    // Protocolo nativo do aplicativo WhatsApp Desktop ou Celular
+    // Não abre nenhuma aba no navegador!
     const appUrl = `whatsapp://send?phone=${full}${msgParam}`;
-    window.location.href = appUrl;
+    const hiddenLink = document.createElement('a');
+    hiddenLink.href = appUrl;
+    hiddenLink.style.display = 'none';
+    document.body.appendChild(hiddenLink);
+    hiddenLink.click();
+    setTimeout(() => {
+      if (document.body.contains(hiddenLink)) {
+        document.body.removeChild(hiddenLink);
+      }
+    }, 400);
     return true;
   }
 
@@ -181,11 +193,25 @@ export function openWhatsAppDirect(
   const webUrl = `https://web.whatsapp.com/send?phone=${full}${msgParam}`;
 
   if (mode === 'same_tab') {
-    // Reaproveita o mesmo alvo de janela 'portal_whatsapp_hub'
-    // Isso garante que cada clique atualize a mesma aba do WhatsApp sem criar novas!
-    const win = window.open(webUrl, 'portal_whatsapp_hub');
-    if (win) {
-      win.focus();
+    // 1. Tenta reaproveitar a instância de janela já aberta em memória
+    if (waHubWindow) {
+      try {
+        if (!waHubWindow.closed) {
+          waHubWindow.location.href = webUrl;
+          waHubWindow.focus();
+          return true;
+        }
+      } catch (e) {
+        // Cross-origin pode impedir leitura, continua para window.open nomeado
+      }
+    }
+
+    // 2. Abre ou reconecta com a janela de nome fixo 'portal_whatsapp_hub'
+    waHubWindow = window.open(webUrl, 'portal_whatsapp_hub');
+    if (waHubWindow) {
+      try {
+        waHubWindow.focus();
+      } catch (e) {}
     }
     return true;
   }
