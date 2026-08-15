@@ -37,31 +37,31 @@ export const Header: React.FC<HeaderProps> = ({
   const isAdmin = currentProfile?.role === 'admin';
 
   return (
-    <header className="mb-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2B3D63] pb-5">
+    <header className="mb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2B3D63] pb-4">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#C9A227] mb-1.5 flex items-center gap-1.5">
+          <div className="text-[11px] font-bold tracking-wider uppercase text-[#C9A227] mb-1 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            Portal Concurso · Gestão de Migração
+            Portal Concursos · Central de Atendimento & Vendas
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-[#EDE6D6] tracking-tight">
-            Painel de Contatos & Distribuição
+          <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6] tracking-tight">
+            Painel Operacional
           </h1>
-          <p className="text-xs sm:text-sm text-[#8C98B4] mt-1">
-            Acompanhamento de alunos, status no WhatsApp, controle de equipe e distribuição de planilhas.
+          <p className="text-xs text-[#8C98B4] mt-0.5">
+            Gestão ágil de contatos, disparos no WhatsApp, controle de equipe e fechamento de matrículas.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start md:self-center flex-wrap">
+        <div className="flex items-center gap-2 self-start md:self-center flex-wrap">
           <button
             id="ai-assistant-btn"
             onClick={onOpenAIAssistant}
-            className="flex items-center gap-2 bg-[#172644] hover:bg-[#1F3057] text-[#C9A227] hover:text-[#EDE6D6] border border-[#C9A227]/50 font-bold rounded-lg px-3.5 py-2.5 text-xs sm:text-sm transition-all duration-150 shadow-md active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 bg-[#172644] hover:bg-[#1F3057] text-[#C9A227] hover:text-[#EDE6D6] border border-[#C9A227]/40 font-bold rounded-lg px-3 py-2 text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
             title="Abrir Assistente Inteligente com IA (Google Gemini)"
           >
             <Bot className="w-4 h-4 text-[#C9A227]" />
             <span>Assistente IA</span>
-            <span className="bg-[#C9A227]/20 text-[#C9A227] text-[10px] px-1.5 py-0.5 rounded font-sans uppercase">
+            <span className="bg-[#C9A227]/20 text-[#C9A227] text-[10px] px-1.5 py-0.2 rounded font-sans uppercase">
               Gemini
             </span>
           </button>
@@ -70,29 +70,35 @@ export const Header: React.FC<HeaderProps> = ({
             id="export-btn"
             onClick={onOpenDailyExport}
             disabled={contactsCount === 0}
-            className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold rounded-lg px-4 py-2.5 text-xs sm:text-sm transition-all duration-150 shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold rounded-lg px-3.5 py-2 text-xs transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             title="Abrir painel de fechamento do dia e exportar lista atualizada com status"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            Fechamento do Dia & Exportar
+            <span>Fechamento & Exportar</span>
           </button>
         </div>
       </div>
 
       {/* Navigation tabs */}
-      <nav className="flex items-center gap-2 sm:gap-6 border-b border-[#2B3D63] mt-4 pt-1 overflow-x-auto">
+      <nav className="flex items-center gap-1.5 sm:gap-2 border-b border-[#2B3D63] mt-3 pb-1 overflow-x-auto">
         <button
           id="nav-btn-contatos"
           onClick={() => onSelectView('contatos')}
-          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'contatos'
-              ? 'text-[#EDE6D6] border-[#C9A227]'
-              : 'text-[#8C98B4] border-transparent hover:text-[#EDE6D6]'
+              ? 'bg-[#C9A227] text-[#101B2D] shadow-sm font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
-          <Users className="w-4 h-4 text-[#C9A227]" />
-          Meus Contatos
-          <span className="text-xs font-sans font-normal px-2 py-0.5 rounded-full bg-[#172644] text-[#8C98B4]">
+          <Users className="w-4 h-4" />
+          <span>Meus Contatos</span>
+          <span
+            className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+              activeView === 'contatos'
+                ? 'bg-[#101B2D]/20 text-[#101B2D]'
+                : 'bg-[#172644] text-[#8C98B4]'
+            }`}
+          >
             {contactsCount}
           </span>
         </button>
@@ -100,99 +106,94 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           id="nav-btn-disparos"
           onClick={() => onSelectView('disparos')}
-          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-bold cursor-pointer transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'disparos'
-              ? 'text-[#4ADE80] border-[#4ADE80]'
-              : 'text-[#8C98B4] border-transparent hover:text-[#4ADE80]'
+              ? 'bg-[#16A34A] text-white shadow-sm font-bold'
+              : 'text-[#8C98B4] hover:text-[#4ADE80] hover:bg-[#172644]'
           }`}
         >
           <Zap className="w-4 h-4 text-[#4ADE80]" />
-          Disparador (Zap & E-mail)
-          <span className="text-[10px] uppercase font-sans font-bold px-1.5 py-0.5 rounded bg-[#6E8F5C]/20 text-[#4ADE80]">
-            Rápido
+          <span>Disparador Rápido</span>
+          <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-black/20 text-white">
+            Zap & E-mail
           </span>
-        </button>
-
-        <button
-          id="nav-btn-dashboard"
-          onClick={() => onSelectView('dashboard')}
-          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-            activeView === 'dashboard'
-              ? 'text-[#EDE6D6] border-[#C9A227]'
-              : 'text-[#8C98B4] border-transparent hover:text-[#EDE6D6]'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4 text-[#C9A227]" />
-          Dashboard & Métricas
         </button>
 
         <button
           id="nav-btn-mensagens"
           onClick={() => onSelectView('mensagens')}
-          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'mensagens'
-              ? 'text-[#EDE6D6] border-[#C9A227]'
-              : 'text-[#8C98B4] border-transparent hover:text-[#EDE6D6]'
+              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
           <MessageSquare className="w-4 h-4 text-[#C9A227]" />
-          Mensagens Prontas
+          <span>Mensagens Prontas</span>
         </button>
 
         <button
           id="nav-btn-objecoes"
           onClick={() => onSelectView('objecoes')}
-          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'objecoes'
-              ? 'text-[#EDE6D6] border-[#C9A227]'
-              : 'text-[#8C98B4] border-transparent hover:text-[#EDE6D6]'
+              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
           <ShieldAlert className="w-4 h-4 text-[#C9A227]" />
-          Objeções
+          <span>Objeções</span>
         </button>
 
         <button
           id="nav-btn-planos"
           onClick={() => onSelectView('planos')}
-          className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'planos'
-              ? 'text-[#EDE6D6] border-[#C9A227]'
-              : 'text-[#8C98B4] border-transparent hover:text-[#EDE6D6]'
+              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
           <BookOpen className="w-4 h-4 text-[#C9A227]" />
-          Planos
+          <span>Planos & Valores</span>
+        </button>
+
+        <button
+          id="nav-btn-dashboard"
+          onClick={() => onSelectView('dashboard')}
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
+            activeView === 'dashboard'
+              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 text-[#C9A227]" />
+          <span>Métricas</span>
         </button>
 
         {isAdmin && (
           <button
             id="nav-btn-admin"
             onClick={() => onSelectView('admin')}
-            className={`flex items-center gap-2 py-2.5 px-2 border-b-2 font-serif text-sm sm:text-base font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold cursor-pointer transition-all whitespace-nowrap ml-auto ${
               activeView === 'admin'
-                ? 'text-[#C9A227] border-[#C9A227]'
-                : 'text-[#C9A227]/70 border-transparent hover:text-[#C9A227]'
+                ? 'bg-[#B14432] text-white shadow-sm'
+                : 'text-[#C9A227] bg-[#172644] hover:bg-[#1F3057] border border-[#C9A227]/40'
             }`}
           >
-            <Shield className="w-4 h-4 text-[#C9A227]" />
-            Painel Admin
+            <Shield className="w-4 h-4" />
+            <span>Gestão / Admin</span>
             {inactiveAlertsCount > 0 && (
               <span
-                className="text-[11px] font-sans font-bold px-2 py-0.5 rounded-full bg-[#DC2626] text-white animate-pulse shadow-sm"
+                className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-[#DC2626] text-white animate-pulse shadow-sm"
                 title={`${inactiveAlertsCount} lead(s) estão há 3 ou mais dias sem resposta pelo vendedor`}
               >
-                🚨 {inactiveAlertsCount} parado(s) +3d
+                🚨 {inactiveAlertsCount} parados
               </span>
             )}
             {pendingApprovalsCount > 0 && (
-              <span className="text-[11px] font-sans font-bold px-2 py-0.5 rounded-full bg-[#B14432] text-white">
-                {pendingApprovalsCount} pendente(s)
-              </span>
-            )}
-            {inactiveAlertsCount === 0 && pendingApprovalsCount === 0 && (
-              <span className="text-[10px] font-sans uppercase font-bold px-1.5 py-0.5 rounded bg-[#C9A227]/20 text-[#C9A227]">
-                Gestão
+              <span className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-amber-500 text-black">
+                {pendingApprovalsCount} pendentes
               </span>
             )}
           </button>
@@ -201,3 +202,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

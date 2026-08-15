@@ -497,80 +497,85 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       </div>
 
       {/* Sub Navigation Bar */}
-      <div className="flex items-center gap-2 border-b border-[#2B3D63] pb-2 overflow-x-auto">
+      <div className="flex items-center gap-1.5 border-b border-[#2B3D63] pb-2 overflow-x-auto">
         <button
+          type="button"
           onClick={() => setActiveSubTab('alerts')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
             activeSubTab === 'alerts'
               ? 'bg-[#DC2626] text-white shadow-md font-bold'
               : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          Radar de Alertas (+3 Dias Sem Contato)
+          <span>Leads Parados (+3 Dias)</span>
           {inactiveAlertContacts.length > 0 && (
-            <span className="bg-white text-[#DC2626] text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+            <span className="bg-white text-[#DC2626] text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {inactiveAlertContacts.length}
             </span>
           )}
         </button>
 
         <button
-          onClick={() => setActiveSubTab('activity')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeSubTab === 'activity'
-              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-          Monitor de Vendedores & Produtividade
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('users')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeSubTab === 'users'
-              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Gestão de Atendentes & Acessos
-          {pendingUsers.length > 0 && (
-            <span className="bg-[#B14432] text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-              {pendingUsers.length}
-            </span>
-          )}
-        </button>
-
-        <button
+          type="button"
           onClick={() => setActiveSubTab('distribution')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
             activeSubTab === 'distribution'
               ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
               : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
           <Share2 className="w-4 h-4" />
-          Distribuir Planilhas
+          <span>Distribuir Planilhas</span>
           {unassignedContacts.length > 0 && (
-            <span className="bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/40 text-[10px] px-1.5 py-0.2 rounded-full">
+            <span className="bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/40 text-[10px] px-1.5 py-0.2 rounded-full font-sans">
               {unassignedContacts.length} livres
             </span>
           )}
         </button>
 
         <button
+          type="button"
+          onClick={() => setActiveSubTab('activity')}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'activity'
+              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>Produtividade da Equipe</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('users')}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'users'
+              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Atendentes & Acessos</span>
+          {pendingUsers.length > 0 && (
+            <span className="bg-[#B14432] text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+              {pendingUsers.length} pendentes
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveSubTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
             activeSubTab === 'overview'
               ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
               : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
           }`}
         >
-          <PieChart className="w-4 h-4" />
-          Visão Geral
+          <FileSpreadsheet className="w-4 h-4" />
+          <span>Base Geral ({globalContacts.length})</span>
         </button>
       </div>
 
