@@ -15,7 +15,14 @@ import {
 } from 'lucide-react';
 import { Contact, Temperature } from '../types';
 import { TEMP_COLORS, TEMP_ORDER } from '../data/defaults';
-import { waLink, formatDateBR, isOverdue, getContactInactivityStatus, isWithoutContactFor3Days } from '../utils/excel';
+import {
+  waLink,
+  formatDateBR,
+  isOverdue,
+  getContactInactivityStatus,
+  isWithoutContactFor3Days,
+  openWhatsAppDirect,
+} from '../utils/excel';
 
 interface CardProps {
   contact: Contact;
@@ -51,9 +58,9 @@ export const ContactCard: React.FC<CardProps> = ({
 
   const handleOpenWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!whatsappHref) return;
+    if (!contact.whatsapp) return;
     onUpdateField(contact.id, 'ultimoContato', new Date().toISOString().split('T')[0]);
-    window.open(whatsappHref, '_blank');
+    openWhatsAppDirect(contact.whatsapp);
   };
 
   const handleCopyPhone = () => {

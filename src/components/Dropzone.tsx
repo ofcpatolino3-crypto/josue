@@ -6,7 +6,6 @@ import { Contact } from '../types';
 
 interface DropzoneProps {
   onImportRows: (rows: Partial<Contact>[], batchName?: string) => void;
-  onLoadSample: () => void;
   onClearAll: () => void;
   hasContacts: boolean;
   isAdmin?: boolean;
@@ -14,7 +13,6 @@ interface DropzoneProps {
 
 export const Dropzone: React.FC<DropzoneProps> = ({
   onImportRows,
-  onLoadSample,
   onClearAll,
   hasContacts,
   isAdmin = false,
@@ -107,15 +105,6 @@ export const Dropzone: React.FC<DropzoneProps> = ({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={onLoadSample}
-              className="text-[#8C98B4] hover:text-[#C9A227] flex items-center gap-1 cursor-pointer transition-colors text-[11px]"
-            >
-              <Sparkles className="w-3 h-3 text-[#C9A227]" />
-              Recarregar demo
-            </button>
-
-            <button
-              type="button"
               onClick={() => {
                 if (window.confirm('Tem certeza que deseja apagar todos os contatos da lista?')) {
                   onClearAll();
@@ -178,14 +167,6 @@ export const Dropzone: React.FC<DropzoneProps> = ({
           {/* Auxiliary bar */}
           <div className="flex items-center justify-between text-xs px-1">
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onLoadSample}
-                className="text-[#8C98B4] hover:text-[#C9A227] flex items-center gap-1.5 cursor-pointer transition-colors py-0.5"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#C9A227]" />
-                Carregar contatos de exemplo (demo)
-              </button>
               {hasContacts && (
                 <button
                   type="button"

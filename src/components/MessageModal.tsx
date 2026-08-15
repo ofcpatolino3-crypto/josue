@@ -18,7 +18,7 @@ import {
   FastForward,
 } from 'lucide-react';
 import { Contact, MessageTemplate } from '../types';
-import { fillTemplate, waLinkWithMessage } from '../utils/excel';
+import { fillTemplate, waLinkWithMessage, openWhatsAppDirect } from '../utils/excel';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -107,23 +107,20 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       return;
     }
 
-    const url = waLinkWithMessage(contact.whatsapp, customText);
-    if (url) {
-      window.open(url, '_blank');
+    openWhatsAppDirect(contact.whatsapp, customText);
 
-      if (autoMarkContacted && onMarkContacted) {
-        onMarkContacted(contact.id);
-      }
+    if (autoMarkContacted && onMarkContacted) {
+      onMarkContacted(contact.id);
+    }
 
-      onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
+    onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
 
-      if (hasNext && onSelectContact) {
-        const nextContact = contactsQueue[currentIndex + 1];
-        onSelectContact(nextContact);
-      } else {
-        onToast('Você concluiu toda a fila de envio de contatos!', 'success');
-        onClose();
-      }
+    if (hasNext && onSelectContact) {
+      const nextContact = contactsQueue[currentIndex + 1];
+      onSelectContact(nextContact);
+    } else {
+      onToast('Você concluiu toda a fila de envio de contatos!', 'success');
+      onClose();
     }
   };
 
@@ -133,17 +130,14 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       return;
     }
 
-    const url = waLinkWithMessage(contact.whatsapp, customText);
-    if (url) {
-      window.open(url, '_blank');
+    openWhatsAppDirect(contact.whatsapp, customText);
 
-      if (autoMarkContacted && onMarkContacted) {
-        onMarkContacted(contact.id);
-      }
-
-      onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
-      onClose();
+    if (autoMarkContacted && onMarkContacted) {
+      onMarkContacted(contact.id);
     }
+
+    onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
+    onClose();
   };
 
   const getCategoryBadge = (cat: string) => {

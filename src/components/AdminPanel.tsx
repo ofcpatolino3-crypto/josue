@@ -28,6 +28,7 @@ import {
   ArrowUpDown,
   Bell,
   Check,
+  Download,
 } from 'lucide-react';
 import { UserProfile, Contact, LeadBatch, Temperature } from '../types';
 import {
@@ -37,6 +38,7 @@ import {
   formatDateBR,
   waLink,
   todayStr,
+  exportSupervisorContactsToExcel,
 } from '../utils/excel';
 
 interface AdminPanelProps {
@@ -332,6 +334,58 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setTimeout(() => setCopiedMessageId(null), 3000);
   };
 
+  // Supervisor Export Handlers
+  const handleExportSupervisorAll = async () => {
+    if (globalContacts.length === 0) {
+      alert('Não há contatos cadastrados na base geral para exportar.');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      await exportSupervisorContactsToExcel(globalContacts, 'Base_Geral_Supervisao');
+      setSuccessMsg(`Planilha de Supervisão com ${globalContacts.length} contatos exportada com sucesso!`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (e: any) {
+      alert('Erro ao exportar planilha: ' + e.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleExportSupervisorAlerts = async () => {
+    if (inactiveAlertContacts.length === 0) {
+      alert('Não há leads parados no momento.');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      await exportSupervisorContactsToExcel(inactiveAlertContacts, 'Leads_Parados_Mais_3_Dias');
+      setSuccessMsg(`Planilha de Leads Parados com ${inactiveAlertContacts.length} contatos exportada com sucesso!`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (e: any) {
+      alert('Erro ao exportar planilha: ' + e.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleExportSupervisorUnassigned = async () => {
+    if (unassignedContacts.length === 0) {
+      alert('Não há contatos não distribuídos no momento.');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      await exportSupervisorContactsToExcel(unassignedContacts, 'Leads_Nao_Distribuidos');
+      setSuccessMsg(`Planilha com ${unassignedContacts.length} contatos livres exportada com sucesso!`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (e: any) {
+      alert('Erro ao exportar planilha: ' + e.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Banner Alert / Success */}
@@ -359,7 +413,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportSupervisorAll}
+              disabled={isProcessing || globalContacts.length === 0}
+              className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              title="Exporta a planilha completa da supervisão com atendente, curso, lote e status de cada aluno"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Exportar Planilha de Gestão (.xlsx)</span>
+            </button>
+
             <span className="text-xs bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] px-3 py-1.5 rounded-lg flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#6E8F5C]" />
               Admin: <b>{currentProfile?.displayName || currentProfile?.email}</b>
@@ -530,17 +595,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </p>
               </div>
 
-              {inactiveAlertContacts.length > 0 && (
-                <button
-                  onClick={handleBulkReassignAllInactive}
-                  disabled={isProcessing || attendants.length === 0}
-                  className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold text-xs px-4 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer shrink-0 disabled:opacity-40"
-                  title="Dividir todos os contatos parados igualmente entre os atendentes ativos"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Redistribuir Todos ({inactiveAlertContacts.length})
-                </button>
-              )}
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {inactiveAlertContacts.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleExportSupervisorAlerts}
+                      disabled={isProcessing}
+                      className="bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-bold text-xs px-3.5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                      title="Exportar planilha Excel apenas com os leads parados"
+                    >
+                      <Download className="w-4 h-4 text-[#C9A227]" />
+                      <span>Exportar Parados ({inactiveAlertContacts.length})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleBulkReassignAllInactive}
+                      disabled={isProcessing || attendants.length === 0}
+                      className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold text-xs px-4 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                      title="Dividir todos os contatos parados igualmente entre os atendentes ativos"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Redistribuir Todos</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Filter Bar for Alerts */}
@@ -1261,15 +1342,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
+                  type="button"
+                  onClick={handleExportSupervisorUnassigned}
+                  disabled={isProcessing || unassignedContacts.length === 0}
+                  className="bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="Exportar planilha Excel apenas com os contatos ainda não distribuídos"
+                >
+                  <Download className="w-4 h-4 text-[#C9A227]" />
+                  <span>Exportar Não Distribuídos ({unassignedContacts.length})</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleAutoEqualDistribute}
                   disabled={isProcessing || unassignedContacts.length === 0 || attendants.length === 0}
                   className="bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   title="Dividir igualmente todos os contatos sem atendente entre os atendentes aprovados"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  Dividir Igualmente ({unassignedContacts.length})
+                  <span>Dividir Igualmente ({unassignedContacts.length})</span>
                 </button>
               </div>
             </div>

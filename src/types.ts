@@ -43,6 +43,7 @@ export interface Contact {
   createdAt?: number;
   assignedTo?: string; // UID do atendente
   assignedToEmail?: string;
+  assignedToName?: string;
   batchId?: string; // ID da planilha de importação
   batchName?: string;
   lastMessageAt?: number; // Timestamp da última mensagem enviada pelo vendedor

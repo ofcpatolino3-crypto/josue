@@ -23,7 +23,15 @@ import {
   Share2,
 } from 'lucide-react';
 import { Contact, MessageTemplate, BroadcastLog, Temperature } from '../types';
-import { fillTemplate, waLinkWithMessage, todayStr } from '../utils/excel';
+import {
+  fillTemplate,
+  waLinkWithMessage,
+  todayStr,
+  openWhatsAppDirect,
+  getWhatsAppTargetMode,
+  setWhatsAppTargetMode,
+  WhatsAppTargetMode,
+} from '../utils/excel';
 
 interface FastBroadcastViewProps {
   contacts: Contact[];
@@ -60,10 +68,23 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Options
+  const [waTargetMode, setWaTargetModeState] = useState<WhatsAppTargetMode>(() => getWhatsAppTargetMode());
   const [autoSaveContact, setAutoSaveContact] = useState<boolean>(true);
   const [autoMarkToday, setAutoMarkToday] = useState<boolean>(true);
   const [copiedImage, setCopiedImage] = useState<boolean>(false);
   const [copiedText, setCopiedText] = useState<boolean>(false);
+
+  const handleUpdateWaTargetMode = (mode: WhatsAppTargetMode) => {
+    setWaTargetModeState(mode);
+    setWhatsAppTargetMode(mode);
+    if (mode === 'same_tab') {
+      onToast('✅ Configurado: Todos os disparos usarão a mesma aba do WhatsApp Web sem criar novas!', 'info');
+    } else if (mode === 'desktop_app') {
+      onToast('✅ Configurado: Disparos abrirão direto no Aplicativo WhatsApp Desktop / Celular.', 'info');
+    } else {
+      onToast('ℹ️ Configurado: Cada disparo abrirá em uma nova aba do navegador.', 'info');
+    }
+  };
 
   // History Log
   const [broadcastLogs, setBroadcastLogs] = useState<BroadcastLog[]>(() => {
@@ -317,8 +338,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
       handleCopyImageToClipboard();
     }
 
-    // Open WhatsApp
-    window.open(link, '_blank');
+    // Open WhatsApp using user's target mode preference (same single tab, desktop app, or new tab)
+    openWhatsAppDirect(digits, processedText, waTargetMode);
 
     // Auto save / mark contacted
     if (autoSaveContact) {
@@ -326,7 +347,14 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
     }
 
     recordBroadcast('whatsapp', nome || digits, processedText);
-    onToast('🚀 WhatsApp aberto com sucesso! Mensagem preenchida.', 'success');
+    onToast(
+      waTargetMode === 'same_tab'
+        ? '🚀 WhatsApp aberto na mesma aba! Mensagem preenchida.'
+        : waTargetMode === 'desktop_app'
+        ? '🚀 WhatsApp Desktop acionado! Mensagem pronta.'
+        : '🚀 WhatsApp aberto em nova aba!',
+      'success'
+    );
   };
 
   // 2. Email Broadcast (Gmail Web or Default Mailto)
@@ -437,21 +465,21 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
     }
 
     const processedText = fillTemplate(mensagem, currentBatchContact);
-    const link = waLinkWithMessage(digits, processedText);
-    if (link) {
-      if (imageUrl) {
-        handleCopyImageToClipboard();
-      }
-      window.open(link, '_blank');
-      if (onMarkContacted) {
-        onMarkContacted(currentBatchContact.id);
-      }
-      recordBroadcast('whatsapp', currentBatchContact.nome, processedText);
-      onToast(`Disparo realizado para ${currentBatchContact.nome}!`, 'success');
-      // Advance to next
-      if (batchQueueIndex < filteredBatchQueue.length - 1) {
-        setBatchQueueIndex((prev) => prev + 1);
-      }
+    if (imageUrl) {
+      handleCopyImageToClipboard();
+    }
+    openWhatsAppDirect(digits, processedText, waTargetMode);
+    if (onMarkContacted) {
+      onMarkContacted(currentBatchContact.id);
+    }
+    recordBroadcast('whatsapp', currentBatchContact.nome, processedText);
+    onToast(
+      `Disparo realizado para ${currentBatchContact.nome}! (${waTargetMode === 'same_tab' ? 'Mesma aba' : waTargetMode === 'desktop_app' ? 'App Desktop' : 'Nova aba'})`,
+      'success'
+    );
+    // Advance to next
+    if (batchQueueIndex < filteredBatchQueue.length - 1) {
+      setBatchQueueIndex((prev) => prev + 1);
     }
   };
 
@@ -533,6 +561,63 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             >
               <Clock className="w-3.5 h-3.5" />
               <span>Histórico ({broadcastLogs.length})</span>
+            </button>
+          </div>
+        </div>
+
+        {/* WhatsApp Window / Tab Mode Bar */}
+        <div className="mt-4 pt-4 border-t border-[#2B3D63]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-[#8C98B4]">
+            <span className="font-semibold text-[#EDE6D6] flex items-center gap-1.5">
+              <span>📱</span> Comportamento do WhatsApp:
+            </span>
+            <span className="hidden md:inline text-[11px] text-[#8C98B4]">
+              (evita abrir abas repetidas no navegador)
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-[#101B2D] p-1 rounded-lg border border-[#2B3D63] flex-wrap">
+            <button
+              type="button"
+              onClick={() => handleUpdateWaTargetMode('same_tab')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
+                waTargetMode === 'same_tab'
+                  ? 'bg-[#16A34A] text-white shadow-sm ring-1 ring-[#4ADE80]/50'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057]'
+              }`}
+              title="Abre o WhatsApp Web e reaproveita sempre a mesma aba a cada disparo"
+            >
+              <span>🔄</span>
+              <span>Reaproveitar Mesma Aba</span>
+              <span className="text-[10px] bg-black/20 px-1 rounded font-normal">Recomendado</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleUpdateWaTargetMode('desktop_app')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
+                waTargetMode === 'desktop_app'
+                  ? 'bg-[#2563EB] text-white shadow-sm ring-1 ring-[#60A5FA]/50'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057]'
+              }`}
+              title="Abre direto no Aplicativo WhatsApp instalado no computador / celular"
+            >
+              <span>💻</span>
+              <span>App Desktop / Mobile</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleUpdateWaTargetMode('new_tab')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
+                waTargetMode === 'new_tab'
+                  ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057]'
+              }`}
+              title="Abre uma nova aba no navegador para cada mensagem"
+            >
+              <span>📑</span>
+              <span>Nova Aba</span>
             </button>
           </div>
         </div>

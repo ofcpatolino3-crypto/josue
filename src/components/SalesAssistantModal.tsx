@@ -26,7 +26,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Contact, Objection, Plan, Temperature } from '../types';
-import { fillTemplate, waLinkWithMessage } from '../utils/excel';
+import { fillTemplate, waLinkWithMessage, openWhatsAppDirect } from '../utils/excel';
 
 interface SalesAssistantModalProps {
   isOpen: boolean;
@@ -322,14 +322,11 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
       return;
     }
 
-    const url = waLinkWithMessage(contact.whatsapp, text);
-    if (url) {
-      window.open(url, '_blank');
-      if (onMarkContacted) {
-        onMarkContacted(contact.id);
-      }
-      onToast(`WhatsApp aberto com mensagem para ${contact.nome}!`, 'success');
+    openWhatsAppDirect(contact.whatsapp, text);
+    if (onMarkContacted) {
+      onMarkContacted(contact.id);
     }
+    onToast(`WhatsApp acionado com mensagem para ${contact.nome}!`, 'success');
   };
 
   const handleSendAndNext = (text: string) => {

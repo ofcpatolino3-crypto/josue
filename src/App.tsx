@@ -1331,7 +1331,6 @@ export default function App() {
             {/* Dropzone & Import Bar */}
             <Dropzone
               onImportRows={handleImportRows}
-              onLoadSample={handleLoadSample}
               onClearAll={handleClearAll}
               hasContacts={contacts.length > 0}
               isAdmin={currentProfile?.role === 'admin'}

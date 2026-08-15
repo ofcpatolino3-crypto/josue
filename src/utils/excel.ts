@@ -115,6 +115,28 @@ export function mapRowToContact(row: Record<string, unknown>): Partial<Contact> 
   return out;
 }
 
+export type WhatsAppTargetMode = 'same_tab' | 'desktop_app' | 'new_tab';
+
+export function getWhatsAppTargetMode(): WhatsAppTargetMode {
+  try {
+    const saved = localStorage.getItem('portal_whatsapp_target_mode');
+    if (saved === 'same_tab' || saved === 'desktop_app' || saved === 'new_tab') {
+      return saved as WhatsAppTargetMode;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return 'same_tab'; // Padrão: Reaproveita a mesma aba para não criar dezenas de abas!
+}
+
+export function setWhatsAppTargetMode(mode: WhatsAppTargetMode) {
+  try {
+    localStorage.setItem('portal_whatsapp_target_mode', mode);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 export function waLink(tel: string): string | null {
   const digits = (tel || '').replace(/\D/g, '');
   if (!digits) return null;
@@ -131,6 +153,46 @@ export function waLinkWithMessage(tel: string, message?: string): string | null 
     return `${base}&text=${encodeURIComponent(message.trim())}`;
   }
   return base;
+}
+
+/**
+ * Abre o WhatsApp sem criar abas infinitas quando no modo 'same_tab' (padrão),
+ * ou diretamente no aplicativo Desktop quando no modo 'desktop_app'.
+ */
+export function openWhatsAppDirect(
+  tel: string,
+  message?: string,
+  customMode?: WhatsAppTargetMode
+): boolean {
+  const digits = (tel || '').replace(/\D/g, '');
+  if (!digits) return false;
+  const full = digits.length <= 11 ? '55' + digits : digits;
+  const mode = customMode || getWhatsAppTargetMode();
+  const msgParam = message && message.trim() ? `&text=${encodeURIComponent(message.trim())}` : '';
+
+  if (mode === 'desktop_app') {
+    // Protocolo nativo do aplicativo desktop ou mobile
+    const appUrl = `whatsapp://send?phone=${full}${msgParam}`;
+    window.location.href = appUrl;
+    return true;
+  }
+
+  // URL do WhatsApp Web
+  const webUrl = `https://web.whatsapp.com/send?phone=${full}${msgParam}`;
+
+  if (mode === 'same_tab') {
+    // Reaproveita o mesmo alvo de janela 'portal_whatsapp_hub'
+    // Isso garante que cada clique atualize a mesma aba do WhatsApp sem criar novas!
+    const win = window.open(webUrl, 'portal_whatsapp_hub');
+    if (win) {
+      win.focus();
+    }
+    return true;
+  }
+
+  // Modo nova aba
+  window.open(webUrl, '_blank');
+  return true;
 }
 
 export function getFirstName(fullName?: string): string {
@@ -699,4 +761,139 @@ ${courseLines || '• Nenhum curso cadastrado'}
 
 📈 *Taxa de Conversão em Vendas:* ${convRate}%
 _Relatório gerado automaticamente pelo Painel de Contatos._`;
+}
+
+/**
+ * Exportação Completa e Especial para Gestão e Supervisão
+ * Contém colunas detalhadas: Atendente Responsável, Lote de Origem, Contatado, Inatividade, etc.
+ */
+export async function exportSupervisorContactsToExcel(
+  contacts: Contact[],
+  filterTitle: string = 'Base Geral de Gestão',
+  filename?: string
+) {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Portal Concursos - Painel de Gestão e Supervisão';
+  workbook.lastModifiedBy = 'Supervisor';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+
+  const ws = workbook.addWorksheet('Gestão de Leads', {
+    views: [{ state: 'frozen', ySplit: 3, xSplit: 0 }],
+  });
+
+  ws.columns = [
+    { key: 'nome', width: 28 },
+    { key: 'whatsapp', width: 18 },
+    { key: 'email', width: 26 },
+    { key: 'curso', width: 24 },
+    { key: 'temperatura', width: 16 },
+    { key: 'status', width: 20 },
+    { key: 'atendente', width: 24 },
+    { key: 'lote', width: 20 },
+    { key: 'dataCadastro', width: 15 },
+    { key: 'ultimoContato', width: 15 },
+    { key: 'proximoContato', width: 15 },
+    { key: 'inatividade', width: 16 },
+    { key: 'observacao', width: 34 },
+  ];
+
+  // Header Title
+  const titleRow = ws.addRow([`PORTAL CONCURSOS - EXPORTAÇÃO DE GESTÃO: ${filterTitle.toUpperCase()}`]);
+  ws.mergeCells('A1:M1');
+  titleRow.height = 30;
+  const titleCell = ws.getCell('A1');
+  titleCell.font = { name: 'Calibri', size: 12, bold: true, color: { argb: 'FFC9A227' } };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF101B2D' } };
+  titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  // Subtitle
+  const subRow = ws.addRow([`Gerado em: ${formatDateBR(todayStr())} às ${new Date().toLocaleTimeString()} | Total: ${contacts.length} contatos`]);
+  ws.mergeCells('A2:M2');
+  subRow.height = 20;
+  const subCell = ws.getCell('A2');
+  subCell.font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FFEDE6D6' } };
+  subCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF172644' } };
+  subCell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  // Table Headers
+  const headerRow = ws.addRow([
+    'Nome do Lead',
+    'WhatsApp / Fone',
+    'E-mail',
+    'Curso / Interesse',
+    'Etiqueta / Temp',
+    'Status Atual',
+    'Atendente Responsável',
+    'Lote / Origem',
+    'Data Cadastro',
+    'Último Contato',
+    'Próximo Contato',
+    'Dias s/ Contato',
+    'Observações / Notas',
+  ]);
+  headerRow.height = 24;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Calibri', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3156' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF2B3D63' } },
+      bottom: { style: 'medium', color: { argb: 'FFC9A227' } },
+      left: { style: 'thin', color: { argb: 'FF2B3D63' } },
+      right: { style: 'thin', color: { argb: 'FF2B3D63' } },
+    };
+  });
+
+  contacts.forEach((c) => {
+    const temp = c.temperatura || 'Frio';
+    const style = TEMP_EXCEL_STYLES[temp];
+    const daysOff = getDaysWithoutContact(c);
+
+    const r = ws.addRow([
+      c.nome || 'Sem Nome',
+      c.whatsapp || '',
+      c.email || '',
+      c.curso || '',
+      temp,
+      c.status || '',
+      c.assignedToName || c.assignedToEmail || (c.assignedTo ? 'Atribuído' : 'Não Atribuído (Geral)'),
+      c.batchName || 'Base Direta',
+      formatDateBR(c.dataContato),
+      formatDateBR(c.ultimoContato) || 'Pendente',
+      formatDateBR(c.proximoContato),
+      daysOff > 0 ? `${daysOff} dias` : 'Hoje / Recente',
+      c.observacao || '',
+    ]);
+    r.height = 20;
+
+    r.eachCell((cell, colNum) => {
+      cell.font = { name: 'Calibri', size: 9, color: { argb: 'FF1F2937' } };
+      cell.alignment = { vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      };
+
+      if (colNum === 5) {
+        cell.font = { name: 'Calibri', size: 9, bold: true, color: { argb: style.text } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: style.fill } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      }
+    });
+  });
+
+  const actualFilename = filename || `gestao-supervisao-contatos-${todayStr()}.xlsx`;
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute('download', actualFilename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
