@@ -82,6 +82,7 @@ import { PlansView } from './components/PlansView';
 import { AdminPanel } from './components/AdminPanel';
 import { FastBroadcastView } from './components/FastBroadcastView';
 import { ToastContainer } from './components/Toast';
+import { SmartImportModal, SmartImportResult } from './components/SmartImportModal';
 
 const STORAGE_CONTACTS = 'contacts_v3';
 const STORAGE_OBJECTIONS = 'objections_v3';
@@ -195,6 +196,7 @@ export default function App() {
   const [messageModalContact, setMessageModalContact] = useState<Contact | null>(null);
   const [salesAssistantContact, setSalesAssistantContact] = useState<Contact | null>(null);
   const [showAIChatAssistant, setShowAIChatAssistant] = useState(false);
+  const [showAppSmartImport, setShowAppSmartImport] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Auto redirect if not admin trying to access admin tab
@@ -1047,6 +1049,166 @@ export default function App() {
         `Nenhum novo contato importado. A planilha contém ${rows.length} linha(s), mas todas estavam sem nome ou já cadastradas.`,
         'error'
       );
+    }
+  };
+
+  const handleImportSmartContacts = async (result: SmartImportResult) => {
+    const {
+      contacts: rows,
+      batchName,
+      distributionMode,
+      targetUserUid,
+      targetUserEmail,
+      selectedAttendantUids,
+    } = result;
+
+    let added = 0;
+    const newItems: Contact[] = [];
+
+    rows.forEach((r) => {
+      if (!r.nome || !r.nome.trim()) return;
+
+      newItems.push({
+        id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
+        nome: r.nome.trim(),
+        whatsapp: r.whatsapp || '',
+        email: r.email || '',
+        curso: r.curso || '',
+        temperatura: r.temperatura || 'Frio',
+        dataContato: r.dataContato || todayStr(),
+        ultimoContato: r.ultimoContato || '',
+        proximoContato: r.proximoContato || '',
+        status: r.status || 'Novo Lead',
+        observacao: r.observacao || '',
+        createdAt: Date.now(),
+        batchName: batchName || 'Importação IA',
+      });
+      added++;
+    });
+
+    if (added === 0) {
+      addToast('Nenhum contato com nome válido para importar.', 'error');
+      return;
+    }
+
+    try {
+      setSyncing(true);
+      const batch = writeBatch(db);
+      const batchDocId = 'b_' + Date.now();
+      const batchDocRef = doc(db, 'lead_batches', batchDocId);
+      let distributedCount = 0;
+
+      if (distributionMode === 'unassigned') {
+        newItems.forEach((c) => {
+          const globalRef = doc(db, 'global_contacts', c.id);
+          batch.set(globalRef, c, { merge: true });
+        });
+        batch.set(batchDocRef, {
+          id: batchDocId,
+          name: batchName,
+          totalLeads: newItems.length,
+          distributedLeads: 0,
+          createdAt: Date.now(),
+          createdBy: currentProfile?.email || 'admin',
+        });
+      } else if (distributionMode === 'single' && targetUserUid) {
+        newItems.forEach((c) => {
+          const updated: Contact = {
+            ...c,
+            assignedTo: targetUserUid,
+            assignedToEmail: targetUserEmail,
+          };
+          const userRef = doc(db, 'users', targetUserUid, 'contacts', c.id);
+          batch.set(userRef, updated, { merge: true });
+          const globalRef = doc(db, 'global_contacts', c.id);
+          batch.set(globalRef, updated, { merge: true });
+        });
+        distributedCount = newItems.length;
+        batch.set(batchDocRef, {
+          id: batchDocId,
+          name: batchName,
+          totalLeads: newItems.length,
+          distributedLeads: distributedCount,
+          createdAt: Date.now(),
+          createdBy: currentProfile?.email || 'admin',
+        });
+      } else if (distributionMode === 'self' && currentProfile) {
+        newItems.forEach((c) => {
+          const updated: Contact = {
+            ...c,
+            assignedTo: currentProfile.uid,
+            assignedToEmail: currentProfile.email,
+          };
+          const userRef = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
+          batch.set(userRef, updated, { merge: true });
+          const globalRef = doc(db, 'global_contacts', c.id);
+          batch.set(globalRef, updated, { merge: true });
+        });
+        setContacts((prev) => [
+          ...newItems.map((c) => ({
+            ...c,
+            assignedTo: currentProfile.uid,
+            assignedToEmail: currentProfile.email,
+          })),
+          ...prev,
+        ]);
+        distributedCount = newItems.length;
+        batch.set(batchDocRef, {
+          id: batchDocId,
+          name: batchName,
+          totalLeads: newItems.length,
+          distributedLeads: distributedCount,
+          createdAt: Date.now(),
+          createdBy: currentProfile?.email || 'admin',
+        });
+      } else if (distributionMode === 'equal') {
+        const targetAttendants = allUsers.filter(
+          (u) =>
+            u.status === 'approved' &&
+            u.role === 'attendant' &&
+            (!selectedAttendantUids || selectedAttendantUids.length === 0 || selectedAttendantUids.includes(u.uid))
+        );
+        if (targetAttendants.length > 0) {
+          newItems.forEach((c, idx) => {
+            const assignedUser = targetAttendants[idx % targetAttendants.length];
+            const updated: Contact = {
+              ...c,
+              assignedTo: assignedUser.uid,
+              assignedToEmail: assignedUser.email,
+            };
+            const userRef = doc(db, 'users', assignedUser.uid, 'contacts', c.id);
+            batch.set(userRef, updated, { merge: true });
+            const globalRef = doc(db, 'global_contacts', c.id);
+            batch.set(globalRef, updated, { merge: true });
+          });
+          distributedCount = newItems.length;
+        } else {
+          newItems.forEach((c) => {
+            const globalRef = doc(db, 'global_contacts', c.id);
+            batch.set(globalRef, c, { merge: true });
+          });
+        }
+        batch.set(batchDocRef, {
+          id: batchDocId,
+          name: batchName,
+          totalLeads: newItems.length,
+          distributedLeads: distributedCount,
+          createdAt: Date.now(),
+          createdBy: currentProfile?.email || 'admin',
+        });
+      }
+
+      await batch.commit();
+      confetti({ particleCount: 80, spread: 80, origin: { y: 0.8 } });
+      addToast(
+        `🎉 ${added} contato(s) do lote "${batchName}" importado(s) com sucesso!`,
+        'success'
+      );
+    } catch (e: any) {
+      console.error('Error importing smart contacts:', e);
+      addToast('Erro ao importar contatos: ' + e.message, 'error');
+    } finally {
+      setSyncing(false);
     }
   };
 

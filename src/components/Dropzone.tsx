@@ -9,6 +9,7 @@ interface DropzoneProps {
   onClearAll: () => void;
   hasContacts: boolean;
   isAdmin?: boolean;
+  onOpenSmartImport?: () => void;
 }
 
 export const Dropzone: React.FC<DropzoneProps> = ({
@@ -16,6 +17,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   onClearAll,
   hasContacts,
   isAdmin = false,
+  onOpenSmartImport,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!hasContacts);
@@ -84,21 +86,32 @@ export const Dropzone: React.FC<DropzoneProps> = ({
       {hasContacts && !isExpanded ? (
         /* Compact bar when contacts already exist */
         <div className="flex flex-wrap items-center justify-between gap-2 bg-[#172644]/80 border border-[#2B3D63] rounded-lg px-3 py-2 text-xs">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenSmartImport && (
+              <button
+                type="button"
+                onClick={onOpenSmartImport}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] text-[#101B2D] px-3 py-1 rounded-md font-bold transition-all shadow-sm cursor-pointer hover:brightness-110"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Importar Planilha / PDF / Foto (IA)</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] px-2.5 py-1 rounded-md font-semibold border border-[#2B3D63] transition-colors cursor-pointer"
             >
               <UploadCloud className="w-3.5 h-3.5 text-[#C9A227]" />
-              {isAdmin ? 'Importar Lote / Planilha para Distribuir' : 'Importar contatos (.xlsx, .csv)'}
+              {isAdmin ? 'Importar Planilha Simples' : 'Importar (.xlsx, .csv)'}
             </button>
             <button
               type="button"
               onClick={() => setIsExpanded(true)}
               className="text-[#8C98B4] hover:text-[#EDE6D6] underline text-[11px] cursor-pointer"
             >
-              Abrir área de arrastar arquivo
+              Abrir área de arrastar
             </button>
           </div>
 
@@ -149,7 +162,21 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {onOpenSmartImport && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenSmartImport();
+                  }}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] hover:brightness-110 text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-md cursor-pointer whitespace-nowrap"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Importar PDF / Foto / IA</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 id="dz-btn"
@@ -157,9 +184,9 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="bg-[#C9A227] hover:bg-[#d8b030] active:scale-[0.98] text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                className="bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg border border-[#2B3D63] transition-all shadow-sm cursor-pointer whitespace-nowrap"
               >
-                Escolher arquivo
+                Escolher Planilha
               </button>
             </div>
           </div>

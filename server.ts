@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -10,7 +10,8 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
   // Lazy Gemini client helper
   let aiClient: GoogleGenAI | null = null;
@@ -160,6 +161,119 @@ Instruções para o WhatsApp:
       console.error('Error in /api/ai/generate-pitch:', error);
       return res.status(500).json({
         error: error.message || 'Erro ao gerar pitch com IA.',
+      });
+    }
+  });
+
+  // AI Document / PDF / Photo / Image / Text Contact Extractor Endpoint
+  app.post('/api/ai/extract-contacts', async (req, res) => {
+    try {
+      const { text, fileData, mimeType, fileName } = req.body;
+
+      if (!text && !fileData) {
+        return res.status(400).json({ error: 'Nenhum texto ou arquivo fornecido para extração.' });
+      }
+
+      const ai = getGemini();
+
+      if (!ai) {
+        return res.status(503).json({
+          error: 'GEMINI_API_KEY não configurada no servidor. Configure a chave para extrair contatos de PDFs e Fotos com IA.',
+        });
+      }
+
+      const systemInstruction = `Você é um especialista em OCR e Extração Inteligente de Contatos e Alunos do Portal Concurso.
+Sua função é analisar com extrema precisão arquivos (documentos PDF, fotos de listas impressas, capturas de tela do WhatsApp ou CRM, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
+
+Regras de Extração para cada contato:
+1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2."), cargos ou títulos desnecessários.
+2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 11987654321, 91981234567, 21999998888). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, mantenha no formato brasileiro padrão com DDD (10 ou 11 dígitos).
+3. email: Endereço de e-mail válido se estiver visível no arquivo (em minúsculas).
+4. curso: Nome do concurso (ex: "Polícia Federal", "INSS", "Polícia Civil", "TJ-SP", "Receita Federal", "PRF", "Enfermagem", "Banco do Brasil"), matéria ou curso isolado de interesse. Se não estiver explícito, use o contexto do documento ou deixe vazio.
+5. temperatura: 'Quente' (se demonstrou alto interesse, pagou valor recente ou pediu proposta), 'Morno' (se fez pergunta padrão ou interesse moderado) ou 'Frio' (se é contato antigo ou lista geral). Padrão: 'Morno'.
+6. observacao: Notas adicionais, forma de pagamento, histórico, data informada ou detalhes da conversa.
+7. valorPago: Se houver indicação de valor pago em curso avulso (ex: R$ 150, R$ 297), extraia o número decimal (ex: 150.00).
+8. status: 'Novo Lead' ou 'Pendente'.
+
+Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa antes do fim da lista.`;
+
+      const promptText = `Analise atentamente este arquivo (${fileName || 'documento'}) e extraia todos os contatos e informações de leads/alunos nele contidos em formato estruturado.`;
+
+      const parts: Array<any> = [];
+
+      if (fileData && mimeType) {
+        // Support base64 encoded PDFs and Images
+        const cleanBase64 = fileData.includes('base64,') ? fileData.split('base64,')[1] : fileData;
+        parts.push({
+          inlineData: {
+            mimeType: mimeType,
+            data: cleanBase64,
+          },
+        });
+      }
+
+      if (text) {
+        parts.push({
+          text: `Conteúdo de texto/lista fornecido:\n${text}`,
+        });
+      }
+
+      parts.push({ text: promptText });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: { parts },
+        config: {
+          systemInstruction,
+          temperature: 0.2,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              contacts: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    nome: { type: Type.STRING, description: 'Nome completo do aluno' },
+                    whatsapp: { type: Type.STRING, description: 'Telefone ou WhatsApp apenas dígitos com DDD' },
+                    email: { type: Type.STRING, description: 'E-mail do aluno se houver' },
+                    curso: { type: Type.STRING, description: 'Concurso ou curso de interesse' },
+                    temperatura: { type: Type.STRING, description: 'Quente, Morno ou Frio' },
+                    observacao: { type: Type.STRING, description: 'Observação ou notas' },
+                    valorPago: { type: Type.NUMBER, description: 'Valor já pago se mencionado' },
+                    status: { type: Type.STRING, description: 'Status inicial' },
+                  },
+                  required: ['nome'],
+                },
+              },
+              summary: { type: Type.STRING, description: 'Resumo breve do que foi detectado no arquivo' },
+              totalDetected: { type: Type.INTEGER, description: 'Total de contatos detectados' },
+            },
+            required: ['contacts'],
+          },
+        },
+      });
+
+      const responseText = response.text || '{}';
+      let parsedData: any = {};
+      try {
+        parsedData = JSON.parse(responseText);
+      } catch (err) {
+        console.error('Failed to parse Gemini JSON output:', responseText);
+        parsedData = { contacts: [] };
+      }
+
+      return res.json({
+        success: true,
+        contacts: parsedData.contacts || [],
+        summary: parsedData.summary || `Foram identificados ${parsedData.contacts?.length || 0} contatos com sucesso.`,
+        totalDetected: parsedData.contacts?.length || 0,
+      });
+    } catch (error: any) {
+      console.error('Error in /api/ai/extract-contacts:', error);
+      return res.status(500).json({
+        error: error.message || 'Erro ao extrair contatos com IA.',
       });
     }
   });

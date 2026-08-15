@@ -29,8 +29,12 @@ import {
   Bell,
   Check,
   Download,
+  UploadCloud,
+  FileText,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { UserProfile, Contact, LeadBatch, Temperature } from '../types';
+import { SmartImportModal, SmartImportResult } from './SmartImportModal';
 import {
   isWithoutContactFor3Days,
   getContactInactivityStatus,
@@ -66,6 +70,7 @@ interface AdminPanelProps {
     targetUserEmail: string
   ) => Promise<void>;
   onBatchDeleteContacts: (contactIds: string[]) => Promise<void>;
+  onImportSmartContacts?: (result: SmartImportResult) => Promise<void>;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -81,8 +86,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onDistributeEqually,
   onReassignSingleContact,
   onBatchDeleteContacts,
+  onImportSmartContacts,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'alerts' | 'activity' | 'users' | 'distribution' | 'overview'>('alerts');
+  const [activeSubTab, setActiveSubTab] = useState<'alerts' | 'activity' | 'users' | 'distribution' | 'overview' | 'import_ai'>('alerts');
+  const [showSmartImportModal, setShowSmartImportModal] = useState(false);
   const [userSearch, setUserSearch] = useState('');
   const [selectedBatchFilter, setSelectedBatchFilter] = useState('todos');
   const [selectedTargetUser, setSelectedTargetUser] = useState('');
@@ -417,13 +424,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => setShowSmartImportModal(true)}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] hover:brightness-110 text-[#101B2D] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md cursor-pointer"
+              title="Importar planilhas, PDFs de matrículas ou fotos de listas com inteligência artificial"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Importar Planilha / PDF / Foto (IA)</span>
+            </button>
+
+            <button
+              type="button"
               onClick={handleExportSupervisorAll}
               disabled={isProcessing || globalContacts.length === 0}
-              className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
               title="Exporta a planilha completa da supervisão com atendente, curso, lote e status de cada aluno"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Exportar Planilha de Gestão (.xlsx)</span>
+              <Download className="w-3.5 h-3.5 text-[#C9A227]" />
+              <span>Exportar Gestão (.xlsx)</span>
             </button>
 
             <span className="text-xs bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] px-3 py-1.5 rounded-lg flex items-center gap-2">
@@ -515,6 +532,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               {inactiveAlertContacts.length}
             </span>
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('import_ai')}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'import_ai'
+              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
+              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-[#C9A227]" />
+          <span>Importar Planilha / PDF / Foto (IA)</span>
         </button>
 
         <button
@@ -1350,6 +1380,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => setShowSmartImportModal(true)}
+                  className="bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] hover:brightness-110 text-[#101B2D] font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                  title="Importar novas planilhas, PDFs ou fotos com inteligência artificial"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Importar Novos Leads (IA)</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleExportSupervisorUnassigned}
                   disabled={isProcessing || unassignedContacts.length === 0}
                   className="bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1643,6 +1683,125 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* SUB-TAB 5: 📥 IMPORTAR PLANILHAS / PDF / FOTOS VIA IA                     */}
+      {/* ========================================================================= */}
+      {activeSubTab === 'import_ai' && (
+        <div className="space-y-6">
+          <div className="bg-[#172644] border border-[#C9A227]/40 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#C9A227]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#C9A227] uppercase tracking-wider">
+                <Sparkles className="w-4 h-4" />
+                Inteligência Artificial de Extração & Reconhecimento
+              </div>
+              <h3 className="text-2xl font-bold font-serif text-[#EDE6D6]">
+                Importador Inteligente de Leads (Planilhas, PDFs, Fotos e Textos)
+              </h3>
+              <p className="text-sm text-[#8C98B4] max-w-3xl leading-relaxed">
+                Carregue qualquer arquivo ou foto de lista de alunos. A IA detecta e extrai automaticamente <strong className="text-[#EDE6D6]">Nomes, Telefones com DDD, Cursos de Interesse, E-mails e Observações</strong>, permitindo que você revise tudo antes de distribuir para sua equipe.
+              </p>
+
+              <div className="pt-2 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowSmartImportModal(true)}
+                  className="bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] hover:brightness-110 active:scale-[0.98] text-[#101B2D] font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-lg flex items-center gap-2.5 cursor-pointer"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>Iniciar Importação com IA</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveSubTab('distribution')}
+                  className="bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-semibold text-xs px-4 py-3 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Share2 className="w-4 h-4 text-[#C9A227]" />
+                  <span>Ver Contatos Não Distribuídos ({unassignedContacts.length})</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Supported Formats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-5 shadow-md flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-[#101B2D] border border-[#C9A227]/40 flex items-center justify-center text-[#C9A227] mb-3">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-bold text-[#EDE6D6]">Planilhas Excel & CSV</h4>
+                <p className="text-xs text-[#8C98B4] mt-1.5 leading-relaxed">
+                  Arquivos <span className="text-[#EDE6D6]">.xlsx, .xls ou .csv</span> com cabeçalhos padronizados ou desorganizados. A IA reconhece sinônimos de colunas.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSmartImportModal(true)}
+                className="mt-4 text-xs font-semibold text-[#C9A227] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                Importar Planilha →
+              </button>
+            </div>
+
+            <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-5 shadow-md flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-[#101B2D] border border-[#C9A227]/40 flex items-center justify-center text-[#C9A227] mb-3">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-bold text-[#EDE6D6]">Documentos em PDF</h4>
+                <p className="text-xs text-[#8C98B4] mt-1.5 leading-relaxed">
+                  Listas de inscritos, relatórios de cursos ou formulários salvos em <span className="text-[#EDE6D6]">.pdf</span>. O sistema lê as páginas e extrai os contatos.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSmartImportModal(true)}
+                className="mt-4 text-xs font-semibold text-[#C9A227] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                Importar PDF →
+              </button>
+            </div>
+
+            <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-5 shadow-md flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-[#101B2D] border border-[#C9A227]/40 flex items-center justify-center text-[#C9A227] mb-3">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <h4 className="text-sm font-bold text-[#EDE6D6]">Fotos, Prints & Câmera</h4>
+                <p className="text-xs text-[#8C98B4] mt-1.5 leading-relaxed">
+                  Fotografias de cadernos, anotações de balcão, prints do WhatsApp ou fotos de formulários <span className="text-[#EDE6D6]">(.png, .jpg, .jpeg)</span>.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSmartImportModal(true)}
+                className="mt-4 text-xs font-semibold text-[#C9A227] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                Importar Foto →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Smart Import Modal */}
+      <SmartImportModal
+        isOpen={showSmartImportModal}
+        onClose={() => setShowSmartImportModal(false)}
+        onConfirmImport={async (res) => {
+          if (onImportSmartContacts) {
+            await onImportSmartContacts(res);
+          }
+          setShowSmartImportModal(false);
+          setActiveSubTab('distribution');
+        }}
+        existingContacts={globalContacts}
+        users={users}
+        currentProfile={currentProfile}
+      />
     </div>
   );
 };
