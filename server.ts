@@ -165,8 +165,8 @@ Instruções para o WhatsApp:
     }
   });
 
-  // AI Document / PDF / Photo / Image / Text Contact Extractor Endpoint
-  app.post('/api/ai/extract-contacts', async (req, res) => {
+  // Shared handler for contact extraction (PDFs, Photos, Screenshots, and Text)
+  const handleExtractContacts = async (req: express.Request, res: express.Response) => {
     try {
       const { text, fileData, mimeType, fileName } = req.body;
 
@@ -178,18 +178,18 @@ Instruções para o WhatsApp:
 
       if (!ai) {
         return res.status(503).json({
-          error: 'GEMINI_API_KEY não configurada no servidor. Configure a chave para extrair contatos de PDFs e Fotos com IA.',
+          error: 'GEMINI_API_KEY não configurada no servidor. Configure a chave no painel de Secrets para extrair contatos de fotos e documentos com IA.',
         });
       }
 
       const systemInstruction = `Você é um especialista em OCR e Extração Inteligente de Contatos e Alunos do Portal Concurso.
-Sua função é analisar com extrema precisão arquivos (documentos PDF, fotos de listas impressas, capturas de tela do WhatsApp ou CRM, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
+Sua função é analisar com extrema precisão arquivos (fotos de listas, capturas de tela do WhatsApp, prints de CRM, documentos PDF, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
 
 Regras de Extração para cada contato:
 1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2."), cargos ou títulos desnecessários.
 2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 11987654321, 91981234567, 21999998888). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, mantenha no formato brasileiro padrão com DDD (10 ou 11 dígitos).
 3. email: Endereço de e-mail válido se estiver visível no arquivo (em minúsculas).
-4. curso: Nome do concurso (ex: "Polícia Federal", "INSS", "Polícia Civil", "TJ-SP", "Receita Federal", "PRF", "Enfermagem", "Banco do Brasil"), matéria ou curso isolado de interesse. Se não estiver explícito, use o contexto do documento ou deixe vazio.
+4. curso: Nome do concurso (ex: "Polícia Federal", "INSS", "Polícia Civil", "TJ-SP", "Receita Federal", "PRF", "Enfermagem", "Banco do Brasil", "PMPA", "PCPA", "DEPEN"), matéria ou curso isolado de interesse. Se não estiver explícito, use o contexto do documento ou deixe vazio.
 5. temperatura: 'Quente' (se demonstrou alto interesse, pagou valor recente ou pediu proposta), 'Morno' (se fez pergunta padrão ou interesse moderado) ou 'Frio' (se é contato antigo ou lista geral). Padrão: 'Morno'.
 6. observacao: Notas adicionais, forma de pagamento, histórico, data informada ou detalhes da conversa.
 7. valorPago: Se houver indicação de valor pago em curso avulso (ex: R$ 150, R$ 297), extraia o número decimal (ex: 150.00).
@@ -197,16 +197,29 @@ Regras de Extração para cada contato:
 
 Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa antes do fim da lista.`;
 
-      const promptText = `Analise atentamente este arquivo (${fileName || 'documento'}) e extraia todos os contatos e informações de leads/alunos nele contidos em formato estruturado.`;
+      const promptText = `Analise atentamente esta imagem ou documento (${fileName || 'arquivo'}) e extraia todos os contatos e informações de leads/alunos nele contidos em formato estruturado.`;
 
       const parts: Array<any> = [];
 
-      if (fileData && mimeType) {
+      if (fileData) {
         // Support base64 encoded PDFs and Images
         const cleanBase64 = fileData.includes('base64,') ? fileData.split('base64,')[1] : fileData;
+        
+        let detectedMime = mimeType || 'image/jpeg';
+        const nameLower = (fileName || '').toLowerCase();
+        if (detectedMime.includes('pdf') || nameLower.endsWith('.pdf')) {
+          detectedMime = 'application/pdf';
+        } else if (detectedMime.includes('png') || nameLower.endsWith('.png')) {
+          detectedMime = 'image/png';
+        } else if (detectedMime.includes('webp') || nameLower.endsWith('.webp')) {
+          detectedMime = 'image/webp';
+        } else {
+          detectedMime = 'image/jpeg';
+        }
+
         parts.push({
           inlineData: {
-            mimeType: mimeType,
+            mimeType: detectedMime,
             data: cleanBase64,
           },
         });
@@ -271,12 +284,18 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
         totalDetected: parsedData.contacts?.length || 0,
       });
     } catch (error: any) {
-      console.error('Error in /api/ai/extract-contacts:', error);
+      console.error('Error in contact extraction:', error);
       return res.status(500).json({
         error: error.message || 'Erro ao extrair contatos com IA.',
       });
     }
-  });
+  };
+
+  // AI Document / PDF / Photo / Image / Text Contact Extractor Endpoints
+  app.post('/api/ai/extract-contacts', handleExtractContacts);
+  app.post('/api/extract-contacts', handleExtractContacts);
+  app.post('/api/contacts/extract', handleExtractContacts);
+  app.post('/api/ai/ocr', handleExtractContacts);
 
   // Vite middleware for development vs static build in production
   if (process.env.NODE_ENV !== 'production') {
