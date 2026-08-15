@@ -83,15 +83,26 @@ export interface BroadcastLog {
   status: 'sent' | 'prepared';
 }
 
+export type MessageTemplateCategory = 
+  | 'pos_prova' 
+  | 'pre_prova' 
+  | 'migracao' 
+  | 'fechamento_pix' 
+  | 'recuperacao_sumidos' 
+  | 'renovacao' 
+  | 'boas_vindas' 
+  | 'geral';
+
 export interface MessageTemplate {
   id: string;
   titulo: string;
-  categoria: 'pos_prova' | 'pre_prova' | 'migracao' | 'renovacao' | 'geral';
+  categoria: MessageTemplateCategory;
   texto: string;
   descricao?: string;
   gatilho?: string;
   emocao?: string;
   logica?: string;
+  tags?: string[];
 }
 
 export interface ToastMessage {

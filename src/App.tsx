@@ -151,7 +151,17 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_TEMPLATES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Merge with DEFAULT_TEMPLATES to ensure new built-in templates are included
+          const existingIds = new Set(parsed.map((p: MessageTemplate) => p.id));
+          const missingDefaults = DEFAULT_TEMPLATES.filter((d) => !existingIds.has(d.id));
+          if (missingDefaults.length > 0) {
+            const merged = [...parsed, ...missingDefaults];
+            localStorage.setItem(STORAGE_TEMPLATES, JSON.stringify(merged));
+            return merged;
+          }
+          return parsed;
+        }
       }
     } catch (e) {
       console.error(e);

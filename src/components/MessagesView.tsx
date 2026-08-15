@@ -153,7 +153,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
         return (
           <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#5C7A9E] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Clock className="w-3 h-3 text-[#5C7A9E]" />
-            Pré-Prova / Preparação
+            Pré-Prova / Rotina
           </span>
         );
       case 'migracao':
@@ -163,11 +163,32 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
             Migração p/ Assinatura 1.0
           </span>
         );
+      case 'fechamento_pix':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#16A34A] border border-[#16A34A]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <Sparkles className="w-3 h-3 text-[#16A34A]" />
+            Fechamento & PIX
+          </span>
+        );
+      case 'recuperacao_sumidos':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#E11D48] border border-[#E11D48]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <RotateCcw className="w-3 h-3 text-[#E11D48]" />
+            Resgate / Sumidos
+          </span>
+        );
       case 'renovacao':
         return (
           <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#6E8F5C] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <RefreshCw className="w-3 h-3 text-[#6E8F5C]" />
             Renovação
+          </span>
+        );
+      case 'boas_vindas':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#38BDF8] border border-[#38BDF8]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <Sparkles className="w-3 h-3 text-[#38BDF8]" />
+            Boas-Vindas & Diagnóstico
           </span>
         );
       default:
@@ -284,10 +305,13 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227] cursor-pointer"
               >
                 <option value="pos_prova">Pós-Prova (Como foi no concurso)</option>
-                <option value="pre_prova">Pré-Prova (Como está a preparação)</option>
-                <option value="migracao">Migração de Edital</option>
+                <option value="migracao">Migração de Edital (Abatimento Integral)</option>
+                <option value="pre_prova">Pré-Prova (Rotina de estudos & Reta Final)</option>
+                <option value="fechamento_pix">Fechamento Rápido & PIX / Cartão</option>
+                <option value="recuperacao_sumidos">Resgate / Alunos Sumidos com Afeto</option>
                 <option value="renovacao">Renovação de Assinatura</option>
-                <option value="geral">Geral / Primeiro Contato</option>
+                <option value="boas_vindas">Boas-Vindas & Diagnóstico Amigo</option>
+                <option value="geral">Geral</option>
               </select>
             </div>
           </div>
@@ -382,8 +406,11 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
           {[
             { id: 'todos', label: 'Todos os Scripts' },
             { id: 'pos_prova', label: 'Pós-Prova' },
-            { id: 'pre_prova', label: 'Pré-Prova / Preparação' },
             { id: 'migracao', label: 'Migração p/ Assinatura 1.0' },
+            { id: 'fechamento_pix', label: 'Fechamento & PIX' },
+            { id: 'pre_prova', label: 'Pré-Prova / Rotina' },
+            { id: 'recuperacao_sumidos', label: 'Resgate / Sumidos' },
+            { id: 'boas_vindas', label: 'Boas-Vindas' },
             { id: 'renovacao', label: 'Renovação' },
           ].map((cat) => (
             <button
@@ -469,9 +496,12 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                           className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227] cursor-pointer"
                         >
                           <option value="pos_prova">Pós-Prova</option>
-                          <option value="pre_prova">Pré-Prova</option>
-                          <option value="migracao">Migração</option>
+                          <option value="migracao">Migração de Edital</option>
+                          <option value="pre_prova">Pré-Prova / Rotina</option>
+                          <option value="fechamento_pix">Fechamento & PIX</option>
+                          <option value="recuperacao_sumidos">Resgate / Sumidos</option>
                           <option value="renovacao">Renovação</option>
+                          <option value="boas_vindas">Boas-Vindas</option>
                           <option value="geral">Geral</option>
                         </select>
                       </div>

@@ -153,7 +153,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
         return (
           <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#5C7A9E] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Clock className="w-3 h-3 text-[#5C7A9E]" />
-            Pré-Prova / Preparação
+            Pré-Prova / Rotina
           </span>
         );
       case 'migracao':
@@ -163,11 +163,32 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             Migração p/ Assinatura 1.0
           </span>
         );
+      case 'fechamento_pix':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#16A34A] border border-[#16A34A]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <Sparkles className="w-3 h-3 text-[#16A34A]" />
+            Fechamento & PIX
+          </span>
+        );
+      case 'recuperacao_sumidos':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#E11D48] border border-[#E11D48]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <RefreshCw className="w-3 h-3 text-[#E11D48]" />
+            Resgate / Sumidos
+          </span>
+        );
       case 'renovacao':
         return (
           <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#6E8F5C] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <RefreshCw className="w-3 h-3 text-[#6E8F5C]" />
             Renovação
+          </span>
+        );
+      case 'boas_vindas':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#38BDF8] border border-[#38BDF8]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <Sparkles className="w-3 h-3 text-[#38BDF8]" />
+            Boas-Vindas & Diagnóstico
           </span>
         );
       default:
