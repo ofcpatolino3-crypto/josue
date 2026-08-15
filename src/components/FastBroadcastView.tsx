@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
+import * as XLSX from 'xlsx';
 import {
   Send,
   Mail,
@@ -21,6 +22,19 @@ import {
   Eye,
   AlertCircle,
   Share2,
+  FileSpreadsheet,
+  Download,
+  Bot,
+  FileCode,
+  HelpCircle,
+  CheckSquare,
+  Square,
+  Play,
+  Layers,
+  ArrowRight,
+  ShieldCheck,
+  Terminal,
+  Filter,
 } from 'lucide-react';
 import { Contact, MessageTemplate, BroadcastLog, Temperature } from '../types';
 import {
@@ -48,8 +62,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   onMarkContacted,
   onToast,
 }) => {
-  // Mode: single quick broadcast, batch queue broadcast, history
-  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'history'>('single');
+  // Mode: single quick broadcast, batch queue broadcast, automated mass broadcast (zero tabs), history
+  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'auto_mass' | 'history'>('auto_mass');
 
   // Single Broadcast Form States
   const [selectedContactId, setSelectedContactId] = useState<string>('');
@@ -103,6 +117,18 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   const [batchOnlyPending, setBatchOnlyPending] = useState<boolean>(true);
   const [batchQueueIndex, setBatchQueueIndex] = useState<number>(0);
   const [selectedBatchIds, setSelectedBatchIds] = useState<string[]>([]);
+
+  // Automated Mass Broadcast (Zero Tabs / Chrome Extensions / CSV & Script)
+  const [massCourseFilter, setMassCourseFilter] = useState<string>('');
+  const [massTempFilter, setMassTempFilter] = useState<string>('');
+  const [massBatchFilter, setMassBatchFilter] = useState<string>('');
+  const [massSearch, setMassSearch] = useState<string>('');
+  const [massOnlyPending, setMassOnlyPending] = useState<boolean>(false);
+  const [massSelectedIds, setMassSelectedIds] = useState<string[]>([]);
+  const [massDelaySeconds, setMassDelaySeconds] = useState<number>(6);
+  const [massSubTab, setMassSubTab] = useState<'exporter' | 'script' | 'guide'>('exporter');
+  const [copiedMassScript, setCopiedMassScript] = useState<boolean>(false);
+  const [copiedMassLines, setCopiedMassLines] = useState<boolean>(false);
 
   // Format and clean phone
   const cleanPhone = (val: string) => val.replace(/\D/g, '');
@@ -501,6 +527,218 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
     onToast(`E-mail aberto para ${currentBatchContact.nome}!`, 'success');
   };
 
+  // Unique batches for filter
+  const uniqueBatches = useMemo(() => {
+    const set = new Set<string>();
+    contacts.forEach((c) => {
+      if (c.batchName) set.add(c.batchName);
+    });
+    return Array.from(set);
+  }, [contacts]);
+
+  // Filtered contacts with valid WhatsApp for automated mass broadcast
+  const filteredMassContacts = useMemo(() => {
+    const today = todayStr();
+    return contacts.filter((c) => {
+      if (!c.whatsapp || !cleanPhone(c.whatsapp)) return false;
+      if (massCourseFilter && c.curso !== massCourseFilter) return false;
+      if (massTempFilter && c.temperatura !== massTempFilter) return false;
+      if (massBatchFilter && c.batchName !== massBatchFilter) return false;
+      if (massOnlyPending && (c.ultimoContato === today || c.dataContato === today)) return false;
+      if (massSearch) {
+        const q = massSearch.toLowerCase();
+        const matchName = (c.nome || '').toLowerCase().includes(q);
+        const matchPhone = cleanPhone(c.whatsapp || '').includes(q);
+        const matchCourse = (c.curso || '').toLowerCase().includes(q);
+        if (!matchName && !matchPhone && !matchCourse) return false;
+      }
+      return true;
+    });
+  }, [contacts, massCourseFilter, massTempFilter, massBatchFilter, massOnlyPending, massSearch]);
+
+  // Selected mass contacts (or all filtered if none explicitly checked)
+  const targetMassContacts = useMemo(() => {
+    if (massSelectedIds.length === 0) return filteredMassContacts;
+    return filteredMassContacts.filter((c) => massSelectedIds.includes(c.id));
+  }, [filteredMassContacts, massSelectedIds]);
+
+  const handleToggleSelectAllMass = (select: boolean) => {
+    if (select) {
+      setMassSelectedIds(filteredMassContacts.map((c) => c.id));
+    } else {
+      setMassSelectedIds([]);
+    }
+  };
+
+  const handleToggleMassContact = (id: string) => {
+    setMassSelectedIds((prev) => {
+      // If currently all are implicitly selected (empty array), populate all except this one
+      if (prev.length === 0) {
+        return filteredMassContacts.filter((c) => c.id !== id).map((c) => c.id);
+      }
+      if (prev.includes(id)) {
+        return prev.filter((item) => item !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  // Helper to format full international phone (55 + DDD + number)
+  const getFullWaNumber = (phoneStr: string) => {
+    const raw = cleanPhone(phoneStr);
+    if (!raw) return '';
+    if (raw.startsWith('55') && (raw.length === 12 || raw.length === 13)) {
+      return raw;
+    }
+    return `55${raw}`;
+  };
+
+  // 1. Export XLSX for Chrome Extensions (WA Web Plus, WhatsBulk, WA Sender, etc.)
+  const handleExportMassXLSX = () => {
+    if (targetMassContacts.length === 0) {
+      onToast('Nenhum contato selecionado para exportar.', 'error');
+      return;
+    }
+
+    const rows = targetMassContacts.map((c) => ({
+      Phone: getFullWaNumber(c.whatsapp || ''),
+      Name: c.nome || 'Aluno',
+      Message: fillTemplate(mensagem, c),
+      Course: c.curso || '',
+      Temperature: c.temperatura || 'Frio',
+      Email: c.email || '',
+      Batch: c.batchName || 'Geral',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Disparo_WhatsApp');
+    const fileName = `Disparo_WhatsApp_PortalConcursos_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    onToast(`Planilha com ${rows.length} mensagens gerada com sucesso!`, 'success');
+  };
+
+  // 2. Export CSV (UTF-8 with BOM for 1-click import in all extensions)
+  const handleExportMassCSV = () => {
+    if (targetMassContacts.length === 0) {
+      onToast('Nenhum contato selecionado para exportar.', 'error');
+      return;
+    }
+
+    const headers = ['Phone', 'Name', 'Message', 'Course', 'Email'];
+    const rows = targetMassContacts.map((c) => {
+      const phone = getFullWaNumber(c.whatsapp || '');
+      const name = (c.nome || 'Aluno').replace(/"/g, '""');
+      const msg = fillTemplate(mensagem, c).replace(/"/g, '""');
+      const course = (c.curso || '').replace(/"/g, '""');
+      const emailVal = (c.email || '').replace(/"/g, '""');
+      return `"${phone}","${name}","${msg}","${course}","${emailVal}"`;
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Disparo_WhatsApp_PortalConcursos_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onToast(`Arquivo CSV com ${rows.length} contatos baixado!`, 'success');
+  };
+
+  // 3. Copy formatted text lines to clipboard (e.g. 5591987654321, Olá...)
+  const handleCopyMassTextList = () => {
+    if (targetMassContacts.length === 0) {
+      onToast('Nenhum contato selecionado para copiar.', 'error');
+      return;
+    }
+
+    const textLines = targetMassContacts
+      .map((c) => `${getFullWaNumber(c.whatsapp || '')}, ${fillTemplate(mensagem, c).replace(/\n/g, ' ')}`)
+      .join('\n');
+
+    navigator.clipboard.writeText(textLines).then(() => {
+      setCopiedMassLines(true);
+      setTimeout(() => setCopiedMassLines(false), 3000);
+      onToast(`Lista com ${targetMassContacts.length} contatos copiada para a área de transferência!`, 'success');
+    });
+  };
+
+  // 4. Generate and Copy WhatsApp Web Console Automation Script
+  const handleGenerateAndCopyMassScript = () => {
+    if (targetMassContacts.length === 0) {
+      onToast('Nenhum contato selecionado.', 'error');
+      return;
+    }
+
+    const payload = targetMassContacts.map((c) => ({
+      name: c.nome || 'Aluno',
+      phone: getFullWaNumber(c.whatsapp || ''),
+      message: fillTemplate(mensagem, c),
+    }));
+
+    const scriptCode = `/**
+ * =========================================================================
+ * 🤖 ROBÔ DE DISPARO AUTOMÁTICO EM MASSA - PORTAL CONCURSOS
+ * =========================================================================
+ * 1. Abra o WhatsApp Web (web.whatsapp.com) nesta mesma janela.
+ * 2. Pressione F12 no teclado (ou Ctrl + Shift + I) e clique na aba 'Console'.
+ * 3. Cole todo este código e pressione ENTER.
+ * O robô abrirá e enviará conversa por conversa na mesma aba sem abrir novas janelas!
+ * =========================================================================
+ */
+(async function runPortalBulkBroadcast() {
+  const contacts = ${JSON.stringify(payload, null, 2)};
+  const delaySeconds = ${massDelaySeconds};
+
+  console.clear();
+  console.log("%c🚀 PORTAL CONCURSOS | INICIANDO DISPARO EM MASSA (" + contacts.length + " CONTATOS)", "background: #101B2D; color: #C9A227; font-size: 15px; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 1px solid #C9A227;");
+  console.log("%cIntervalo de segurança anti-bloqueio: " + delaySeconds + " segundos por envio", "color: #8C98B4; font-size: 12px;");
+
+  for (let i = 0; i < contacts.length; i++) {
+    const item = contacts[i];
+    const progress = Math.round(((i + 1) / contacts.length) * 100);
+    console.log("%c[" + (i + 1) + "/" + contacts.length + " - " + progress + "%] 💬 Enviando para " + item.name + " (" + item.phone + ")...", "color: #38bdf8; font-weight: bold;");
+    
+    // Navega para o link oficial na mesma aba sem criar janelas
+    const targetUrl = "https://web.whatsapp.com/send?phone=" + item.phone + "&text=" + encodeURIComponent(item.message);
+    window.location.href = targetUrl;
+    
+    // Aguarda o intervalo de segurança configurado
+    await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+  }
+
+  console.log("%c🎉 DISPAROS FINALIZADOS COM SUCESSO!", "background: #166534; color: #4ade80; font-size: 16px; font-weight: bold; padding: 10px; border-radius: 8px;");
+  alert("🎉 Portal Concursos: Todos os " + contacts.length + " disparos foram concluídos!");
+})();`;
+
+    navigator.clipboard.writeText(scriptCode).then(() => {
+      setCopiedMassScript(true);
+      setTimeout(() => setCopiedMassScript(false), 3500);
+      onToast(`Código do Robô copiado! Abra o WhatsApp Web, aperte F12 > Console e cole (Ctrl+V).`, 'success');
+    });
+  };
+
+  // 5. Batch Mark Selected Contacts as Contacted Today
+  const handleMarkSelectedMassContactedToday = () => {
+    if (targetMassContacts.length === 0) {
+      onToast('Nenhum contato selecionado.', 'error');
+      return;
+    }
+
+    let marked = 0;
+    targetMassContacts.forEach((c) => {
+      if (onMarkContacted) {
+        onMarkContacted(c.id);
+        marked++;
+      }
+      recordBroadcast('whatsapp', c.nome, fillTemplate(mensagem, c));
+    });
+
+    onToast(`✅ ${marked} contato(s) marcado(s) como contatados hoje (${todayStr()})!`, 'success');
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header Banner */}
@@ -521,6 +759,22 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
           {/* Tab navigation */}
           <div className="flex items-center gap-1.5 bg-[#101B2D] p-1 rounded-lg border border-[#2B3D63] self-start md:self-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab('auto_mass')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                activeTab === 'auto_mass'
+                  ? 'bg-[#10B981] text-white shadow-sm ring-1 ring-[#34D399]'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+            >
+              <Bot className="w-3.5 h-3.5 text-[#34D399]" />
+              <span>Disparo Automático (Zero Abas)</span>
+              <span className="text-[10px] bg-emerald-950 text-[#34D399] px-1.5 py-0.2 rounded-full font-mono border border-emerald-700/50">
+                {filteredMassContacts.length}
+              </span>
+            </button>
+
             <button
               type="button"
               onClick={() => setActiveTab('single')}
@@ -1239,6 +1493,541 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               </div>
             </div>
           ) : null}
+        </div>
+      )}
+
+      {/* TAB: AUTOMATED MASS BROADCAST (ZERO ABAS NO NAVEGADOR / OPÇÃO B) */}
+      {activeTab === 'auto_mass' && (
+        <div className="space-y-6">
+          {/* Hero Feature Banner */}
+          <div className="bg-gradient-to-r from-[#0F291E] via-[#10243E] to-[#172644] border border-[#10B981]/40 rounded-xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 bg-[#10B981]/20 border border-[#10B981]/50 px-3 py-1 rounded-full text-xs font-bold text-[#34D399] uppercase tracking-wider">
+                  <Bot className="w-4 h-4 text-[#34D399]" />
+                  Disparo em Massa 100% Automático · Zero Abas
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
+                  Dispare para centenas de alunos sem abrir abas manuais
+                </h3>
+                <p className="text-xs sm:text-sm text-[#A7B3CC] max-w-2xl leading-relaxed">
+                  Gere arquivos 100% formatados para extensões de envio em massa (<b>WA Web Plus</b>, <b>WhatsBulk</b>, <b>WA Sender</b>) ou use nosso robô embutido para disparar na mesma janela do WhatsApp Web sem travar seu navegador.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleExportMassXLSX}
+                  disabled={targetMassContacts.length === 0}
+                  className="flex items-center justify-center gap-2 bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 disabled:opacity-40 cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Baixar Planilha (.xlsx)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleGenerateAndCopyMassScript}
+                  disabled={targetMassContacts.length === 0}
+                  className="flex items-center justify-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 disabled:opacity-40 cursor-pointer"
+                >
+                  {copiedMassScript ? <Check className="w-4 h-4 text-emerald-950" /> : <Terminal className="w-4 h-4" />}
+                  <span>{copiedMassScript ? 'Robô Copiado!' : 'Copiar Robô (F12)'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Sub-Navigation for Mode Selection */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-4 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2B3D63] pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#C9A227]">
+                  Escolha o Método de Disparo:
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-[#101B2D] p-1 rounded-lg border border-[#2B3D63] flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setMassSubTab('exporter')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                    massSubTab === 'exporter'
+                      ? 'bg-[#10B981] text-white shadow-sm'
+                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  }`}
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Planilha & Extensões (Recomendado)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMassSubTab('script')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                    massSubTab === 'script'
+                      ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
+                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  }`}
+                >
+                  <Terminal className="w-3.5 h-3.5" />
+                  <span>Robô Console WhatsApp Web</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMassSubTab('guide')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                    massSubTab === 'guide'
+                      ? 'bg-[#2563EB] text-white shadow-sm'
+                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  }`}
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Guia Passo a Passo</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Sub-Tab 1: Exporter for Chrome Extensions */}
+            {massSubTab === 'exporter' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        Planilha Excel (.xlsx)
+                      </div>
+                      <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded font-mono">
+                        Mais Usado
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8C98B4]">
+                      Arquivo com colunas <code>Phone</code>, <code>Name</code> e <code>Message</code> formatadas para importar em qualquer disparador.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleExportMassXLSX}
+                      disabled={targetMassContacts.length === 0}
+                      className="w-full flex items-center justify-center gap-1.5 bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Baixar Planilha Excel</span>
+                    </button>
+                  </div>
+
+                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[#60A5FA] font-bold text-xs">
+                        <Download className="w-4 h-4" />
+                        Arquivo CSV UTF-8 (.csv)
+                      </div>
+                      <span className="text-[10px] bg-blue-950 text-[#60A5FA] px-1.5 py-0.5 rounded font-mono">
+                        Universal
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8C98B4]">
+                      Arquivo CSV com separador padrão aceito por WhatsBulk, W-Sender e robôs do Chrome.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleExportMassCSV}
+                      disabled={targetMassContacts.length === 0}
+                      className="w-full flex items-center justify-center gap-1.5 bg-[#1E40AF] hover:bg-[#1D4ED8] text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Baixar Arquivo CSV</span>
+                    </button>
+                  </div>
+
+                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[#C9A227] font-bold text-xs">
+                        <Copy className="w-4 h-4" />
+                        Copiar Lista de Contatos
+                      </div>
+                      <span className="text-[10px] bg-amber-950 text-[#C9A227] px-1.5 py-0.5 rounded font-mono">
+                        1 Clique
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8C98B4]">
+                      Copia todos os números e mensagens para colar diretamente na caixa de texto da extensão.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopyMassTextList}
+                      disabled={targetMassContacts.length === 0}
+                      className="w-full flex items-center justify-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] text-xs font-bold py-2 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                    >
+                      {copiedMassLines ? <Check className="w-3.5 h-3.5 text-emerald-950" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedMassLines ? 'Lista Copiada!' : 'Copiar Texto para Colar'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Batch Mark Button */}
+                <div className="bg-[#101B2D]/60 border border-[#2B3D63] p-3 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs text-[#8C98B4]">
+                    <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
+                    <span>
+                      Já realizou ou iniciou o disparo externo? Atualize os status no sistema:
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleMarkSelectedMassContactedToday}
+                    disabled={targetMassContacts.length === 0}
+                    className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#4ADE80] border border-[#4ADE80]/40 text-xs font-bold px-3 py-1.5 rounded-md transition-colors cursor-pointer disabled:opacity-40"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Marcar {targetMassContacts.length} como Contatados Hoje</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 2: WhatsApp Web Console Script */}
+            {massSubTab === 'script' && (
+              <div className="space-y-4">
+                <div className="bg-[#0B141A] border border-[#2B3D63] p-4 rounded-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F3057] pb-3">
+                    <div>
+                      <div className="flex items-center gap-2 text-[#C9A227] font-bold text-sm">
+                        <Terminal className="w-4 h-4" />
+                        Robô de Disparo na Mesma Janela do WhatsApp Web
+                      </div>
+                      <p className="text-xs text-[#8C98B4] mt-0.5">
+                        Esse script automatiza o envio na mesma aba do WhatsApp Web sem abrir nenhuma nova janela.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#8C98B4]">Delay entre envios:</span>
+                      <select
+                        value={massDelaySeconds}
+                        onChange={(e) => setMassDelaySeconds(Number(e.target.value))}
+                        className="bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded px-2 py-1 focus:outline-none"
+                      >
+                        <option value={4}>4 seg (Rápido)</option>
+                        <option value={6}>6 seg (Recomendado)</option>
+                        <option value={8}>8 seg (Seguro)</option>
+                        <option value={12}>12 seg (Máxima Segurança)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 3 Step Instructions */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63]/70 space-y-1">
+                      <div className="font-bold text-[#EDE6D6] flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-[#C9A227] text-[#101B2D] flex items-center justify-center font-mono text-xs">1</span>
+                        Abra o WhatsApp Web
+                      </div>
+                      <p className="text-[#8C98B4] text-[11px]">
+                        Acesse <a href="https://web.whatsapp.com" target="_blank" rel="noreferrer" className="text-[#60A5FA] underline">web.whatsapp.com</a> e verifique se seu QR Code já está conectado.
+                      </p>
+                    </div>
+
+                    <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63]/70 space-y-1">
+                      <div className="font-bold text-[#EDE6D6] flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-[#C9A227] text-[#101B2D] flex items-center justify-center font-mono text-xs">2</span>
+                        Abra o Console (F12)
+                      </div>
+                      <p className="text-[#8C98B4] text-[11px]">
+                        Pressione a tecla <b>F12</b> no teclado (ou clique com botão direito &gt; Inspecionar) e clique na aba <b>Console</b>.
+                      </p>
+                    </div>
+
+                    <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63]/70 space-y-1">
+                      <div className="font-bold text-[#EDE6D6] flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-[#C9A227] text-[#101B2D] flex items-center justify-center font-mono text-xs">3</span>
+                        Cole o Robô e Enter
+                      </div>
+                      <p className="text-[#8C98B4] text-[11px]">
+                        Clique no botão abaixo para copiar o código, cole no Console (Ctrl+V) e aperte <b>Enter</b>!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={handleGenerateAndCopyMassScript}
+                      disabled={targetMassContacts.length === 0}
+                      className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow transition-all cursor-pointer disabled:opacity-40"
+                    >
+                      {copiedMassScript ? <Check className="w-4 h-4 text-emerald-950" /> : <Terminal className="w-4 h-4" />}
+                      <span>{copiedMassScript ? 'Código Copiado! (Pronto para Colar)' : 'Copiar Código do Robô para o Console'}</span>
+                    </button>
+
+                    <span className="text-xs text-[#8C98B4] font-mono">
+                      {targetMassContacts.length} contatos incluídos no script
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab 3: Step-by-Step Guide with Chrome Extensions */}
+            {massSubTab === 'guide' && (
+              <div className="space-y-4 text-xs text-[#8C98B4]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-[#EDE6D6] text-sm flex items-center gap-2">
+                        <span>🧩</span> Extensão 1: WA Web Plus para WhatsApp™
+                      </h4>
+                      <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded">
+                        Gratuita / Mais Popular
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      A extensão mais utilizada do mundo para WhatsApp Web. Possui módulo de envio de mensagens em massa com suporte a planilhas Excel e anexos.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#A7B3CC]">
+                      <li>Instale a extensão pela Chrome Web Store.</li>
+                      <li>Clique em <b>"Baixar Planilha (.xlsx)"</b> aqui no Portal Concursos.</li>
+                      <li>No WhatsApp Web, clique no ícone do WA Web Plus e vá em <b>Envio de Mensagens</b>.</li>
+                      <li>Carregue a planilha e clique em <b>Iniciar</b>. O envio ocorre 100% em segundo plano sem abrir nenhuma aba!</li>
+                    </ol>
+                  </div>
+
+                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-[#EDE6D6] text-sm flex items-center gap-2">
+                        <span>⚡</span> Extensão 2: WA Sender / WhatsBulk
+                      </h4>
+                      <span className="text-[10px] bg-blue-950 text-blue-400 px-1.5 py-0.5 rounded">
+                        Disparo Rápido
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      Permite colar a lista de contatos diretamente sem precisar salvar arquivos no computador.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#A7B3CC]">
+                      <li>Instale o <b>WA Sender</b> no Chrome ou Edge.</li>
+                      <li>Clique em <b>"Copiar Texto para Colar"</b> aqui no Portal Concursos.</li>
+                      <li>Abra a janela da extensão e cole no campo de contatos (Ctrl+V).</li>
+                      <li>Clique em <b>Send</b> para disparar em lote automático.</li>
+                    </ol>
+                  </div>
+                </div>
+
+                <div className="bg-[#101B2D] p-3.5 rounded-lg border border-[#2B3D63] flex items-center gap-3">
+                  <ShieldCheck className="w-5 h-5 text-[#4ADE80] shrink-0" />
+                  <p className="text-[11px] text-[#A7B3CC]">
+                    <b>Dica de Segurança Anti-Bloqueio:</b> Nossas planilhas e scripts já utilizam personalização com o primeiro nome do aluno e curso de interesse. Recomendamos manter um intervalo mínimo de <b>5 a 8 segundos</b> entre envios para preservar a saúde do seu número.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Contact Filtering & Interactive Table */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2B3D63] pb-3">
+              <div>
+                <h4 className="text-base font-bold font-serif text-[#EDE6D6] flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#C9A227]" />
+                  Lista de Leads Selecionados ({targetMassContacts.length} de {filteredMassContacts.length})
+                </h4>
+                <p className="text-xs text-[#8C98B4]">
+                  Filtre os contatos que deseja incluir no disparo em massa.
+                </p>
+              </div>
+
+              {/* Selection helper buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleToggleSelectAllMass(true)}
+                  className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#EDE6D6] px-2.5 py-1.5 rounded-md border border-[#2B3D63] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <CheckSquare className="w-3.5 h-3.5 text-[#4ADE80]" />
+                  <span>Selecionar Todos</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleToggleSelectAllMass(false)}
+                  className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#8C98B4] hover:text-[#EDE6D6] px-2.5 py-1.5 rounded-md border border-[#2B3D63] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Square className="w-3.5 h-3.5" />
+                  <span>Desmarcar Todos</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filters Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label className="block text-[#8C98B4] mb-1 font-semibold">Buscar Aluno ou Telefone:</label>
+                <input
+                  type="text"
+                  value={massSearch}
+                  onChange={(e) => setMassSearch(e.target.value)}
+                  placeholder="Nome, DDD, número ou curso..."
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#8C98B4] mb-1 font-semibold">Filtrar por Curso:</label>
+                <select
+                  value={massCourseFilter}
+                  onChange={(e) => setMassCourseFilter(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                >
+                  <option value="">Todos os Cursos ({uniqueCourses.length})</option>
+                  {uniqueCourses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#8C98B4] mb-1 font-semibold">Filtrar por Temperatura:</label>
+                <select
+                  value={massTempFilter}
+                  onChange={(e) => setMassTempFilter(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                >
+                  <option value="">Todas Temperaturas</option>
+                  <option value="Quente">🔥 Quente</option>
+                  <option value="Potencial">⚡ Potencial</option>
+                  <option value="Morno">🌤️ Morno</option>
+                  <option value="Frio">❄️ Frio</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#8C98B4] mb-1 font-semibold">Lote de Importação:</label>
+                <select
+                  value={massBatchFilter}
+                  onChange={(e) => setMassBatchFilter(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                >
+                  <option value="">Todos os Lotes ({uniqueBatches.length})</option>
+                  {uniqueBatches.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Checkbox only pending today */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <label className="flex items-center gap-2 text-[#8C98B4] hover:text-[#EDE6D6] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={massOnlyPending}
+                  onChange={(e) => setMassOnlyPending(e.target.checked)}
+                  className="rounded border-[#2B3D63] text-[#10B981]"
+                />
+                <span>Ocultar contatos que já foram contatados hoje ({todayStr()})</span>
+              </label>
+
+              <span className="text-[11px] text-[#C9A227] font-semibold">
+                Mensagem base atual: {mensagem.slice(0, 35)}...
+              </span>
+            </div>
+
+            {/* Interactive Leads Table */}
+            {filteredMassContacts.length === 0 ? (
+              <div className="py-10 text-center text-[#8C98B4] bg-[#101B2D] rounded-xl border border-[#2B3D63]">
+                <AlertCircle className="w-7 h-7 mx-auto mb-2 text-[#C9A227] opacity-60" />
+                <p className="text-sm font-semibold text-[#EDE6D6]">Nenhum contato com WhatsApp válido encontrado.</p>
+                <p className="text-xs mt-1">Ajuste os filtros acima para listar os contatos.</p>
+              </div>
+            ) : (
+              <div className="bg-[#101B2D] rounded-xl border border-[#2B3D63] overflow-hidden">
+                <div className="max-h-80 overflow-y-auto divide-y divide-[#2B3D63]/70">
+                  {filteredMassContacts.map((contact) => {
+                    const isSelected =
+                      massSelectedIds.length === 0 || massSelectedIds.includes(contact.id);
+                    const filledMsg = fillTemplate(mensagem, contact);
+
+                    return (
+                      <div
+                        key={contact.id}
+                        onClick={() => handleToggleMassContact(contact.id)}
+                        className={`p-3 flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer hover:bg-[#172644] ${
+                          isSelected ? 'bg-[#172644]/40' : 'opacity-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="rounded border-[#2B3D63] text-[#10B981] focus:ring-0 shrink-0"
+                          />
+
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-[#EDE6D6] truncate">
+                                {contact.nome}
+                              </span>
+                              <span className="font-mono text-[11px] text-[#4ADE80]">
+                                +55 {cleanPhone(contact.whatsapp || '')}
+                              </span>
+                              {contact.curso && (
+                                <span className="text-[10px] bg-[#1F3057] text-[#C9A227] px-1.5 py-0.2 rounded truncate max-w-[150px]">
+                                  {contact.curso}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-[#8C98B4] truncate mt-0.5 max-w-xl">
+                              💬 {filledMsg}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-2">
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${
+                              contact.temperatura === 'Quente'
+                                ? 'bg-red-950 text-red-400 border border-red-800/40'
+                                : contact.temperatura === 'Potencial'
+                                ? 'bg-amber-950 text-amber-400 border border-amber-800/40'
+                                : contact.temperatura === 'Morno'
+                                ? 'bg-yellow-950 text-yellow-300 border border-yellow-800/40'
+                                : 'bg-slate-800 text-slate-300'
+                            }`}
+                          >
+                            {contact.temperatura || 'Frio'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-3 bg-[#0B141A] border-t border-[#2B3D63] flex items-center justify-between text-xs text-[#8C98B4]">
+                  <span>Total na listagem: {filteredMassContacts.length} contatos</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#EDE6D6] font-semibold">
+                      {targetMassContacts.length} selecionados para envio
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleExportMassXLSX}
+                      className="bg-[#10B981] hover:bg-[#059669] text-white font-bold px-3 py-1.5 rounded text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Baixar Planilha</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
