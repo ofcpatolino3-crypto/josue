@@ -95,13 +95,32 @@ export function cleanPhone(tel: unknown): string {
     digits = digits.slice(1);
   }
 
-  // Handle 55 DDI prefix (Brazil international code)
-  if (digits.startsWith('55') && (digits.length === 12 || digits.length === 13)) {
-    // 55 + DDD (2) + 8 or 9 digits -> strip 55 to keep standard DDD+Number
-    return digits.slice(2);
-  } else if (digits.startsWith('550') && digits.length === 14) {
-    // 550 + DDD (2) + 9 digits -> strip 550
+  // Handle 550 prefix (14 digits)
+  if (digits.startsWith('550') && digits.length === 14) {
     return digits.slice(3);
+  }
+
+  // Handle 55 DDI prefix (Brazil international code)
+  if (digits.startsWith('55')) {
+    // 55 + DDD (2) + 8 or 9 digits (12 or 13 digits)
+    if (digits.length === 12 || digits.length === 13) {
+      return digits.slice(2);
+    }
+    // If 11 digits starting with 55 (e.g. 55839811193 -> 55 + DDD 83 + 7 digits)
+    const validDdds = [
+      '11','12','13','14','15','16','17','18','19',
+      '21','22','24','27','28',
+      '31','32','33','34','35','37','38',
+      '41','42','43','44','45','46','47','48','49',
+      '51','53','54','55',
+      '61','62','63','64','65','66','67','68','69',
+      '71','73','74','75','77','79',
+      '81','82','83','84','85','86','87','88','89',
+      '91','92','93','94','95','96','97','98','99'
+    ];
+    if (digits.length === 11 && validDdds.includes(digits.slice(2, 4))) {
+      return digits.slice(2);
+    }
   }
 
   return digits;

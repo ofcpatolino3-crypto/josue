@@ -183,29 +183,32 @@ Instruções para o WhatsApp:
       }
 
       const systemInstruction = `Você é um especialista sênior em OCR, Visão Computacional e Extração Inteligente de Contatos, Alunos e Compras do Portal Concurso.
-Sua função é analisar com extrema precisão e fidelidade documentos, capturas de tela do WhatsApp, prints de plataformas de pagamento/vendas (Hotmart, Eduzz, Kiwify, Asaas, MercadoPago, Monetizze, Braip, Hubla), comprovantes de PIX, CRM, notas, planilhas escaneadas, formulários ou textos.
+Sua função é analisar com extrema precisão e fidelidade documentos, capturas de tela do WhatsApp, prints de planilhas como Google Sheets/Excel, prints de plataformas de pagamento/vendas (Hotmart, Eduzz, Kiwify, Asaas, MercadoPago, Monetizze, Braip, Hubla), comprovantes de PIX, CRM, notas, formulários ou textos.
+
+REGRAS CRÍTICAS DE OCR EM PLANILHAS E TABELAS:
+- NUNCA use cabeçalhos de tabela como nome ou curso do contato! Termos como "Nome", "CPF", "WhatsA", "WhatsApp", "Telefone", "Valor", "Status", "Matrícula" NÃO são alunos. Ignore a linha de cabeçalho.
+- Se a linha começar com número de matrícula ou ID (ex: "109185 Gustavo"), remova o número/matrícula e extraia apenas o nome do aluno: "Gustavo".
+- Em prints de planilhas com colunas (ex: Matrícula | Nome | WhatsApp/CPF | Curso | Valor), relacione cada coluna com o campo correto de cada pessoa.
+- Remova DDI 55 do início do telefone, mantendo o DDD (2 dígitos) + número (8 ou 9 dígitos). Ex: 5583981119398 -> 83981119398.
 
 ATENÇÃO MÁXIMA PARA CADA CAMPO:
 
 1. CURSO / PRODUTO COMPRADO (campo "curso"):
 - EXTRAIA O NOME COMPLETO E EXATO DO CURSO, CONCURSO, TURMA OU PRODUTO QUE O ALUNO COMPROU OU TEM INTERESSE.
-- Procure por termos como: "Curso", "Isolada", "Combo", "Turma", "Apostila", "Mentoria", "Assinatura", "Polícia Militar", "PM-PA", "PMPA", "Polícia Civil", "PC-PA", "PCPA", "Polícia Federal", "PRF", "TJ-SP", "TJ-PA", "INSS", "Receita Federal", "Enfermagem", "Banco do Brasil", "Caixa", "Guarda Municipal", "SEFAZ", "Detran", "DEPEN", "Tribunal", "OAB", "Direito Penal", "Português", "Raciocínio Lógico", etc.
-- Se no print ou texto aparecer o nome da oferta, módulo ou pacote comprado (ex: "Combo PM Pará Soldado", "Turma Elite PCPA", "Isolada Português para INSS"), copie exatamente esse nome.
-- NUNCA deixe "Concursos Gerais" se houver qualquer menção ao concurso, órgão, cargo ou matéria no arquivo ou imagem. Se não houver, coloque o concurso deduzido pelo contexto.
+- Procure por termos como: "Curso", "Isolada", "Combo", "Turma", "Apostila", "Mentoria", "Assinatura", "Polícia Militar", "PM-PA", "PMPA", "Polícia Civil", "PC-PA", "PCPA", "Polícia Federal", "PRF", "TJ-SP", "TJ-PA", "INSS", "Receita Federal", "Enfermagem", "Banco do Brasil", "Caixa", "Guarda Municipal", "SEFAZ", "Detran", "DEPEN", "Tribunal", "OAB", "Prefeitura de...", "Direito Penal", "Português", "Raciocínio Lógico", etc.
+- NUNCA coloque cabeçalhos como ") Vaor =" ou "Valor" aqui.
 
 2. E-MAIL (campo "email"):
 - Procure ativamente por endereços de e-mail (ex: aluno@gmail.com, nome.sobrenome@hotmail.com, contato@...).
-- Em prints de checkout, faturas, formulários ou conversas, o e-mail frequentemente aparece abaixo do nome ou próximo ao telefone.
-- Em mensagens de texto/WhatsApp, identifique padrões como "email: ...", "e-mail: ..." ou qualquer texto no formato usuario@dominio.com.
-- Retorne SEMPRE o e-mail completo em letras minúsculas (ex: "maria.silva@gmail.com"). Se não houver e-mail visível, deixe string vazia "".
+- Retorne SEMPRE o e-mail completo em letras minúsculas. Se não houver e-mail visível, deixe string vazia "".
 
 3. NOME (campo "nome"):
 - Extraia o nome completo ou primeiro nome da pessoa.
-- Remova prefixos como "Nome:", "Aluno:", "1.", "2.", "•", "->", "Encaminhada".
+- Remova numerações ("1.", "2.", "109185"), prefixos como "Nome:", "Aluno:", "•", "->", "Encaminhada".
 
 4. TELEFONE / WHATSAPP (campo "whatsapp"):
 - Extraia o número completo com DDD (apenas dígitos).
-- Exemplo: "(91) 98123-4567" -> "91981234567". Se tiver prefixo DDI +55, normalize para os 10 ou 11 dígitos padrão do Brasil.
+- Exemplo: "(83) 98111-9398" -> "83981119398". Se tiver prefixo DDI +55, normalize para os 10 ou 11 dígitos padrão do Brasil.
 
 5. TEMPERATURA (campo "temperatura"):
 - "Pagou" se comprou, pagou, enviou comprovante, é aluno matriculado ou tem valor pago.
@@ -321,39 +324,56 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
 
       const rawContacts: Array<any> = Array.isArray(parsedData.contacts) ? parsedData.contacts : [];
 
+      const HEADER_NOISE = ['cpf', 'whatsa', 'whatsapp', 'telefone', 'valor', 'vaor', 'preco', 'r$', 'status', 'aluno', 'nome', 'matricula', 'inscricao'];
+
       // Post-process and sanitize contacts
-      const sanitizedContacts = rawContacts.map((c: any, index: number) => {
-        let phoneDigits = (c.whatsapp || '').toString().replace(/\D/g, '');
-        if (phoneDigits.startsWith('55') && (phoneDigits.length === 12 || phoneDigits.length === 13)) {
-          phoneDigits = phoneDigits.slice(2);
-        }
-        while (phoneDigits.startsWith('0') && phoneDigits.length > 10) {
-          phoneDigits = phoneDigits.slice(1);
-        }
+      const sanitizedContacts = rawContacts
+        .filter((c: any) => {
+          const nameLower = (c.nome || '').toString().toLowerCase().trim();
+          if (HEADER_NOISE.some((h) => nameLower === h || nameLower === `cpf = ${h}` || nameLower.startsWith('cpf ='))) return false;
+          if (nameLower.includes('whatsa') && nameLower.includes('cpf')) return false;
+          return true;
+        })
+        .map((c: any, index: number) => {
+          let phoneDigits = (c.whatsapp || '').toString().replace(/\D/g, '');
+          if (phoneDigits.startsWith('55') && (phoneDigits.length === 12 || phoneDigits.length === 13)) {
+            phoneDigits = phoneDigits.slice(2);
+          } else if (phoneDigits.startsWith('550') && phoneDigits.length === 14) {
+            phoneDigits = phoneDigits.slice(3);
+          }
+          while (phoneDigits.startsWith('0') && phoneDigits.length > 10) {
+            phoneDigits = phoneDigits.slice(1);
+          }
 
-        let nome = (c.nome || '').trim();
-        if (!nome) {
-          nome = phoneDigits ? `Contato (${phoneDigits})` : `Lead ${index + 1}`;
-        }
+          let nome = (c.nome || '').toString().trim();
+          nome = nome.replace(/^\d{3,10}\s*[-_\s|:]*\s*/, '').trim();
+          if (!nome || HEADER_NOISE.some((h) => nome.toLowerCase() === h)) {
+            nome = phoneDigits ? `Aluno (${phoneDigits.slice(0, 2)})` : `Aluno ${index + 1}`;
+          }
 
-        let temp = (c.temperatura || 'Morno').trim();
-        if (/quente/i.test(temp)) temp = 'Quente';
-        else if (/pag/i.test(temp) || /matriculado/i.test(temp)) temp = 'Pagou';
-        else if (/potencial/i.test(temp) || /alto/i.test(temp)) temp = 'Potencial';
-        else if (/frio/i.test(temp)) temp = 'Frio';
-        else temp = 'Morno';
+          let curso = (c.curso || '').toString().trim();
+          if (/va[lo0]r\s*[=\:]/i.test(curso) || HEADER_NOISE.some((h) => curso.toLowerCase() === h)) {
+            curso = 'Concursos Gerais';
+          }
 
-        return {
-          nome,
-          whatsapp: phoneDigits,
-          email: (c.email || '').toString().trim().toLowerCase(),
-          curso: (c.curso || '').toString().trim(),
-          temperatura: temp,
-          observacao: (c.observacao || '').toString().trim(),
-          valorPago: typeof c.valorPago === 'number' ? c.valorPago : 0,
-          status: (c.status || 'Novo Lead').toString().trim(),
-        };
-      });
+          let temp = (c.temperatura || 'Morno').trim();
+          if (/quente/i.test(temp)) temp = 'Quente';
+          else if (/pag/i.test(temp) || /matriculado/i.test(temp)) temp = 'Pagou';
+          else if (/potencial/i.test(temp) || /alto/i.test(temp)) temp = 'Potencial';
+          else if (/frio/i.test(temp)) temp = 'Frio';
+          else temp = 'Morno';
+
+          return {
+            nome,
+            whatsapp: phoneDigits,
+            email: (c.email || '').toString().trim().toLowerCase(),
+            curso: curso || 'Concursos Gerais',
+            temperatura: temp,
+            observacao: (c.observacao || '').toString().trim(),
+            valorPago: typeof c.valorPago === 'number' ? c.valorPago : 0,
+            status: (c.status || 'Novo Lead').toString().trim(),
+          };
+        });
 
       return res.json({
         success: true,

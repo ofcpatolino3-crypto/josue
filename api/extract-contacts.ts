@@ -51,23 +51,25 @@ export default async function handler(req: any, res: any) {
     }
 
     const systemInstruction = `Você é um especialista em OCR e Extração Inteligente de Contatos e Alunos do Portal Concurso.
-Sua função é analisar com extrema precisão arquivos (fotos de listas, capturas de tela do WhatsApp, mensagens encaminhadas, prints de CRM, documentos PDF, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
+Sua função é analisar com extrema precisão arquivos (fotos de listas, capturas de tela do WhatsApp, prints de planilhas como Google Sheets/Excel, mensagens encaminhadas, prints de CRM, documentos PDF, formulários escaneados ou texto corrido) e extrair todos os contatos individuais encontrados.
 
-Atenção especial a capturas de tela e mensagens de WhatsApp:
-- Geralmente cada contato possui o Nome em uma linha (ou em maiúsculas), seguido pelo e-mail e o número de telefone/WhatsApp com DDD entre parênteses ou no formato (DD) 9XXXX-XXXX.
-- Separe cada pessoa em um objeto de contato individual com seu respectivo nome, telefone e e-mail.
+REGRAS CRÍTICAS DE OCR EM PLANILHAS E TABELAS:
+- NUNCA use cabeçalhos de tabela como nome ou curso do contato! Ex: Termos como "Nome", "CPF", "WhatsA", "WhatsApp", "Telefone", "Valor", "Status", "Matrícula" NÃO são alunos. Ignore a linha de cabeçalho.
+- Se a linha começar com número de matrícula ou ID (ex: "109185 Gustavo"), remova o número/matrícula e extraia apenas o nome do aluno: "Gustavo".
+- Em prints de planilhas com colunas (ex: Matrícula | Nome | WhatsApp/CPF | Curso | Valor), relacione cada coluna com o campo correto de cada pessoa.
+- Remova DDI 55 do início do telefone, mantendo o DDD (2 dígitos) + número (8 ou 9 dígitos). Ex: 5583981119398 -> 83981119398.
 
 Regras de Extração para cada contato:
-1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2."), setas ("->"), prefixos como "Encaminhada" ou cargos desnecessários.
-2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 11987654321, 31996218500, 75981009055, 21999998888). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, mantenha no formato brasileiro padrão com DDD (10 ou 11 dígitos).
+1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2.", "109185"), setas ("->"), prefixos como "Encaminhada" ou rótulos ("Nome:", "Aluno:").
+2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 83981286997, 17991029387, 88992356945). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, remova o 55 e mantenha DDD + 8 ou 9 dígitos.
 3. email: Endereço de e-mail válido se estiver visível no arquivo (em minúsculas).
-4. curso: Nome do concurso (ex: "Polícia Federal", "INSS", "Polícia Civil", "TJ-SP", "Receita Federal", "PRF", "Enfermagem", "Banco do Brasil", "PMPA", "PCPA", "DEPEN"), matéria ou curso isolado de interesse. Se não estiver explícito, use o contexto do documento ou deixe vazio.
-5. temperatura: 'Quente' (se demonstrou alto interesse, pagou valor recente ou pediu proposta), 'Morno' (se fez pergunta padrão ou interesse moderado) ou 'Frio' (se é contato antigo ou lista geral). Padrão: 'Morno'.
-6. observacao: Notas adicionais, forma de pagamento, histórico, data informada ou detalhes da conversa.
+4. curso: Nome do concurso (ex: "Prefeitura de...", "PM-PA", "Polícia Civil", "TJ-SP", "INSS", "Polícia Federal", "PRF", "Banco do Brasil"), matéria ou curso de interesse. NUNCA coloque cabeçalhos como ") Vaor =" ou "Valor" aqui.
+5. temperatura: 'Pagou' (se constar pago/matriculado), 'Quente' (alto interesse), 'Morno' ou 'Frio'. Padrão: 'Morno'.
+6. observacao: Notas adicionais, forma de pagamento, histórico ou data informada.
 7. valorPago: Se houver indicação de valor pago em curso avulso (ex: R$ 150, R$ 297), extraia o número decimal (ex: 150.00).
-8. status: 'Novo Lead' ou 'Pendente'.
+8. status: 'Novo Lead'.
 
-Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa antes do fim da lista.`;
+Extraia com fidelidade TODOS os contatos válidos encontrados, linha por linha.`;
 
     const promptText = `Analise atentamente esta imagem ou documento (${fileName || 'arquivo'}) e extraia todos os contatos e informações de leads/alunos nele contidos em formato estruturado.`;
 
@@ -161,34 +163,58 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
 
     const rawContacts: Array<any> = Array.isArray(parsedData.contacts) ? parsedData.contacts : [];
 
-    const sanitizedContacts = rawContacts.map((c: any, index: number) => {
-      let phoneDigits = (c.whatsapp || '').toString().replace(/\D/g, '');
-      if (phoneDigits.length === 13 && phoneDigits.startsWith('55')) {
-        phoneDigits = phoneDigits.slice(2);
-      } else if (phoneDigits.length === 12 && phoneDigits.startsWith('55')) {
-        phoneDigits = phoneDigits.slice(2);
-      }
+    const HEADER_NOISE = ['cpf', 'whatsa', 'whatsapp', 'telefone', 'valor', 'vaor', 'preco', 'r$', 'status', 'aluno', 'nome', 'matricula', 'inscricao'];
 
-      let temp: 'Quente' | 'Morno' | 'Frio' = 'Morno';
-      if (c.temperatura) {
-        const tempStr = c.temperatura.toString().toLowerCase();
-        if (tempStr.includes('quent') || tempStr.includes('alt') || tempStr.includes('hot')) temp = 'Quente';
-        else if (tempStr.includes('fri') || tempStr.includes('baix') || tempStr.includes('cold')) temp = 'Frio';
-      }
+    const sanitizedContacts = rawContacts
+      .filter((c: any) => {
+        const nameLower = (c.nome || '').toString().toLowerCase().trim();
+        const courseLower = (c.curso || '').toString().toLowerCase().trim();
+        // Discard header rows
+        if (HEADER_NOISE.some((h) => nameLower === h || nameLower === `cpf = ${h}` || nameLower.startsWith('cpf ='))) return false;
+        if (nameLower.includes('whatsa') && nameLower.includes('cpf')) return false;
+        return true;
+      })
+      .map((c: any, index: number) => {
+        let phoneDigits = (c.whatsapp || '').toString().replace(/\D/g, '');
+        if (phoneDigits.startsWith('55') && (phoneDigits.length === 12 || phoneDigits.length === 13)) {
+          phoneDigits = phoneDigits.slice(2);
+        } else if (phoneDigits.startsWith('550') && phoneDigits.length === 14) {
+          phoneDigits = phoneDigits.slice(3);
+        }
 
-      return {
-        id: 'ai_imp_' + Date.now() + '_' + index + '_' + Math.random().toString(36).slice(2, 6),
-        nome: (c.nome || `Aluno ${index + 1}`).trim(),
-        whatsapp: phoneDigits,
-        email: (c.email || '').trim().toLowerCase(),
-        curso: (c.curso || 'Concursos Gerais').trim(),
-        temperatura: temp,
-        status: 'Novo Lead',
-        observacao: c.observacao || '',
-        valorPago: typeof c.valorPago === 'number' ? c.valorPago : undefined,
-        criadoEm: new Date().toISOString(),
-      };
-    });
+        let cleanName = (c.nome || '').toString().trim();
+        // Remove leading matricula/ID (e.g. "109185 Gustavo" -> "Gustavo")
+        cleanName = cleanName.replace(/^\d{3,10}\s*[-_\s|:]*\s*/, '').trim();
+        if (!cleanName || HEADER_NOISE.some((h) => cleanName.toLowerCase() === h)) {
+          cleanName = phoneDigits ? `Aluno (${phoneDigits.slice(0, 2)})` : `Aluno ${index + 1}`;
+        }
+
+        let cleanCourse = (c.curso || '').toString().trim();
+        if (/va[lo0]r\s*[=\:]/i.test(cleanCourse) || HEADER_NOISE.some((h) => cleanCourse.toLowerCase() === h)) {
+          cleanCourse = 'Concursos Gerais';
+        }
+
+        let temp: 'Quente' | 'Morno' | 'Frio' | 'Pagou' = 'Morno';
+        if (c.temperatura) {
+          const tempStr = c.temperatura.toString().toLowerCase();
+          if (tempStr.includes('pago') || tempStr.includes('matriculado')) temp = 'Pagou';
+          else if (tempStr.includes('quent') || tempStr.includes('alt') || tempStr.includes('hot')) temp = 'Quente';
+          else if (tempStr.includes('fri') || tempStr.includes('baix') || tempStr.includes('cold')) temp = 'Frio';
+        }
+
+        return {
+          id: 'ai_imp_' + Date.now() + '_' + index + '_' + Math.random().toString(36).slice(2, 6),
+          nome: cleanName,
+          whatsapp: phoneDigits,
+          email: (c.email || '').trim().toLowerCase(),
+          curso: cleanCourse || 'Concursos Gerais',
+          temperatura: temp,
+          status: 'Novo Lead',
+          observacao: c.observacao || (c.valorPago ? `Valor pago: R$ ${Number(c.valorPago).toFixed(2)}` : ''),
+          valorPago: typeof c.valorPago === 'number' ? c.valorPago : undefined,
+          criadoEm: new Date().toISOString(),
+        };
+      });
 
     return res.status(200).json({
       contacts: sanitizedContacts,
