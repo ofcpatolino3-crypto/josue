@@ -21,8 +21,16 @@ import {
   Download,
   Plus,
   Zap,
+  ArrowRight,
+  Filter,
+  CheckSquare,
+  Square,
+  UserPlus,
+  RotateCcw,
+  Briefcase,
+  HelpCircle,
 } from 'lucide-react';
-import { UserProfile, Contact, LeadBatch } from '../types';
+import { UserProfile, Contact, LeadBatch, UserRole } from '../types';
 import { SmartImportModal, SmartImportResult } from './SmartImportModal';
 import {
   isWithoutContactFor3Days,
@@ -39,10 +47,10 @@ interface AdminPanelProps {
   users: UserProfile[];
   globalContacts: Contact[];
   batches: LeadBatch[];
-  onApproveUser: (uid: string, role: 'admin' | 'attendant') => Promise<void>;
+  onApproveUser: (uid: string, role: UserRole) => Promise<void>;
   onBlockUser: (uid: string) => Promise<void>;
-  onChangeUserRole: (uid: string, role: 'admin' | 'attendant') => Promise<void>;
-  onCreateUserByAdmin?: (name: string, emailOrUser: string, pass: string, role: 'admin' | 'attendant') => Promise<boolean | string>;
+  onChangeUserRole: (uid: string, role: UserRole) => Promise<void>;
+  onCreateUserByAdmin?: (name: string, emailOrUser: string, pass: string, role: UserRole) => Promise<boolean | string>;
   onDistributeContacts: (
     contactsToAssign: Contact[],
     targetUserUid: string,
@@ -76,11 +84,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onBatchDeleteContacts,
   onImportSmartContacts,
 }) => {
-  // Navigation Tabs: 4 clear, focused sections
-  const [activeTab, setActiveTab] = useState<'alerts' | 'activity' | 'distribution' | 'users'>('alerts');
+  // Main Navigation Tabs
+  const [activeTab, setActiveTab] = useState<'distribution' | 'alerts' | 'activity' | 'users'>('distribution');
   const [showSmartImportModal, setShowSmartImportModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Distribution Sub-tools & Controls
+  const [distributionMode, setDistributionMode] = useState<'round_robin' | 'manual_select' | 'by_course' | 'transfer_portfolio'>('round_robin');
+  const [selectedAttendantsForRoleta, setSelectedAttendantsForRoleta] = useState<string[]>([]);
+  const [customAmountToDistribute, setCustomAmountToDistribute] = useState<number>(20);
+  const [targetAttendantForCustom, setTargetAttendantForCustom] = useState<string>('');
+  
+  // By Course routing
+  const [selectedCourseForRouting, setSelectedCourseForRouting] = useState<string>('');
+  const [targetAttendantForCourse, setTargetAttendantForCourse] = useState<string>('');
+
+  // Transfer whole portfolio
+  const [portfolioSourceUser, setPortfolioSourceUser] = useState<string>('');
+  const [portfolioTargetUser, setPortfolioTargetUser] = useState<string>('');
+
+  // Distribution Table Filters
+  const [selectedBatchFilter, setSelectedBatchFilter] = useState('todos');
+  const [selectedTargetUser, setSelectedTargetUser] = useState('');
+  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
+  const [actionFilter, setActionFilter] = useState<'todos' | 'unassigned' | 'assigned' | 'alerts'>('unassigned');
+  const [distributionSearch, setDistributionSearch] = useState('');
 
   // Alerts Tab Filters
   const [alertSearch, setAlertSearch] = useState('');
@@ -89,29 +119,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [reassignTargetByContact, setReassignTargetByContact] = useState<Record<string, string>>({});
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
-  // Distribution Tab Filters
-  const [selectedBatchFilter, setSelectedBatchFilter] = useState('todos');
-  const [selectedTargetUser, setSelectedTargetUser] = useState('');
-  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
-  const [actionFilter, setActionFilter] = useState<'todos' | 'unassigned' | 'assigned'>('unassigned');
-  const [distributionSearch, setDistributionSearch] = useState('');
-
-  // Users Tab Filters & Creation Modal
+  // Users Tab
   const [userSearch, setUserSearch] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPass, setNewUserPass] = useState('123456');
-  const [newUserRole, setNewUserRole] = useState<'attendant' | 'admin'>('attendant');
+  const [newUserRole, setNewUserRole] = useState<UserRole>('attendant');
   const [createUserError, setCreateUserError] = useState('');
 
-  // Core User Computations
+  // Computed Users Lists
   const pendingUsers = useMemo(() => users.filter((u) => u.status === 'pending'), [users]);
+  const activeStaff = useMemo(() => users.filter((u) => u.status === 'approved' && (u.role === 'attendant' || u.role === 'supervisor')), [users]);
   const attendants = useMemo(() => users.filter((u) => u.status === 'approved' && u.role === 'attendant'), [users]);
+  const allApprovedUsers = useMemo(() => users.filter((u) => u.status === 'approved'), [users]);
+
+  // Initializing default checked attendants for Roleta (all approved attendants)
+  React.useEffect(() => {
+    if (attendants.length > 0 && selectedAttendantsForRoleta.length === 0) {
+      setSelectedAttendantsForRoleta(attendants.map((a) => a.uid));
+    }
+  }, [attendants]);
+
+  // Base Contacts pools
   const unassignedContacts = useMemo(() => globalContacts.filter((c) => !c.assignedTo), [globalContacts]);
   const assignedContacts = useMemo(() => globalContacts.filter((c) => !!c.assignedTo), [globalContacts]);
 
-  // 3+ Days Inactivity Alerts list
+  // 3+ Days Inactivity Alert Contacts
   const inactiveAlertContacts = useMemo(() => {
     return globalContacts
       .filter((c) => isWithoutContactFor3Days(c))
@@ -142,7 +176,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     });
   }, [inactiveAlertContacts, alertAttendantFilter, alertDaysFilter, alertSearch]);
 
-  // Today's stats
+  // Today stats
   const today = todayStr();
   const todayInteractedCount = useMemo(() => {
     return globalContacts.filter((c) => {
@@ -151,6 +185,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return false;
     }).length;
   }, [globalContacts, today]);
+
+  // Courses available among unassigned leads
+  const unassignedCoursesList = useMemo(() => {
+    const counts: Record<string, number> = {};
+    unassignedContacts.forEach((c) => {
+      const course = c.curso?.trim() || 'Sem Curso Informado';
+      counts[course] = (counts[course] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+  }, [unassignedContacts]);
 
   // Attendant Performance Statistics
   const attendantStats = useMemo(() => {
@@ -182,7 +226,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         coverageRate,
         statusTier,
       };
-    }).sort((a, b) => b.inactive3Days - a.inactive3Days);
+    }).sort((a, b) => b.totalLeads - a.totalLeads);
   }, [attendants, globalContacts, today]);
 
   // Filtered Users
@@ -196,12 +240,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     });
   }, [users, userSearch]);
 
-  // Filtered Contacts for Distribution
+  // Filtered Contacts for Distribution Table
   const filteredContactsForDistribution = useMemo(() => {
     return globalContacts.filter((c) => {
       if (selectedBatchFilter !== 'todos' && c.batchName !== selectedBatchFilter) return false;
       if (actionFilter === 'unassigned' && c.assignedTo) return false;
       if (actionFilter === 'assigned' && !c.assignedTo) return false;
+      if (actionFilter === 'alerts' && !isWithoutContactFor3Days(c)) return false;
       if (distributionSearch.trim()) {
         const q = distributionSearch.toLowerCase();
         const mName = (c.nome || '').toLowerCase().includes(q);
@@ -214,11 +259,204 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     });
   }, [globalContacts, selectedBatchFilter, actionFilter, distributionSearch]);
 
-  // Single contact reassignment
+  // Toast Helper
+  const showNotification = (msg: string, isErr = false) => {
+    if (isErr) {
+      setErrorMsg(msg);
+      setTimeout(() => setErrorMsg(''), 5000);
+    } else {
+      setSuccessMsg(msg);
+      setTimeout(() => setSuccessMsg(''), 5000);
+    }
+  };
+
+  // --- ACTIONS ---
+
+  // 1. Roleta / Equitative Division
+  const handleExecuteRoletaDistribution = async () => {
+    const selectedUsers = attendants.filter((a) => selectedAttendantsForRoleta.includes(a.uid));
+    if (selectedUsers.length === 0) {
+      showNotification('Selecione pelo menos um atendente para participar da divisão.', true);
+      return;
+    }
+    if (unassignedContacts.length === 0) {
+      showNotification('Não há leads livres disponíveis para distribuição no momento.', true);
+      return;
+    }
+
+    const leadsPerPerson = Math.floor(unassignedContacts.length / selectedUsers.length);
+    const confirmText = `Deseja dividir ${unassignedContacts.length} leads livres igualmente entre os ${selectedUsers.length} atendentes selecionados (~${leadsPerPerson} leads para cada)?`;
+    
+    if (!window.confirm(confirmText)) return;
+
+    setIsProcessing(true);
+    try {
+      await onDistributeEqually(unassignedContacts, selectedUsers);
+      showNotification(`⚡ Sucesso! ${unassignedContacts.length} leads foram divididos igualmente entre ${selectedUsers.length} atendentes.`);
+    } catch (e: any) {
+      showNotification('Erro na divisão de leads: ' + e.message, true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 2. Custom Amount Distribution
+  const handleExecuteCustomAmountDistribution = async () => {
+    if (!targetAttendantForCustom) {
+      showNotification('Selecione o atendente que receberá os leads.', true);
+      return;
+    }
+    const targetUser = users.find((u) => u.uid === targetAttendantForCustom);
+    if (!targetUser) return;
+
+    if (unassignedContacts.length === 0) {
+      showNotification('Não há leads livres disponíveis.', true);
+      return;
+    }
+
+    const amount = Math.min(Math.max(1, customAmountToDistribute), unassignedContacts.length);
+    const sliceToAssign = unassignedContacts.slice(0, amount);
+
+    setIsProcessing(true);
+    try {
+      await onDistributeContacts(sliceToAssign, targetUser.uid, targetUser.email);
+      showNotification(`✅ ${sliceToAssign.length} leads atribuídos para ${targetUser.displayName || targetUser.email}!`);
+    } catch (e: any) {
+      showNotification('Erro ao atribuir leads: ' + e.message, true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 3. By Course Routing
+  const handleExecuteCourseRouting = async () => {
+    if (!selectedCourseForRouting) {
+      showNotification('Selecione o concurso para roteamento.', true);
+      return;
+    }
+    if (!targetAttendantForCourse) {
+      showNotification('Selecione o atendente especialista que receberá os leads.', true);
+      return;
+    }
+    const targetUser = users.find((u) => u.uid === targetAttendantForCourse);
+    if (!targetUser) return;
+
+    const courseLeads = unassignedContacts.filter((c) => {
+      const cName = c.curso?.trim() || 'Sem Curso Informado';
+      return cName === selectedCourseForRouting;
+    });
+
+    if (courseLeads.length === 0) {
+      showNotification('Nenhum lead livre encontrado para este concurso.', true);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onDistributeContacts(courseLeads, targetUser.uid, targetUser.email);
+      showNotification(`🎯 ${courseLeads.length} leads do concurso "${selectedCourseForRouting}" foram atribuídos para ${targetUser.displayName || targetUser.email}!`);
+    } catch (e: any) {
+      showNotification('Erro ao distribuir por curso: ' + e.message, true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 4. Transfer whole portfolio
+  const handleExecutePortfolioTransfer = async () => {
+    if (!portfolioSourceUser) {
+      showNotification('Selecione o atendente de origem (quem vai transferir).', true);
+      return;
+    }
+    if (!portfolioTargetUser) {
+      showNotification('Selecione o destino da carteira.', true);
+      return;
+    }
+    if (portfolioSourceUser === portfolioTargetUser) {
+      showNotification('A origem e o destino não podem ser o mesmo atendente.', true);
+      return;
+    }
+
+    const sourceLeads = globalContacts.filter((c) => c.assignedTo === portfolioSourceUser);
+    if (sourceLeads.length === 0) {
+      showNotification('O atendente de origem não possui leads atribuídos.', true);
+      return;
+    }
+
+    const sourceUser = users.find((u) => u.uid === portfolioSourceUser);
+
+    if (portfolioTargetUser === 'ROULETTE_EQUIP') {
+      // Divide among all other attendants
+      const otherAttendants = attendants.filter((a) => a.uid !== portfolioSourceUser);
+      if (otherAttendants.length === 0) {
+        showNotification('Não há outros atendentes para receber os contatos.', true);
+        return;
+      }
+      if (!window.confirm(`Transferir todos os ${sourceLeads.length} contatos de ${sourceUser?.displayName || 'origem'} e dividi-los igualmente entre os ${otherAttendants.length} outros atendentes?`)) {
+        return;
+      }
+
+      setIsProcessing(true);
+      try {
+        await onDistributeEqually(sourceLeads, otherAttendants);
+        showNotification(`🔄 Toda a carteira (${sourceLeads.length} leads) de ${sourceUser?.displayName} foi redistribuída na equipe!`);
+      } catch (e: any) {
+        showNotification('Erro na transferência: ' + e.message, true);
+      } finally {
+        setIsProcessing(false);
+      }
+    } else {
+      const targetUser = users.find((u) => u.uid === portfolioTargetUser);
+      if (!targetUser) return;
+
+      if (!window.confirm(`Transferir todos os ${sourceLeads.length} contatos de ${sourceUser?.displayName || 'origem'} para ${targetUser.displayName || targetUser.email}?`)) {
+        return;
+      }
+
+      setIsProcessing(true);
+      try {
+        await onDistributeContacts(sourceLeads, targetUser.uid, targetUser.email);
+        showNotification(`🔄 ${sourceLeads.length} contatos transferidos de ${sourceUser?.displayName} para ${targetUser.displayName || targetUser.email}!`);
+      } catch (e: any) {
+        showNotification('Erro na transferência: ' + e.message, true);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
+  // 5. Manual table selection assign
+  const handleAssignSelectedFromTable = async () => {
+    if (!selectedTargetUser) {
+      showNotification('Selecione o atendente que receberá os contatos.', true);
+      return;
+    }
+    const target = users.find((u) => u.uid === selectedTargetUser);
+    if (!target) return;
+
+    const contactsToAssign = globalContacts.filter((c) => selectedContactIds.includes(c.id));
+    if (contactsToAssign.length === 0) {
+      showNotification('Nenhum contato selecionado na tabela.', true);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onDistributeContacts(contactsToAssign, target.uid, target.email);
+      setSelectedContactIds([]);
+      showNotification(`✅ ${contactsToAssign.length} contatos atribuídos para ${target.displayName || target.email}!`);
+    } catch (e: any) {
+      showNotification('Erro ao distribuir: ' + e.message, true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 6. Single contact transfer
   const handleReassignSingle = async (contactId: string) => {
     const targetUid = reassignTargetByContact[contactId];
     if (!targetUid) {
-      alert('Selecione o atendente para transferir.');
+      showNotification('Selecione o atendente para transferir.', true);
       return;
     }
     const target = users.find((u) => u.uid === targetUid);
@@ -234,97 +472,34 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           await onDistributeContacts([contact], target.uid, target.email);
         }
       }
-      setSuccessMsg(`Contato reatribuído para ${target.displayName || target.email}!`);
-      setTimeout(() => setSuccessMsg(''), 4000);
+      showNotification(`Contato transferido com sucesso para ${target.displayName || target.email}!`);
     } catch (e: any) {
-      alert('Erro ao transferir contato: ' + e.message);
+      showNotification('Erro ao transferir contato: ' + e.message, true);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // Bulk reassign all 3+ days inactive contacts
+  // 7. Bulk reassign all inactive
   const handleBulkReassignAllInactive = async () => {
     if (inactiveAlertContacts.length === 0) {
-      alert('Não há contatos parados há 3 ou mais dias.');
+      showNotification('Não há contatos parados há 3 ou mais dias.', true);
       return;
     }
     if (attendants.length === 0) {
-      alert('Não há atendentes aprovados disponíveis para receber os contatos.');
+      showNotification('Não há atendentes cadastrados para receber os contatos.', true);
       return;
     }
 
-    const confirmMsg = `Deseja dividir ${inactiveAlertContacts.length} contatos parados igualmente entre os ${attendants.length} atendentes da equipe?`;
+    const confirmMsg = `Deseja pegar todos os ${inactiveAlertContacts.length} leads parados (+3 dias) e dividi-los igualmente entre os ${attendants.length} atendentes da equipe?`;
     if (!window.confirm(confirmMsg)) return;
 
     setIsProcessing(true);
     try {
       await onDistributeEqually(inactiveAlertContacts, attendants);
-      setSuccessMsg(`Sucesso! ${inactiveAlertContacts.length} contatos parados foram redistribuídos igualmente.`);
-      setTimeout(() => setSuccessMsg(''), 5000);
+      showNotification(`🚨 ${inactiveAlertContacts.length} leads parados foram reciclados e divididos igualmente!`);
     } catch (e: any) {
-      alert('Erro ao redistribuir: ' + e.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Assign selected in distribution
-  const handleAssignSelected = async () => {
-    if (!selectedTargetUser) {
-      alert('Selecione o atendente de destino.');
-      return;
-    }
-    const target = users.find((u) => u.uid === selectedTargetUser);
-    if (!target) return;
-
-    const contactsToAssign = globalContacts.filter((c) => selectedContactIds.includes(c.id));
-    if (contactsToAssign.length === 0) {
-      alert('Nenhum contato selecionado.');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await onDistributeContacts(contactsToAssign, target.uid, target.email);
-      setSelectedContactIds([]);
-      setSuccessMsg(`${contactsToAssign.length} contatos atribuídos a ${target.displayName || target.email}!`);
-      setTimeout(() => setSuccessMsg(''), 4000);
-    } catch (e: any) {
-      alert('Erro ao distribuir: ' + e.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Auto equal distribution
-  const handleAutoEqualDistribute = async () => {
-    if (attendants.length === 0) {
-      alert('Não há atendentes aprovados no sistema para receber contatos.');
-      return;
-    }
-
-    const unassigned = globalContacts.filter((c) => {
-      if (selectedBatchFilter !== 'todos' && c.batchName !== selectedBatchFilter) return false;
-      return !c.assignedTo;
-    });
-
-    if (unassigned.length === 0) {
-      alert('Não há contatos livres para distribuição nesta seleção.');
-      return;
-    }
-
-    const perPerson = Math.ceil(unassigned.length / attendants.length);
-    const confirmMsg = `Dividir ${unassigned.length} contatos livres igualmente entre os ${attendants.length} atendentes (${perPerson} por atendente)?`;
-    if (!window.confirm(confirmMsg)) return;
-
-    setIsProcessing(true);
-    try {
-      await onDistributeEqually(unassigned, attendants);
-      setSuccessMsg(`Sucesso! ${unassigned.length} contatos foram divididos igualmente entre ${attendants.length} atendentes.`);
-      setTimeout(() => setSuccessMsg(''), 5000);
-    } catch (e: any) {
-      alert('Erro na distribuição automática: ' + e.message);
+      showNotification('Erro ao redistribuir: ' + e.message, true);
     } finally {
       setIsProcessing(false);
     }
@@ -340,37 +515,58 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // Copy notice to seller
   const handleCopySellerNotice = (contact: Contact, attendantName: string, days: number) => {
-    const text = `🚨 *ALERTA DE ATENDIMENTO - PORTAL CONCURSO*\n\nOlá, *${attendantName}*!\nO aluno *${contact.nome || 'Lead'}* (${contact.whatsapp}) está há *${days} dias sem resposta ou contato* no painel.\n\nPor favor, envie uma mensagem agora para dar andamento e não perder o aluno! 🎯`;
+    const text = `🚨 *ALERTA DE ATENDIMENTO - PORTAL CONCURSO*\n\nOlá, *${attendantName}*!\nO aluno *${contact.nome || 'Lead'}* (${contact.whatsapp}) está há *${days} dias sem resposta ou contato* no painel.\n\nPor favor, envie uma mensagem agora para dar andamento e não perder a matrícula! 🎯`;
     navigator.clipboard.writeText(text);
     setCopiedMessageId(contact.id);
+    showNotification(`Mensagem de cobrança copiada para a área de transferência!`);
     setTimeout(() => setCopiedMessageId(null), 3000);
   };
 
-  // Supervisor Export Handlers
+  // Supervisor Export
   const handleExportSupervisorAll = async () => {
     if (globalContacts.length === 0) {
-      alert('Não há contatos cadastrados para exportar.');
+      showNotification('Não há contatos cadastrados para exportar.', true);
       return;
     }
     setIsProcessing(true);
     try {
       await exportSupervisorContactsToExcel(globalContacts, 'Base_Geral_Supervisao');
-      setSuccessMsg(`Planilha de Supervisão com ${globalContacts.length} contatos exportada!`);
-      setTimeout(() => setSuccessMsg(''), 4000);
+      showNotification(`Planilha de Supervisão com ${globalContacts.length} contatos exportada!`);
     } catch (e: any) {
-      alert('Erro ao exportar planilha: ' + e.message);
+      showNotification('Erro ao exportar planilha: ' + e.message, true);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  // Toggle attendant in Roleta
+  const toggleAttendantInRoleta = (uid: string) => {
+    setSelectedAttendantsForRoleta((prev) =>
+      prev.includes(uid) ? prev.filter((id) => id !== uid) : [...prev, uid]
+    );
+  };
+
+  const selectAllAttendantsInRoleta = () => {
+    setSelectedAttendantsForRoleta(attendants.map((a) => a.uid));
+  };
+
+  const clearAllAttendantsInRoleta = () => {
+    setSelectedAttendantsForRoleta([]);
+  };
+
   return (
     <div className="space-y-5" id="admin-panel-container">
-      {/* Toast Notification */}
+      {/* Toast Feedback */}
       {successMsg && (
         <div className="bg-[#10B981]/20 border border-[#10B981] text-white p-3.5 rounded-xl flex items-center gap-3 animate-fade-in shadow-lg">
           <CheckCircle2 className="w-5 h-5 text-[#10B981] shrink-0" />
           <span className="text-sm font-semibold">{successMsg}</span>
+        </div>
+      )}
+      {errorMsg && (
+        <div className="bg-[#DC2626]/20 border border-[#DC2626] text-white p-3.5 rounded-xl flex items-center gap-3 animate-fade-in shadow-lg">
+          <XCircle className="w-5 h-5 text-[#DC2626] shrink-0" />
+          <span className="text-sm font-semibold">{errorMsg}</span>
         </div>
       )}
 
@@ -379,18 +575,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                <Shield className="w-3 h-3" /> Painel de Supervisão
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/50 px-3 py-1 rounded-full uppercase tracking-wider">
+                <Shield className="w-3.5 h-3.5" />
+                {currentProfile?.role === 'admin' ? '👑 Painel Administrador Master' : '🛡️ Painel de Supervisão & Vendas'}
               </span>
               <span className="text-xs text-[#8C98B4]">
-                • Logado como <strong className="text-white">{currentProfile?.displayName || currentProfile?.email}</strong>
+                • Supervisor: <strong className="text-white">{currentProfile?.displayName || currentProfile?.email}</strong>
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
-              Gestão de Vendedores & Distribuição de Leads
+            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6] tracking-tight">
+              Central de Divisão de Leads & Gestão de Vendedores
             </h2>
             <p className="text-xs text-[#8C98B4]">
-              Acompanhe o radar de inatividade (+3 dias), monitore as vendas e distribua novas listas com praticidade.
+              Distribua leads por roleta equitativa, acompanhe o radar de inatividade (+3 dias) e monitore o desempenho da equipe.
             </p>
           </div>
 
@@ -399,130 +596,157 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <button
               type="button"
               onClick={() => setShowSmartImportModal(true)}
-              className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+              className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer active:scale-95"
             >
               <Sparkles className="w-4 h-4" />
               <span>Importar com IA (Excel/Foto/PDF)</span>
             </button>
 
-            {unassignedContacts.length > 0 && attendants.length > 0 && (
-              <button
-                type="button"
-                onClick={handleAutoEqualDistribute}
-                disabled={isProcessing}
-                className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-white border border-[#C9A227]/40 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
-                title="Dividir igualmente os leads não atribuídos"
-              >
-                <Zap className="w-3.5 h-3.5 text-[#C9A227]" />
-                <span>Dividir {unassignedContacts.length} Leads Livres</span>
-              </button>
-            )}
-
             <button
               type="button"
               onClick={handleExportSupervisorAll}
               disabled={isProcessing || globalContacts.length === 0}
-              className="flex items-center gap-1.5 bg-[#101B2D] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-[#101B2D] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
               title="Exportar planilha Excel completa de supervisão"
             >
               <Download className="w-3.5 h-3.5 text-[#C9A227]" />
-              <span>Exportar Excel</span>
+              <span>Exportar Base Completa</span>
             </button>
           </div>
         </div>
 
-        {/* Executive KPI Summary Counters */}
+        {/* Executive KPI Summary Counters - High Contrast Color-Coded Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#2B3D63]/70">
+          {/* Card 1: Piscina de Leads Livres */}
           <div
-            onClick={() => setActiveTab('alerts')}
-            className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              activeTab === 'alerts'
-                ? 'border-[#DC2626] bg-[#DC2626]/15 ring-1 ring-[#DC2626]'
-                : inactiveAlertContacts.length > 0
-                ? 'bg-[#DC2626]/10 border-[#DC2626]/40 hover:bg-[#DC2626]/20'
-                : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
+            onClick={() => {
+              setActiveTab('distribution');
+              setActionFilter('unassigned');
+            }}
+            className={`p-3.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
+              unassignedContacts.length > 0
+                ? 'bg-[#C9A227]/15 border-[#C9A227] shadow-[0_0_15px_rgba(201,162,39,0.15)] ring-1 ring-[#C9A227]/50'
+                : 'bg-[#101B2D] border-[#2B3D63]'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-[#8C98B4] font-medium">Leads Parados (+3d)</span>
-              {inactiveAlertContacts.length > 0 && <AlertTriangle className="w-3.5 h-3.5 text-[#DC2626]" />}
+              <span className="text-[11px] font-bold text-[#FCD34D] uppercase tracking-wider flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5 text-[#C9A227]" /> Leads Livres (Estoque)
+              </span>
             </div>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className={`text-xl font-bold ${inactiveAlertContacts.length > 0 ? 'text-[#F87171]' : 'text-white'}`}>
+            <div className="flex items-baseline gap-2 mt-1.5">
+              <span className="text-2xl sm:text-3xl font-extrabold text-white">
+                {unassignedContacts.length}
+              </span>
+              <span className="text-[11px] text-[#C9A227] font-semibold">
+                aguardando divisão
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Radar de Inatividade */}
+          <div
+            onClick={() => setActiveTab('alerts')}
+            className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+              inactiveAlertContacts.length > 0
+                ? 'bg-[#DC2626]/20 border-[#DC2626] shadow-[0_0_15px_rgba(220,38,38,0.2)] ring-1 ring-[#DC2626]/60'
+                : 'bg-[#101B2D] border-[#2B3D63]'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#FCA5A5] uppercase tracking-wider flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5 text-[#DC2626]" /> Leads Parados (+3d)
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-1.5">
+              <span className={`text-2xl sm:text-3xl font-extrabold ${inactiveAlertContacts.length > 0 ? 'text-[#F87171]' : 'text-white'}`}>
                 {inactiveAlertContacts.length}
               </span>
               {inactiveAlertContacts.length > 0 && (
-                <span className="text-[10px] text-[#FCA5A5] font-semibold">requer atenção</span>
+                <span className="text-[11px] bg-[#DC2626] text-white px-1.5 py-0.2 rounded font-bold">
+                  Cobrar Vendedor
+                </span>
               )}
             </div>
           </div>
 
+          {/* Card 3: Interações Hoje */}
           <div
             onClick={() => setActiveTab('activity')}
-            className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              activeTab === 'activity'
-                ? 'border-[#4ADE80] bg-[#4ADE80]/15 ring-1 ring-[#4ADE80]'
-                : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
-            }`}
+            className="p-3.5 rounded-xl border border-[#2B3D63] bg-[#101B2D] hover:border-[#10B981] transition-all cursor-pointer"
           >
-            <span className="text-[11px] text-[#8C98B4] font-medium block">Contatados Hoje</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-bold text-[#4ADE80]">{todayInteractedCount}</span>
-              <span className="text-[10px] text-[#8C98B4]">interações</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#86EFAC] uppercase tracking-wider flex items-center gap-1">
+                <TrendingUp className="w-3.5 h-3.5 text-[#10B981]" /> Atendimentos Hoje
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-1.5">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#4ADE80]">
+                {todayInteractedCount}
+              </span>
+              <span className="text-[11px] text-[#8C98B4]">interações ativas</span>
             </div>
           </div>
 
-          <div
-            onClick={() => setActiveTab('distribution')}
-            className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              activeTab === 'distribution'
-                ? 'border-[#C9A227] bg-[#C9A227]/15 ring-1 ring-[#C9A227]'
-                : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
-            }`}
-          >
-            <span className="text-[11px] text-[#8C98B4] font-medium block">Total de Leads / Livres</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-bold text-white">{globalContacts.length}</span>
-              <span className="text-[10px] text-[#C9A227] font-semibold">({unassignedContacts.length} livres)</span>
-            </div>
-          </div>
-
+          {/* Card 4: Equipe de Atendentes */}
           <div
             onClick={() => setActiveTab('users')}
-            className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              activeTab === 'users'
-                ? 'border-[#C9A227] bg-[#C9A227]/15 ring-1 ring-[#C9A227]'
-                : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
-            }`}
+            className="p-3.5 rounded-xl border border-[#2B3D63] bg-[#101B2D] hover:border-[#C9A227] transition-all cursor-pointer"
           >
-            <span className="text-[11px] text-[#8C98B4] font-medium block">Equipe de Atendentes</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-bold text-[#C9A227]">{attendants.length}</span>
-              {pendingUsers.length > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#8C98B4] uppercase tracking-wider flex items-center gap-1">
+                <Users className="w-3.5 h-3.5 text-[#C9A227]" /> Atendentes Ativos
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-1.5">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#EDE6D6]">
+                {attendants.length}
+              </span>
+              {pendingUsers.length > 0 ? (
                 <span className="text-[10px] bg-[#DC2626] text-white px-1.5 py-0.5 rounded font-bold">
                   {pendingUsers.length} pendente(s)
                 </span>
+              ) : (
+                <span className="text-[11px] text-[#8C98B4]">na equipe</span>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Clean 4-Tab Navigation */}
+      {/* 2. Visual Top Tabs */}
       <div className="flex items-center gap-2 border-b border-[#2B3D63] pb-2 overflow-x-auto">
         <button
           type="button"
+          onClick={() => setActiveTab('distribution')}
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shadow-sm ${
+            activeTab === 'distribution'
+              ? 'bg-[#C9A227] text-[#101B2D] shadow-md ring-2 ring-[#C9A227]/40'
+              : 'text-[#8C98B4] hover:text-white hover:bg-[#172644]'
+          }`}
+        >
+          <Share2 className="w-4 h-4" />
+          <span>Central de Divisão & Roleta de Leads</span>
+          {unassignedContacts.length > 0 && (
+            <span className="bg-[#101B2D] text-[#C9A227] text-[11px] px-2 py-0.5 rounded-full font-extrabold">
+              {unassignedContacts.length} livres
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('alerts')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'alerts'
-              ? 'bg-[#DC2626] text-white shadow-md font-bold'
+              ? 'bg-[#DC2626] text-white shadow-md ring-2 ring-[#DC2626]/40'
               : 'text-[#8C98B4] hover:text-white hover:bg-[#172644]'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>Radar de Leads Parados (+3 Dias)</span>
+          <span>Radar de Inatividade (+3 Dias)</span>
           {inactiveAlertContacts.length > 0 && (
-            <span className="bg-white text-[#DC2626] text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+            <span className="bg-white text-[#DC2626] text-[10px] px-2 py-0.5 rounded-full font-extrabold animate-pulse">
               {inactiveAlertContacts.length}
             </span>
           )}
@@ -531,40 +755,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('activity')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'activity'
-              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
+              ? 'bg-[#10B981] text-white shadow-md'
               : 'text-[#8C98B4] hover:text-white hover:bg-[#172644]'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          <span>Produtividade & Metas da Equipe</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('distribution')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'distribution'
-              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
-              : 'text-[#8C98B4] hover:text-white hover:bg-[#172644]'
-          }`}
-        >
-          <Share2 className="w-4 h-4" />
-          <span>Distribuir & Importar Leads</span>
-          {unassignedContacts.length > 0 && (
-            <span className="bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/40 text-[10px] px-1.5 py-0.2 rounded-full">
-              {unassignedContacts.length} livres
-            </span>
-          )}
+          <span>Produtividade & Desempenho da Equipe</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'users'
-              ? 'bg-[#C9A227] text-[#101B2D] shadow-md font-bold'
+              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-md'
               : 'text-[#8C98B4] hover:text-white hover:bg-[#172644]'
           }`}
         >
@@ -579,20 +785,673 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* TAB 1: 🚨 RADAR DE LEADS PARADOS (+3 DIAS)                               */}
+      {/* TAB 1: ⚡ CENTRAL DE DIVISÃO & ROLETA DE LEADS                           */}
+      {/* ========================================================================= */}
+      {activeTab === 'distribution' && (
+        <div className="space-y-5">
+          {/* Sub-modes selector */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-4 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2B3D63] pb-3">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Share2 className="w-4 h-4 text-[#C9A227]" />
+                  Como você deseja fazer a distribuição agora?
+                </h3>
+                <p className="text-xs text-[#8C98B4]">
+                  Escolha o modo de divisão mais conveniente para a rotina de supervisão.
+                </p>
+              </div>
+
+              {/* Badges */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-[#8C98B4]">Leads Livres:</span>
+                <span className="text-sm font-extrabold text-[#C9A227] bg-[#101B2D] border border-[#C9A227]/40 px-2.5 py-1 rounded-lg">
+                  {unassignedContacts.length} disponíveis
+                </span>
+              </div>
+            </div>
+
+            {/* 4 Tool Modes Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setDistributionMode('round_robin')}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  distributionMode === 'round_robin'
+                    ? 'bg-[#C9A227]/20 border-[#C9A227] ring-1 ring-[#C9A227]'
+                    : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-xs text-white">
+                  <Zap className={`w-4 h-4 ${distributionMode === 'round_robin' ? 'text-[#C9A227]' : 'text-[#8C98B4]'}`} />
+                  <span>1. Roleta Equitativa</span>
+                </div>
+                <p className="text-[11px] text-[#8C98B4] mt-1">
+                  Divide os leads livres em partes iguais entre os atendentes selecionados.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDistributionMode('by_course')}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  distributionMode === 'by_course'
+                    ? 'bg-[#C9A227]/20 border-[#C9A227] ring-1 ring-[#C9A227]'
+                    : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-xs text-white">
+                  <Briefcase className={`w-4 h-4 ${distributionMode === 'by_course' ? 'text-[#C9A227]' : 'text-[#8C98B4]'}`} />
+                  <span>2. Por Concurso / Cargo</span>
+                </div>
+                <p className="text-[11px] text-[#8C98B4] mt-1">
+                  Envia todos os leads de um concurso específico para um vendedor especialista.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDistributionMode('manual_select')}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  distributionMode === 'manual_select'
+                    ? 'bg-[#C9A227]/20 border-[#C9A227] ring-1 ring-[#C9A227]'
+                    : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-xs text-white">
+                  <Send className={`w-4 h-4 ${distributionMode === 'manual_select' ? 'text-[#C9A227]' : 'text-[#8C98B4]'}`} />
+                  <span>3. Lote por Quantidade</span>
+                </div>
+                <p className="text-[11px] text-[#8C98B4] mt-1">
+                  Passa um número exato (ex: 20 ou 50 leads) para um vendedor escolhido.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDistributionMode('transfer_portfolio')}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  distributionMode === 'transfer_portfolio'
+                    ? 'bg-[#DC2626]/20 border-[#DC2626] ring-1 ring-[#DC2626]'
+                    : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#8C98B4]'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-xs text-white">
+                  <RotateCcw className={`w-4 h-4 ${distributionMode === 'transfer_portfolio' ? 'text-[#F87171]' : 'text-[#8C98B4]'}`} />
+                  <span>4. Transferir Carteira</span>
+                </div>
+                <p className="text-[11px] text-[#8C98B4] mt-1">
+                  Remaneja todos os contatos de um vendedor ausente para outro ou para a equipe.
+                </p>
+              </button>
+            </div>
+
+            {/* --- TOOL PANEL: 1. ROLETA EQUITATIVA (ROUND ROBIN) --- */}
+            {distributionMode === 'round_robin' && (
+              <div className="bg-[#101B2D] border border-[#C9A227]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#2B3D63]">
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-[#C9A227]" />
+                      Divisão Balanceada / Roleta Automática
+                    </h4>
+                    <p className="text-xs text-[#8C98B4] mt-0.5">
+                      Marque quem vai receber leads nesta rodada. Se um vendedor faltou, desmarque-o abaixo.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={selectAllAttendantsInRoleta}
+                      className="text-xs text-[#C9A227] hover:underline font-semibold cursor-pointer"
+                    >
+                      Selecionar Todos
+                    </button>
+                    <span className="text-[#2B3D63]">|</span>
+                    <button
+                      type="button"
+                      onClick={clearAllAttendantsInRoleta}
+                      className="text-xs text-[#8C98B4] hover:underline cursor-pointer"
+                    >
+                      Desmarcar Todos
+                    </button>
+                  </div>
+                </div>
+
+                {/* Attendants Checklist Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                  {attendants.length === 0 ? (
+                    <div className="col-span-full py-4 text-center text-xs text-[#8C98B4]">
+                      Nenhum atendente cadastrado e aprovado no momento. Cadastre atendentes na aba "Equipe & Permissões".
+                    </div>
+                  ) : (
+                    attendants.map((a) => {
+                      const isChecked = selectedAttendantsForRoleta.includes(a.uid);
+                      const myCount = globalContacts.filter((c) => c.assignedTo === a.uid).length;
+
+                      return (
+                        <div
+                          key={a.uid}
+                          onClick={() => toggleAttendantInRoleta(a.uid)}
+                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
+                            isChecked
+                              ? 'bg-[#C9A227]/15 border-[#C9A227] text-white shadow-sm'
+                              : 'bg-[#172644] border-[#2B3D63] text-[#8C98B4] opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {isChecked ? (
+                              <CheckSquare className="w-4 h-4 text-[#C9A227] shrink-0" />
+                            ) : (
+                              <Square className="w-4 h-4 text-[#8C98B4] shrink-0" />
+                            )}
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-white truncate">
+                                {a.displayName || a.email}
+                              </div>
+                              <div className="text-[10px] text-[#8C98B4]">
+                                Carteira atual: <strong className="text-[#C9A227]">{myCount} leads</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Calculation Box & Action Button */}
+                <div className="bg-[#172644] p-4 rounded-xl border border-[#2B3D63] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="text-xs text-[#8C98B4]">Cálculo da Divisão:</div>
+                    <div className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+                      <span className="text-[#C9A227] font-extrabold">{unassignedContacts.length} leads livres</span>
+                      <span>÷</span>
+                      <span className="text-[#38BDF8] font-extrabold">{selectedAttendantsForRoleta.length} atendente(s)</span>
+                      <span>=</span>
+                      <span className="bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/40 px-2.5 py-0.5 rounded font-extrabold text-sm">
+                        {selectedAttendantsForRoleta.length > 0
+                          ? `~${Math.floor(unassignedContacts.length / selectedAttendantsForRoleta.length)} leads para cada`
+                          : 'Selecione atendentes'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleExecuteRoletaDistribution}
+                    disabled={isProcessing || unassignedContacts.length === 0 || selectedAttendantsForRoleta.length === 0}
+                    className="bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>Executar Divisão Automática Agora</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* --- TOOL PANEL: 2. POR CONCURSO / CARGO --- */}
+            {distributionMode === 'by_course' && (
+              <div className="bg-[#101B2D] border border-[#C9A227]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-[#C9A227]" />
+                    Distribuição Especializada por Concurso
+                  </h4>
+                  <p className="text-xs text-[#8C98B4] mt-0.5">
+                    Envie todos os alunos interessados em um concurso específico direto para o vendedor especialista.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div className="sm:col-span-6">
+                    <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                      1. Escolha o Concurso / Turma:
+                    </label>
+                    <select
+                      value={selectedCourseForRouting}
+                      onChange={(e) => setSelectedCourseForRouting(e.target.value)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#C9A227]"
+                    >
+                      <option value="">Selecione o concurso...</option>
+                      {unassignedCoursesList.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name} ({c.count} leads disponíveis)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-6">
+                    <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                      2. Atendente Especialista:
+                    </label>
+                    <select
+                      value={targetAttendantForCourse}
+                      onChange={(e) => setTargetAttendantForCourse(e.target.value)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#C9A227]"
+                    >
+                      <option value="">Selecione o atendente...</option>
+                      {attendants.map((a) => (
+                        <option key={a.uid} value={a.uid}>
+                          {a.displayName || a.email}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={handleExecuteCourseRouting}
+                    disabled={isProcessing || !selectedCourseForRouting || !targetAttendantForCourse}
+                    className="bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Atribuir Todos Deste Concurso</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* --- TOOL PANEL: 3. LOTE POR QUANTIDADE --- */}
+            {distributionMode === 'manual_select' && (
+              <div className="bg-[#101B2D] border border-[#C9A227]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Send className="w-4 h-4 text-[#C9A227]" />
+                    Atribuição por Quantidade Específica
+                  </h4>
+                  <p className="text-xs text-[#8C98B4] mt-0.5">
+                    Defina quantos leads livres serão entregues para um vendedor específico agora.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div className="sm:col-span-4">
+                    <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                      Quantidade de Leads:
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        max={unassignedContacts.length || 1}
+                        value={customAmountToDistribute}
+                        onChange={(e) => setCustomAmountToDistribute(Number(e.target.value))}
+                        className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#C9A227] font-bold"
+                      />
+                      <div className="flex gap-1">
+                        {[10, 25, 50, 100].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setCustomAmountToDistribute(num)}
+                            className="text-[10px] bg-[#172644] hover:bg-[#2B3D63] text-[#EDE6D6] px-2 py-1.5 rounded border border-[#2B3D63] cursor-pointer"
+                          >
+                            +{num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-5">
+                    <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                      Atendente de Destino:
+                    </label>
+                    <select
+                      value={targetAttendantForCustom}
+                      onChange={(e) => setTargetAttendantForCustom(e.target.value)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#C9A227]"
+                    >
+                      <option value="">Selecione o atendente...</option>
+                      {attendants.map((a) => (
+                        <option key={a.uid} value={a.uid}>
+                          {a.displayName || a.email}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-3 flex items-end">
+                    <button
+                      type="button"
+                      onClick={handleExecuteCustomAmountDistribution}
+                      disabled={isProcessing || !targetAttendantForCustom || unassignedContacts.length === 0}
+                      className="w-full bg-[#10B981] hover:bg-[#059669] text-white font-extrabold text-xs py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Entregar Leads</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* --- TOOL PANEL: 4. TRANSFERIR CARTEIRA --- */}
+            {distributionMode === 'transfer_portfolio' && (
+              <div className="bg-[#101B2D] border border-[#DC2626]/50 rounded-xl p-4.5 space-y-4 animate-fade-in">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <RotateCcw className="w-4 h-4 text-[#F87171]" />
+                    Remanejamento Total de Carteira
+                  </h4>
+                  <p className="text-xs text-[#8C98B4] mt-0.5">
+                    Transfira todos os contatos de um vendedor (que faltou ou saiu) para outro atendente ou divida na equipe.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div className="sm:col-span-5">
+                    <label className="text-xs font-semibold text-[#F87171] block mb-1">
+                      1. Vendedor de Origem (Quem vai passar os leads):
+                    </label>
+                    <select
+                      value={portfolioSourceUser}
+                      onChange={(e) => setPortfolioSourceUser(e.target.value)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#DC2626]"
+                    >
+                      <option value="">Selecione o vendedor de origem...</option>
+                      {attendants.map((a) => {
+                        const count = globalContacts.filter((c) => c.assignedTo === a.uid).length;
+                        return (
+                          <option key={a.uid} value={a.uid}>
+                            {a.displayName || a.email} ({count} leads)
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 flex items-center justify-center pt-5">
+                    <ArrowRight className="w-6 h-6 text-[#C9A227] hidden sm:block" />
+                  </div>
+
+                  <div className="sm:col-span-5">
+                    <label className="text-xs font-semibold text-[#34D399] block mb-1">
+                      2. Destino da Carteira:
+                    </label>
+                    <select
+                      value={portfolioTargetUser}
+                      onChange={(e) => setPortfolioTargetUser(e.target.value)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#10B981]"
+                    >
+                      <option value="">Selecione o destino...</option>
+                      <option value="ROULETTE_EQUIP">⚡ Dividir Igualmente entre Todos os Outros Atendentes</option>
+                      {attendants
+                        .filter((a) => a.uid !== portfolioSourceUser)
+                        .map((a) => (
+                          <option key={a.uid} value={a.uid}>
+                            {a.displayName || a.email}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={handleExecutePortfolioTransfer}
+                    disabled={isProcessing || !portfolioSourceUser || !portfolioTargetUser}
+                    className="bg-[#DC2626] hover:bg-[#b91c1c] text-white font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Confirmar Transferência de Carteira</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Table Controls & Filter Bar */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-4 shadow-sm space-y-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-[#C9A227]" />
+                  Tabela Geral de Leads & Seleção Manual
+                </h3>
+                <p className="text-xs text-[#8C98B4]">
+                  Filtre, pesquise e selecione contatos individualmente para redistribuição.
+                </p>
+              </div>
+
+              {/* Status Filter Pills */}
+              <div className="flex flex-wrap items-center gap-1.5 bg-[#101B2D] p-1 rounded-xl border border-[#2B3D63]">
+                <button
+                  type="button"
+                  onClick={() => setActionFilter('unassigned')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    actionFilter === 'unassigned'
+                      ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
+                      : 'text-[#8C98B4] hover:text-white'
+                  }`}
+                >
+                  ⚡ Livres ({unassignedContacts.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActionFilter('assigned')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    actionFilter === 'assigned'
+                      ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
+                      : 'text-[#8C98B4] hover:text-white'
+                  }`}
+                >
+                  🧑‍💼 Atribuídos ({assignedContacts.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActionFilter('alerts')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    actionFilter === 'alerts'
+                      ? 'bg-[#DC2626] text-white shadow-sm'
+                      : 'text-[#F87171] hover:text-white'
+                  }`}
+                >
+                  🚨 Parados +3d ({inactiveAlertContacts.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActionFilter('todos')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    actionFilter === 'todos'
+                      ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
+                      : 'text-[#8C98B4] hover:text-white'
+                  }`}
+                >
+                  Todos ({globalContacts.length})
+                </button>
+              </div>
+            </div>
+
+            {/* Search & Actions on Selected */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2 border-t border-[#2B3D63]">
+              <div className="sm:col-span-5 relative">
+                <Search className="w-3.5 h-3.5 text-[#8C98B4] absolute left-3 top-3" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome, telefone, curso ou atendente..."
+                  value={distributionSearch}
+                  onChange={(e) => setDistributionSearch(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-white text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#C9A227]"
+                />
+              </div>
+
+              <div className="sm:col-span-3">
+                <select
+                  value={selectedBatchFilter}
+                  onChange={(e) => setSelectedBatchFilter(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#C9A227]"
+                >
+                  <option value="todos">Todos os Lotes / Origens</option>
+                  {batches.map((b) => (
+                    <option key={b.id} value={b.name}>
+                      {b.name} ({b.totalLeads || b.distributedLeads} leads)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sm:col-span-4 flex gap-1.5">
+                <select
+                  value={selectedTargetUser}
+                  onChange={(e) => setSelectedTargetUser(e.target.value)}
+                  className="flex-1 bg-[#101B2D] border border-[#2B3D63] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#C9A227]"
+                >
+                  <option value="">Atendente de Destino...</option>
+                  {attendants.map((a) => (
+                    <option key={a.uid} value={a.uid}>
+                      {a.displayName || a.email}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleAssignSelectedFromTable}
+                  disabled={isProcessing || selectedContactIds.length === 0 || !selectedTargetUser}
+                  className="bg-[#10B981] hover:bg-[#059669] text-white px-3.5 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0 flex items-center gap-1"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Enviar ({selectedContactIds.length})</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Distribution Contacts Table */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-3 bg-[#101B2D] border-b border-[#2B3D63] flex items-center justify-between text-xs">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSelectAllFiltered}
+                  className="text-xs font-semibold text-[#C9A227] hover:underline cursor-pointer flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {selectedContactIds.length === filteredContactsForDistribution.length &&
+                  filteredContactsForDistribution.length > 0
+                    ? 'Desmarcar Todos'
+                    : `Selecionar Todos (${filteredContactsForDistribution.length})`}
+                </button>
+                <span className="text-[#8C98B4]">
+                  • <b>{selectedContactIds.length}</b> selecionado(s)
+                </span>
+              </div>
+
+              {selectedContactIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (window.confirm(`Excluir permanentemente os ${selectedContactIds.length} contatos selecionados?`)) {
+                      await onBatchDeleteContacts(selectedContactIds);
+                      setSelectedContactIds([]);
+                      showNotification(`${selectedContactIds.length} contatos excluídos.`);
+                    }
+                  }}
+                  className="text-[#F87171] hover:underline text-xs cursor-pointer font-semibold"
+                >
+                  Excluir Selecionados ({selectedContactIds.length})
+                </button>
+              )}
+            </div>
+
+            <div className="overflow-x-auto max-h-[550px] overflow-y-auto">
+              <table className="w-full text-left text-xs text-white">
+                <thead className="bg-[#101B2D] text-[#8C98B4] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#2B3D63] z-10">
+                  <tr>
+                    <th className="py-2.5 px-3 w-10 text-center">Sel.</th>
+                    <th className="py-2.5 px-3">Nome / Aluno</th>
+                    <th className="py-2.5 px-3">WhatsApp</th>
+                    <th className="py-2.5 px-3">Curso / Cargo</th>
+                    <th className="py-2.5 px-3">Lote / Origem</th>
+                    <th className="py-2.5 px-3">Atendente Atual</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2B3D63]/50">
+                  {filteredContactsForDistribution.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center text-[#8C98B4]">
+                        Nenhum contato encontrado para estes filtros.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredContactsForDistribution.map((c) => {
+                      const isSelected = selectedContactIds.includes(c.id);
+                      return (
+                        <tr
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedContactIds((prev) =>
+                              prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
+                            );
+                          }}
+                          className={`cursor-pointer transition-colors ${
+                            isSelected ? 'bg-[#C9A227]/15' : 'hover:bg-[#1F3057]/40'
+                          }`}
+                        >
+                          <td className="py-2.5 px-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => {}}
+                              className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-0 cursor-pointer"
+                            />
+                          </td>
+                          <td className="py-2.5 px-3 font-semibold text-white">
+                            <div>{c.nome}</div>
+                            {c.email && <div className="text-[10px] text-[#8C98B4]">{c.email}</div>}
+                          </td>
+                          <td className="py-2.5 px-3 font-mono text-[#8C98B4] whitespace-nowrap">
+                            {c.whatsapp}
+                          </td>
+                          <td className="py-2.5 px-3 text-[#C9A227] font-medium">{c.curso || '—'}</td>
+                          <td className="py-2.5 px-3 text-[#8C98B4]">{c.batchName || 'Importação Direta'}</td>
+                          <td className="py-2.5 px-3">
+                            {c.assignedToEmail ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-[#34D399] font-semibold bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded">
+                                <UserCheck className="w-3 h-3" />
+                                {c.assignedToEmail}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-[#F87171] font-semibold bg-[#DC2626]/15 border border-[#DC2626]/30 px-2 py-0.5 rounded">
+                                <UserX className="w-3 h-3" />
+                                Livre (Sem atendente)
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 2: 🚨 RADAR DE LEADS PARADOS (+3 DIAS)                               */}
       {/* ========================================================================= */}
       {activeTab === 'alerts' && (
         <div className="space-y-4">
-          {/* Controls & Search Header */}
           <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-4 shadow-sm space-y-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-[#F87171]" />
-                  Leads sem Interação há 3+ Dias ({inactiveAlertContacts.length})
+                  Radar de Inatividade & Abandono (+3 Dias)
                 </h3>
                 <p className="text-xs text-[#8C98B4]">
-                  Leads que não receberam mensagem há mais de 72 horas. Cobre o vendedor ou transfira com 1 clique.
+                  Leads que não receberam mensagem há mais de 72 horas. Cobre o vendedor ou transfira para outro com 1 clique.
                 </p>
               </div>
 
@@ -601,10 +1460,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   type="button"
                   onClick={handleBulkReassignAllInactive}
                   disabled={isProcessing}
-                  className="bg-[#DC2626] hover:bg-[#b91c1c] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50 self-start md:self-auto"
+                  className="bg-[#DC2626] hover:bg-[#b91c1c] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50 self-start md:self-auto"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Redistribuir Todos os Parados</span>
+                  <span>Redistribuir Todos os {inactiveAlertContacts.length} Parados</span>
                 </button>
               )}
             </div>
@@ -811,7 +1670,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: 📊 PRODUTIVIDADE & METAS DA EQUIPE                                 */}
+      {/* TAB 3: 📊 PRODUTIVIDADE & DESEMPENHO DA EQUIPE                            */}
       {/* ========================================================================= */}
       {activeTab === 'activity' && (
         <div className="space-y-4">
@@ -919,12 +1778,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   {/* Bottom Action / View */}
                   <div className="flex items-center justify-between pt-2 border-t border-[#2B3D63] text-xs">
-                    <span className="text-[#8C98B4]">
-                      Potenciais/Quentes: <b className="text-white">{item.hotCount}</b>
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPortfolioSourceUser(a.uid);
+                        setDistributionMode('transfer_portfolio');
+                        setActiveTab('distribution');
+                      }}
+                      className="text-[11px] text-[#8C98B4] hover:text-white flex items-center gap-1 cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Transferir Carteira</span>
+                    </button>
 
                     {hasAlerts ? (
                       <button
+                        type="button"
                         onClick={() => {
                           setAlertAttendantFilter(a.uid);
                           setActiveTab('alerts');
@@ -942,245 +1811,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 3: 📦 DISTRIBUIR & IMPORTAR LEADS                                     */}
-      {/* ========================================================================= */}
-      {activeTab === 'distribution' && (
-        <div className="space-y-4">
-          {/* Main Action Banner */}
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Share2 className="w-4 h-4 text-[#C9A227]" />
-                  Central de Distribuição e Atribuição de Leads
-                </h3>
-                <p className="text-xs text-[#8C98B4] mt-0.5">
-                  Atribua leads livres para vendedores específicos ou faça uma divisão automática igualitária.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowSmartImportModal(true)}
-                  className="bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>Importar Novo Arquivo (IA)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleAutoEqualDistribute}
-                  disabled={isProcessing || unassignedContacts.length === 0 || attendants.length === 0}
-                  className="bg-[#1F3057] hover:bg-[#2B3D63] text-white border border-[#2B3D63] font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
-                >
-                  <Zap className="w-4 h-4 text-[#C9A227]" />
-                  <span>Dividir Igualmente ({unassignedContacts.length})</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Filter Bar & Manual Assignment Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-[#2B3D63]">
-              <div className="sm:col-span-3">
-                <label className="text-[11px] font-semibold text-[#8C98B4] block mb-1">
-                  Filtrar por Lote:
-                </label>
-                <select
-                  value={selectedBatchFilter}
-                  onChange={(e) => setSelectedBatchFilter(e.target.value)}
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#C9A227]"
-                >
-                  <option value="todos">Todos os Lotes ({globalContacts.length})</option>
-                  {batches.map((b) => (
-                    <option key={b.id} value={b.name}>
-                      {b.name} ({b.totalRows} leads)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="sm:col-span-3">
-                <label className="text-[11px] font-semibold text-[#8C98B4] block mb-1">
-                  Status de Atribuição:
-                </label>
-                <div className="flex rounded-lg overflow-hidden border border-[#2B3D63]">
-                  <button
-                    onClick={() => setActionFilter('unassigned')}
-                    className={`flex-1 py-1.5 text-xs font-semibold cursor-pointer ${
-                      actionFilter === 'unassigned' ? 'bg-[#C9A227] text-[#101B2D]' : 'bg-[#101B2D] text-[#8C98B4]'
-                    }`}
-                  >
-                    Livres ({unassignedContacts.length})
-                  </button>
-                  <button
-                    onClick={() => setActionFilter('assigned')}
-                    className={`flex-1 py-1.5 text-xs font-semibold cursor-pointer ${
-                      actionFilter === 'assigned' ? 'bg-[#C9A227] text-[#101B2D]' : 'bg-[#101B2D] text-[#8C98B4]'
-                    }`}
-                  >
-                    Atribuídos ({assignedContacts.length})
-                  </button>
-                  <button
-                    onClick={() => setActionFilter('todos')}
-                    className={`flex-1 py-1.5 text-xs font-semibold cursor-pointer ${
-                      actionFilter === 'todos' ? 'bg-[#C9A227] text-[#101B2D]' : 'bg-[#101B2D] text-[#8C98B4]'
-                    }`}
-                  >
-                    Todos
-                  </button>
-                </div>
-              </div>
-
-              <div className="sm:col-span-3">
-                <label className="text-[11px] font-semibold text-[#8C98B4] block mb-1">
-                  Buscar Lead / Aluno:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nome, telefone, curso..."
-                  value={distributionSearch}
-                  onChange={(e) => setDistributionSearch(e.target.value)}
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#C9A227]"
-                />
-              </div>
-
-              <div className="sm:col-span-3">
-                <label className="text-[11px] font-semibold text-[#8C98B4] block mb-1">
-                  Enviar Selecionados para:
-                </label>
-                <div className="flex gap-1.5">
-                  <select
-                    value={selectedTargetUser}
-                    onChange={(e) => setSelectedTargetUser(e.target.value)}
-                    className="flex-1 bg-[#101B2D] border border-[#2B3D63] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#C9A227]"
-                  >
-                    <option value="">Escolher Atendente...</option>
-                    {attendants.map((a) => (
-                      <option key={a.uid} value={a.uid}>
-                        {a.displayName || a.email}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={handleAssignSelected}
-                    disabled={isProcessing || selectedContactIds.length === 0 || !selectedTargetUser}
-                    className="bg-[#10B981] hover:bg-[#059669] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0 flex items-center gap-1"
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Enviar ({selectedContactIds.length})</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Distribution Contacts Table */}
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-3 bg-[#101B2D] border-b border-[#2B3D63] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleSelectAllFiltered}
-                  className="text-xs font-semibold text-[#C9A227] hover:underline cursor-pointer flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  {selectedContactIds.length === filteredContactsForDistribution.length &&
-                  filteredContactsForDistribution.length > 0
-                    ? 'Desmarcar Todos'
-                    : `Selecionar Todos (${filteredContactsForDistribution.length})`}
-                </button>
-                <span className="text-[#8C98B4]">
-                  • <b>{selectedContactIds.length}</b> selecionado(s)
-                </span>
-              </div>
-
-              {selectedContactIds.length > 0 && (
-                <button
-                  onClick={async () => {
-                    if (window.confirm(`Excluir permanentemente os ${selectedContactIds.length} contatos selecionados?`)) {
-                      await onBatchDeleteContacts(selectedContactIds);
-                      setSelectedContactIds([]);
-                    }
-                  }}
-                  className="text-[#F87171] hover:underline text-xs cursor-pointer font-semibold"
-                >
-                  Excluir Selecionados ({selectedContactIds.length})
-                </button>
-              )}
-            </div>
-
-            <div className="overflow-x-auto max-h-[550px] overflow-y-auto">
-              <table className="w-full text-left text-xs text-white">
-                <thead className="bg-[#101B2D] text-[#8C98B4] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#2B3D63] z-10">
-                  <tr>
-                    <th className="py-2.5 px-3 w-10 text-center">Sel.</th>
-                    <th className="py-2.5 px-3">Nome</th>
-                    <th className="py-2.5 px-3">WhatsApp</th>
-                    <th className="py-2.5 px-3">Curso</th>
-                    <th className="py-2.5 px-3">Lote</th>
-                    <th className="py-2.5 px-3">Atendente Atual</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#2B3D63]/50">
-                  {filteredContactsForDistribution.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="py-8 text-center text-[#8C98B4]">
-                        Nenhum contato encontrado para estes filtros.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredContactsForDistribution.map((c) => {
-                      const isSelected = selectedContactIds.includes(c.id);
-                      return (
-                        <tr
-                          key={c.id}
-                          onClick={() => {
-                            setSelectedContactIds((prev) =>
-                              prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
-                            );
-                          }}
-                          className={`cursor-pointer transition-colors ${
-                            isSelected ? 'bg-[#C9A227]/15' : 'hover:bg-[#1F3057]/40'
-                          }`}
-                        >
-                          <td className="py-2.5 px-3 text-center">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => {}}
-                              className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-0 cursor-pointer"
-                            />
-                          </td>
-                          <td className="py-2.5 px-3 font-semibold text-white">{c.nome}</td>
-                          <td className="py-2.5 px-3 font-mono text-[#8C98B4]">{c.whatsapp}</td>
-                          <td className="py-2.5 px-3 text-[#C9A227]">{c.curso || '—'}</td>
-                          <td className="py-2.5 px-3 text-[#8C98B4]">{c.batchName || 'Importação Direta'}</td>
-                          <td className="py-2.5 px-3">
-                            {c.assignedToEmail ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] text-[#34D399] font-semibold bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded">
-                                <UserCheck className="w-3 h-3" />
-                                {c.assignedToEmail}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[11px] text-[#F87171] font-semibold bg-[#DC2626]/15 border border-[#DC2626]/30 px-2 py-0.5 rounded">
-                                <UserX className="w-3 h-3" />
-                                Sem atendente
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
       )}
@@ -1211,7 +1841,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 className="bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Plus className="w-4 h-4" />
-                <span>Adicionar Novo Atendente</span>
+                <span>Adicionar Novo Membro</span>
               </button>
               <div className="text-xs text-[#8C98B4] hidden md:block">
                 Total de Usuários: <b className="text-white">{users.length}</b>
@@ -1246,13 +1876,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
+                        type="button"
                         onClick={() => onApproveUser(u.uid, 'attendant')}
                         className="bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Aprovar
+                        Aprovar Atendente
                       </button>
                       <button
+                        type="button"
                         onClick={() => onBlockUser(u.uid)}
                         className="bg-[#DC2626] hover:bg-[#b91c1c] text-white text-xs px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
                         title="Bloquear"
@@ -1276,7 +1908,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <thead className="bg-[#101B2D] text-[#8C98B4] uppercase text-[10px] font-semibold border-b border-[#2B3D63]">
                   <tr>
                     <th className="py-2.5 px-3">Usuário</th>
-                    <th className="py-2.5 px-3">E-mail</th>
+                    <th className="py-2.5 px-3">E-mail / Login</th>
                     <th className="py-2.5 px-3">Status</th>
                     <th className="py-2.5 px-3">Cargo / Função</th>
                     <th className="py-2.5 px-3">Leads Atribuídos</th>
@@ -1321,11 +1953,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <select
                             value={u.role}
                             disabled={isSelf}
-                            onChange={(e) => onChangeUserRole(u.uid, e.target.value as 'admin' | 'attendant')}
+                            onChange={(e) => onChangeUserRole(u.uid, e.target.value as UserRole)}
                             className="bg-[#101B2D] border border-[#2B3D63] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#C9A227] disabled:opacity-50"
                           >
-                            <option value="attendant">Atendente</option>
-                            <option value="admin">Administrador</option>
+                            <option value="attendant">Atendente (Vendedor)</option>
+                            <option value="supervisor">Supervisor (Divisão de Leads)</option>
+                            <option value="admin">Administrador Master</option>
                           </select>
                         </td>
                         <td className="py-3 px-3 font-semibold text-white">
@@ -1336,15 +1969,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <div className="flex items-center justify-end gap-2">
                               {u.status === 'blocked' ? (
                                 <button
+                                  type="button"
                                   onClick={() => onApproveUser(u.uid, u.role)}
-                                  className="text-xs text-[#34D399] hover:underline"
+                                  className="text-xs text-[#34D399] hover:underline cursor-pointer"
                                 >
                                   Desbloquear
                                 </button>
                               ) : (
                                 <button
+                                  type="button"
                                   onClick={() => onBlockUser(u.uid)}
-                                  className="text-xs text-[#F87171] hover:underline"
+                                  className="text-xs text-[#F87171] hover:underline cursor-pointer"
                                 >
                                   Bloquear
                                 </button>
@@ -1366,12 +2001,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[#2B3D63]">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <UserCheck className="w-4 h-4 text-[#C9A227]" />
-                    Cadastrar Novo Atendente
+                    <UserPlus className="w-4 h-4 text-[#C9A227]" />
+                    Cadastrar Novo Membro da Equipe
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setShowAddUserModal(false)}
-                    className="text-[#8C98B4] hover:text-white text-sm"
+                    className="text-[#8C98B4] hover:text-white text-sm cursor-pointer"
                   >
                     ✕
                   </button>
@@ -1417,14 +2053,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-[#8C98B4] font-semibold block mb-1">Cargo</label>
+                    <label className="text-[#8C98B4] font-semibold block mb-1">Cargo / Função</label>
                     <select
                       value={newUserRole}
-                      onChange={(e) => setNewUserRole(e.target.value as 'attendant' | 'admin')}
+                      onChange={(e) => setNewUserRole(e.target.value as UserRole)}
                       className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg p-2 text-white focus:outline-none focus:border-[#C9A227]"
                     >
-                      <option value="attendant">Atendente (Acesso operacional)</option>
-                      <option value="admin">Administrador (Acesso total)</option>
+                      <option value="attendant">Atendente (Vendedor - Acesso operacional)</option>
+                      <option value="supervisor">Supervisor (Divisão de Leads e Gestão)</option>
+                      <option value="admin">Administrador Master (Acesso total)</option>
                     </select>
                   </div>
                 </div>
@@ -1433,7 +2070,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowAddUserModal(false)}
-                    className="px-3 py-2 text-xs text-[#8C98B4] hover:text-white"
+                    className="px-3 py-2 text-xs text-[#8C98B4] hover:text-white cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -1456,8 +2093,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           setNewUserName('');
                           setNewUserEmail('');
                           setNewUserPass('123456');
-                          setSuccessMsg('Atendente cadastrado com sucesso!');
-                          setTimeout(() => setSuccessMsg(''), 4000);
+                          showNotification('Usuário cadastrado com sucesso!');
                         } else if (typeof res === 'string') {
                           setCreateUserError(res);
                         }
@@ -1484,8 +2120,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           }
           setShowSmartImportModal(false);
           setActiveTab('distribution');
-          setSuccessMsg(`Lote "${res.batchName}" importado e pronto para distribuição!`);
-          setTimeout(() => setSuccessMsg(''), 5000);
+          showNotification(`Lote "${res.batchName}" importado e pronto para distribuição!`);
         }}
         existingContacts={globalContacts}
         users={users}

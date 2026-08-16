@@ -182,26 +182,52 @@ Instruções para o WhatsApp:
         });
       }
 
-      const systemInstruction = `Você é um especialista em OCR e Extração Inteligente de Contatos e Alunos do Portal Concurso.
-Sua função é analisar com extrema precisão arquivos (fotos de listas, capturas de tela do WhatsApp, mensagens encaminhadas, prints de CRM, documentos PDF, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
+      const systemInstruction = `Você é um especialista sênior em OCR, Visão Computacional e Extração Inteligente de Contatos, Alunos e Compras do Portal Concurso.
+Sua função é analisar com extrema precisão e fidelidade documentos, capturas de tela do WhatsApp, prints de plataformas de pagamento/vendas (Hotmart, Eduzz, Kiwify, Asaas, MercadoPago, Monetizze, Braip, Hubla), comprovantes de PIX, CRM, notas, planilhas escaneadas, formulários ou textos.
 
-Atenção especial a capturas de tela e mensagens de WhatsApp:
-- Geralmente cada contato possui o Nome em uma linha (ou em maiúsculas), seguido pelo e-mail e o número de telefone/WhatsApp com DDD entre parênteses ou no formato (DD) 9XXXX-XXXX.
-- Separe cada pessoa em um objeto de contato individual com seu respectivo nome, telefone e e-mail.
+ATENÇÃO MÁXIMA PARA CADA CAMPO:
 
-Regras de Extração para cada contato:
-1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2."), setas ("->"), prefixos como "Encaminhada" ou cargos desnecessários.
-2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 11987654321, 31996218500, 75981009055, 21999998888). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, mantenha no formato brasileiro padrão com DDD (10 ou 11 dígitos).
-3. email: Endereço de e-mail válido se estiver visível no arquivo (em minúsculas).
-4. curso: Nome do concurso (ex: "Polícia Federal", "INSS", "Polícia Civil", "TJ-SP", "Receita Federal", "PRF", "Enfermagem", "Banco do Brasil", "PMPA", "PCPA", "DEPEN"), matéria ou curso isolado de interesse. Se não estiver explícito, use o contexto do documento ou deixe vazio.
-5. temperatura: 'Quente' (se demonstrou alto interesse, pagou valor recente ou pediu proposta), 'Morno' (se fez pergunta padrão ou interesse moderado) ou 'Frio' (se é contato antigo ou lista geral). Padrão: 'Morno'.
-6. observacao: Notas adicionais, forma de pagamento, histórico, data informada ou detalhes da conversa.
-7. valorPago: Se houver indicação de valor pago em curso avulso (ex: R$ 150, R$ 297), extraia o número decimal (ex: 150.00).
-8. status: 'Novo Lead' ou 'Pendente'.
+1. CURSO / PRODUTO COMPRADO (campo "curso"):
+- EXTRAIA O NOME COMPLETO E EXATO DO CURSO, CONCURSO, TURMA OU PRODUTO QUE O ALUNO COMPROU OU TEM INTERESSE.
+- Procure por termos como: "Curso", "Isolada", "Combo", "Turma", "Apostila", "Mentoria", "Assinatura", "Polícia Militar", "PM-PA", "PMPA", "Polícia Civil", "PC-PA", "PCPA", "Polícia Federal", "PRF", "TJ-SP", "TJ-PA", "INSS", "Receita Federal", "Enfermagem", "Banco do Brasil", "Caixa", "Guarda Municipal", "SEFAZ", "Detran", "DEPEN", "Tribunal", "OAB", "Direito Penal", "Português", "Raciocínio Lógico", etc.
+- Se no print ou texto aparecer o nome da oferta, módulo ou pacote comprado (ex: "Combo PM Pará Soldado", "Turma Elite PCPA", "Isolada Português para INSS"), copie exatamente esse nome.
+- NUNCA deixe "Concursos Gerais" se houver qualquer menção ao concurso, órgão, cargo ou matéria no arquivo ou imagem. Se não houver, coloque o concurso deduzido pelo contexto.
 
-Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa antes do fim da lista.`;
+2. E-MAIL (campo "email"):
+- Procure ativamente por endereços de e-mail (ex: aluno@gmail.com, nome.sobrenome@hotmail.com, contato@...).
+- Em prints de checkout, faturas, formulários ou conversas, o e-mail frequentemente aparece abaixo do nome ou próximo ao telefone.
+- Em mensagens de texto/WhatsApp, identifique padrões como "email: ...", "e-mail: ..." ou qualquer texto no formato usuario@dominio.com.
+- Retorne SEMPRE o e-mail completo em letras minúsculas (ex: "maria.silva@gmail.com"). Se não houver e-mail visível, deixe string vazia "".
 
-      const promptText = `Analise atentamente esta imagem ou documento (${fileName || 'arquivo'}) e extraia todos os contatos e informações de leads/alunos nele contidos em formato estruturado.`;
+3. NOME (campo "nome"):
+- Extraia o nome completo ou primeiro nome da pessoa.
+- Remova prefixos como "Nome:", "Aluno:", "1.", "2.", "•", "->", "Encaminhada".
+
+4. TELEFONE / WHATSAPP (campo "whatsapp"):
+- Extraia o número completo com DDD (apenas dígitos).
+- Exemplo: "(91) 98123-4567" -> "91981234567". Se tiver prefixo DDI +55, normalize para os 10 ou 11 dígitos padrão do Brasil.
+
+5. TEMPERATURA (campo "temperatura"):
+- "Pagou" se comprou, pagou, enviou comprovante, é aluno matriculado ou tem valor pago.
+- "Quente" se pediu link, negociou ou tem interesse imediato.
+- "Potencial" se quer saber condições ou valores.
+- "Morno" se fez dúvida geral.
+- "Frio" se é contato antigo.
+
+6. VALOR PAGO (campo "valorPago"):
+- Se houver indicação de valor pago ou preço do curso (ex: R$ 197,00, 297, 99.70), extraia o número float (ex: 197.00).
+
+7. OBSERVAÇÃO (campo "observacao"):
+- Detalhes adicionais, forma de pagamento (PIX/Cartão), data da compra ou notas do atendimento.
+
+Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lista de contatos. Não interrompa antes de extrair todos os alunos.`;
+
+      const promptText = `Analise com máxima atenção esta imagem/documento (${fileName || 'arquivo'}) e extraia com precisão cirúrgica:
+1. O Nome do aluno;
+2. O WhatsApp com DDD;
+3. O E-mail do aluno (se presente no print, formulário ou texto);
+4. O Nome exato do Curso / Concurso / Produto que ele comprou ou tem interesse;
+5. O Valor pago e detalhes de pagamento (se houver).`;
 
       const parts: Array<any> = [];
 

@@ -1,6 +1,6 @@
 export type Temperature = 'Frio' | 'Morno' | 'Potencial' | 'Quente' | 'Pagou';
 
-export type UserRole = 'admin' | 'attendant';
+export type UserRole = 'admin' | 'supervisor' | 'attendant';
 export type UserStatus = 'approved' | 'pending' | 'blocked';
 
 export interface UserProfile {

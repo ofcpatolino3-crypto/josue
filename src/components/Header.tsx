@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   pendingApprovalsCount = 0,
   inactiveAlertsCount = 0,
 }) => {
-  const isAdmin = currentProfile?.role === 'admin';
+  const isSupervisorOrAdmin = currentProfile?.role === 'admin' || currentProfile?.role === 'supervisor';
   const [waMode, setWaMode] = useState<WhatsAppTargetMode>(() => getWhatsAppTargetMode());
 
   const handleSwitchWaMode = (mode: WhatsAppTargetMode) => {
@@ -234,18 +234,18 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Métricas</span>
         </button>
 
-        {isAdmin && (
+        {isSupervisorOrAdmin && (
           <button
             id="nav-btn-admin"
             onClick={() => onSelectView('admin')}
             className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold cursor-pointer transition-all whitespace-nowrap ml-auto ${
               activeView === 'admin'
-                ? 'bg-[#B14432] text-white shadow-sm'
-                : 'text-[#C9A227] bg-[#172644] hover:bg-[#1F3057] border border-[#C9A227]/40'
+                ? 'bg-[#C9A227] text-[#101B2D] shadow-sm font-extrabold'
+                : 'text-[#C9A227] bg-[#172644] hover:bg-[#1F3057] border border-[#C9A227]/50'
             }`}
           >
             <Shield className="w-4 h-4" />
-            <span>Gestão / Admin</span>
+            <span>Supervisão & Leads</span>
             {inactiveAlertsCount > 0 && (
               <span
                 className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-[#DC2626] text-white animate-pulse shadow-sm"

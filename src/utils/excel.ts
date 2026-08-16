@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { Contact, Temperature } from '../types';
+import { extractContactsFromRawText } from './clientOcr';
 
 export function normHeader(h: unknown): string {
   return (h ?? '')
@@ -340,6 +341,21 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
 export function parseRawTextToContacts(rawText: string): Partial<Contact>[] {
   if (!rawText || !rawText.trim()) return [];
 
+  // Use the intelligent multi-line extractor
+  const extracted = extractContactsFromRawText(rawText);
+  if (extracted.length > 0) {
+    return extracted.map((c) => ({
+      nome: c.nome,
+      whatsapp: c.whatsapp,
+      email: c.email || '',
+      curso: c.curso || '',
+      temperatura: c.temperatura || 'Morno',
+      status: c.status || 'Novo Lead',
+      observacao: c.observacao || '',
+      dataContato: c.dataContato || todayStr(),
+    }));
+  }
+
   const lines = rawText
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -394,7 +410,10 @@ export function parseRawTextToContacts(rawText: string): Partial<Contact>[] {
         token.toLowerCase().includes('edital') ||
         token.toLowerCase().includes('concurso') ||
         token.toLowerCase().includes('oab') ||
-        token.toLowerCase().includes('banco')
+        token.toLowerCase().includes('banco') ||
+        token.toLowerCase().includes('curso') ||
+        token.toLowerCase().includes('isolada') ||
+        token.toLowerCase().includes('combo')
       ) {
         curso = token;
       } else if (!nome && /^[A-Za-zÀ-ÿ\s]+$/.test(token) && token.length >= 2) {
@@ -408,6 +427,8 @@ export function parseRawTextToContacts(rawText: string): Partial<Contact>[] {
     if (!nome) {
       if (extractedPhone) {
         nome = `Contato (${formatPhoneDisplay(extractedPhone)})`;
+      } else if (extractedEmail) {
+        nome = extractedEmail.split('@')[0];
       } else {
         nome = `Lead ${i + 1}`;
       }

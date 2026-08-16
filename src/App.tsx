@@ -529,8 +529,8 @@ export default function App() {
     }
   };
 
-  // --- ADMIN ACTIONS (User Approval & Lead Distribution) ---
-  const handleApproveUser = async (uid: string, role: 'admin' | 'attendant') => {
+  // --- ADMIN & SUPERVISOR ACTIONS (User Approval & Lead Distribution) ---
+  const handleApproveUser = async (uid: string, role: 'admin' | 'supervisor' | 'attendant') => {
     try {
       const userDocRef = doc(db, 'user_profiles', uid);
       await setDoc(
@@ -569,7 +569,7 @@ export default function App() {
     }
   };
 
-  const handleChangeUserRole = async (uid: string, role: 'admin' | 'attendant') => {
+  const handleChangeUserRole = async (uid: string, role: 'admin' | 'supervisor' | 'attendant') => {
     try {
       const userDocRef = doc(db, 'user_profiles', uid);
       await setDoc(userDocRef, { role }, { merge: true });
@@ -860,7 +860,7 @@ export default function App() {
     name: string,
     emailOrUser: string,
     pass: string,
-    role: 'admin' | 'attendant'
+    role: 'admin' | 'supervisor' | 'attendant'
   ): Promise<boolean | string> => {
     try {
       const cleanEmail = emailOrUser.trim().toLowerCase();
@@ -885,10 +885,10 @@ export default function App() {
       }
 
       setAllUsers((prev) => [...prev, newProf]);
-      addToast(`Atendente ${name} criado e liberado com sucesso!`, 'success');
+      addToast(`Usuário ${name} (${role === 'supervisor' ? 'Supervisor' : role === 'admin' ? 'Admin' : 'Atendente'}) criado com sucesso!`, 'success');
       return true;
     } catch (e: any) {
-      return 'Erro ao criar atendente: ' + e.message;
+      return 'Erro ao criar usuário: ' + e.message;
     }
   };
 
@@ -1477,8 +1477,8 @@ export default function App() {
           plans={plans}
         />
 
-        {/* VIEW 0: ADMIN PANEL (Exclusive for Administrator) */}
-        {activeView === 'admin' && currentProfile?.role === 'admin' && (
+        {/* VIEW 0: ADMIN & SUPERVISION PANEL (For Admin and Supervisors) */}
+        {activeView === 'admin' && (currentProfile?.role === 'admin' || currentProfile?.role === 'supervisor') && (
           <div className="animate-fadeIn">
             <AdminPanel
               currentProfile={currentProfile}
