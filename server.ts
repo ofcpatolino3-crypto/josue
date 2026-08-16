@@ -183,11 +183,15 @@ Instruções para o WhatsApp:
       }
 
       const systemInstruction = `Você é um especialista em OCR e Extração Inteligente de Contatos e Alunos do Portal Concurso.
-Sua função é analisar com extrema precisão arquivos (fotos de listas, capturas de tela do WhatsApp, prints de CRM, documentos PDF, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
+Sua função é analisar com extrema precisão arquivos (fotos de listas, capturas de tela do WhatsApp, mensagens encaminhadas, prints de CRM, documentos PDF, formulários escaneados, planilhas ou texto corrido) e extrair todos os contatos individuais encontrados.
+
+Atenção especial a capturas de tela e mensagens de WhatsApp:
+- Geralmente cada contato possui o Nome em uma linha (ou em maiúsculas), seguido pelo e-mail e o número de telefone/WhatsApp com DDD entre parênteses ou no formato (DD) 9XXXX-XXXX.
+- Separe cada pessoa em um objeto de contato individual com seu respectivo nome, telefone e e-mail.
 
 Regras de Extração para cada contato:
-1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2."), cargos ou títulos desnecessários.
-2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 11987654321, 91981234567, 21999998888). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, mantenha no formato brasileiro padrão com DDD (10 ou 11 dígitos).
+1. nome: Nome completo ou primeiro nome da pessoa. Remova numerações ("1.", "2."), setas ("->"), prefixos como "Encaminhada" ou cargos desnecessários.
+2. whatsapp: Número de telefone celular ou WhatsApp apenas dígitos com DDD (ex: 11987654321, 31996218500, 75981009055, 21999998888). Limpe espaços, parênteses e traços. Se contiver DDI 55 no início, mantenha no formato brasileiro padrão com DDD (10 ou 11 dígitos).
 3. email: Endereço de e-mail válido se estiver visível no arquivo (em minúsculas).
 4. curso: Nome do concurso (ex: "Polícia Federal", "INSS", "Polícia Civil", "TJ-SP", "Receita Federal", "PRF", "Enfermagem", "Banco do Brasil", "PMPA", "PCPA", "DEPEN"), matéria ou curso isolado de interesse. Se não estiver explícito, use o contexto do documento ou deixe vazio.
 5. temperatura: 'Quente' (se demonstrou alto interesse, pagou valor recente ou pediu proposta), 'Morno' (se fez pergunta padrão ou interesse moderado) ou 'Frio' (se é contato antigo ou lista geral). Padrão: 'Morno'.
@@ -234,7 +238,7 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
       parts.push({ text: promptText });
 
       let responseText = '';
-      const modelsToTry = ['gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-2.5-pro'];
+      const modelsToTry = ['gemini-3.7-flash', 'gemini-3.1-flash-lite'];
       let lastErr: any = null;
 
       for (const modelName of modelsToTry) {
