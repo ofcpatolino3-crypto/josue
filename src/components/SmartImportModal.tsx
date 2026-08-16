@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import {
   X,
@@ -18,9 +18,10 @@ import {
   ArrowRight,
   Info,
   Edit3,
+  Zap,
 } from 'lucide-react';
 import { Contact, Temperature, UserProfile } from '../types';
-import { mapRowToContact, cleanPhone, formatPhoneDisplay } from '../utils/excel';
+import { mapRowToContact, cleanPhone, formatPhoneDisplay, parseRawTextToContacts } from '../utils/excel';
 
 export interface SmartImportResult {
   contacts: Partial<Contact>[];
@@ -142,10 +143,45 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
     setStep('review');
   };
 
-  // Process Excel/CSV locally
+  // Clipboard paste support (Ctrl+V)
+  useEffect(() => {
+    if (!isOpen || step !== 'upload' || loading) return;
+
+    const handlePaste = (e: ClipboardEvent) => {
+      // Check for image files in clipboard
+      if (e.clipboardData?.items) {
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          const item = e.clipboardData.items[i];
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile();
+            if (file) {
+              e.preventDefault();
+              handleFilePicked(file);
+              return;
+            }
+          }
+        }
+      }
+
+      // If user pasted text and tab is text
+      const pastedText = e.clipboardData?.getData('text');
+      if (pastedText && pastedText.trim() && inputTab === 'file') {
+        // Auto-switch to text tab or process directly if there are phone patterns
+        if (/(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}/.test(pastedText)) {
+          setTextInput(pastedText);
+          setInputTab('text');
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [isOpen, step, loading, inputTab]);
+
+  // Process Excel/CSV locally with deep scanning
   const processSpreadsheet = (file: File) => {
     setLoading(true);
-    setLoadingMsg('Lendo colunas da planilha...');
+    setLoadingMsg('Lendo colunas e números da planilha...');
     setErrorMsg('');
 
     const reader = new FileReader();
@@ -157,15 +193,27 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
         const sheetName = wb.SheetNames[0];
         if (!sheetName) throw new Error('Nenhuma aba encontrada na planilha.');
         const sheet = wb.Sheets[sheetName];
-        const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
         
-        const mapped = rawRows.map(mapRowToContact).filter((c) => c.nome && c.nome.trim());
+        // Try formatted strings first (preserves phone formatting & currency)
+        let rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: false });
+        if (rawRows.length === 0) {
+          rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: true });
+        }
+        
+        const mapped = rawRows
+          .map((row, idx) => mapRowToContact(row, idx))
+          .filter((c) => Boolean(c.nome || c.whatsapp || c.email));
+
         if (mapped.length === 0) {
-          throw new Error('Nenhum contato com nome válido foi encontrado nesta planilha.');
+          throw new Error('Nenhum contato com número ou nome identificado na planilha.');
         }
 
         const fileNameClean = file.name.replace(/\.[^/.]+$/, '');
-        populateExtractedList(mapped, `Lote Planilha - ${fileNameClean}`);
+        populateExtractedList(
+          mapped,
+          `Lote Planilha - ${fileNameClean}`,
+          `Planilha processada com sucesso! ${mapped.length} contatos e números identificados.`
+        );
       } catch (err: any) {
         console.error(err);
         setErrorMsg(err.message || 'Erro ao processar planilha. Verifique o formato do arquivo.');
@@ -180,6 +228,30 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
     reader.readAsArrayBuffer(file);
   };
 
+  // Instant local text extraction without AI (0ms delay)
+  const processFastLocalText = (rawText: string) => {
+    if (!rawText || !rawText.trim()) return;
+    setLoading(true);
+    setLoadingMsg('Processando lista de contatos instantaneamente...');
+    setErrorMsg('');
+
+    try {
+      const contacts = parseRawTextToContacts(rawText);
+      if (contacts.length === 0) {
+        throw new Error('Nenhum contato com número ou nome encontrado no texto colado.');
+      }
+      populateExtractedList(
+        contacts,
+        `Lote Texto - ${new Date().toLocaleDateString('pt-BR')}`,
+        `Processamento instantâneo: ${contacts.length} contatos extraídos com sucesso!`
+      );
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Não foi possível interpretar o texto colado.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Process PDF or Image with Gemini AI
   const processWithAI = async (file?: File, rawText?: string) => {
     setLoading(true);
@@ -189,7 +261,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
       let payload: { fileData?: string; mimeType?: string; fileName?: string; text?: string } = {};
 
       if (file) {
-        setLoadingMsg(`Enviando ${file.name} para a Visão Computacional Gemini IA...`);
+        setLoadingMsg(`Enviando ${file.name} para Visão Computacional Gemini IA...`);
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -197,9 +269,19 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
           reader.readAsDataURL(file);
         });
 
+        let detectedMime = file.type || 'image/jpeg';
+        const nameLower = file.name.toLowerCase();
+        if (nameLower.endsWith('.pdf') || detectedMime.includes('pdf')) {
+          detectedMime = 'application/pdf';
+        } else if (nameLower.endsWith('.png')) {
+          detectedMime = 'image/png';
+        } else if (nameLower.endsWith('.webp')) {
+          detectedMime = 'image/webp';
+        }
+
         payload = {
           fileData: base64,
-          mimeType: file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
+          mimeType: detectedMime,
           fileName: file.name,
         };
       } else if (rawText) {
@@ -224,11 +306,11 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
 
       const data = await res.json();
       if (!data.contacts || data.contacts.length === 0) {
-        throw new Error('A IA não conseguiu identificar contatos válidos no documento ou imagem fornecido.');
+        throw new Error('A IA não conseguiu identificar contatos legíveis no documento ou imagem fornecido.');
       }
 
       const defaultName = file
-        ? `Lote ${file.name.endsWith('.pdf') ? 'PDF' : 'Foto'} - ${file.name.replace(/\.[^/.]+$/, '')}`
+        ? `Lote ${file.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Foto'} - ${file.name.replace(/\.[^/.]+$/, '')}`
         : `Lote Texto IA - ${new Date().toLocaleDateString('pt-BR')}`;
 
       populateExtractedList(data.contacts, defaultName, data.summary);
@@ -244,19 +326,22 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
   const handleFilePicked = (file: File) => {
     setSelectedFile(file);
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const isSpreadsheet = ['xlsx', 'xls', 'csv'].includes(ext) || file.type.includes('sheet') || file.type.includes('csv');
+    const isPdf = ext === 'pdf' || file.type === 'application/pdf';
+    const isImage = ['png', 'jpg', 'jpeg', 'webp', 'jfif', 'bmp', 'heic', 'heif', 'gif'].includes(ext) || file.type.startsWith('image/');
 
-    if (['xlsx', 'xls', 'csv'].includes(ext)) {
+    if (isSpreadsheet) {
       setFilePreviewUrl(null);
       processSpreadsheet(file);
-    } else if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
+    } else if (isImage) {
       const url = URL.createObjectURL(file);
       setFilePreviewUrl(url);
       processWithAI(file);
-    } else if (ext === 'pdf') {
+    } else if (isPdf) {
       setFilePreviewUrl(null);
       processWithAI(file);
     } else {
-      setErrorMsg('Formato não suportado. Utilize .xlsx, .csv, .pdf, .png ou .jpg.');
+      setErrorMsg('Formato não suportado. Utilize .xlsx, .csv, .pdf, .png, .jpg ou cole o texto.');
     }
   };
 
@@ -470,7 +555,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         handleFilePicked(e.target.files[0]);
                       }
                     }}
-                    accept=".xlsx,.xls,.csv,.pdf,.png,.jpg,.jpeg,.webp"
+                    accept=".xlsx,.xls,.csv,.pdf,.png,.jpg,.jpeg,.webp,.jfif,.bmp,image/*,application/pdf"
                     className="hidden"
                   />
 
@@ -487,13 +572,13 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-center gap-3">
-                      <div className="p-3 bg-[#10B981]/15 text-[#34D399] border border-[#10B981]/30 rounded-xl" title="Planilhas Excel">
+                      <div className="p-3 bg-[#10B981]/15 text-[#34D399] border border-[#10B981]/30 rounded-xl shadow-sm" title="Planilhas Excel">
                         <FileSpreadsheet className="w-6 h-6" />
                       </div>
-                      <div className="p-3 bg-[#EF4444]/15 text-[#F87171] border border-[#EF4444]/30 rounded-xl" title="Documentos PDF">
+                      <div className="p-3 bg-[#EF4444]/15 text-[#F87171] border border-[#EF4444]/30 rounded-xl shadow-sm" title="Documentos PDF">
                         <FileText className="w-6 h-6" />
                       </div>
-                      <div className="p-3 bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30 rounded-xl" title="Fotos e Prints">
+                      <div className="p-3 bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30 rounded-xl shadow-sm" title="Fotos e Prints">
                         <ImageIcon className="w-6 h-6" />
                       </div>
                     </div>
@@ -503,7 +588,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         Arraste e solte o arquivo aqui ou <span className="text-[#C9A227] underline">clique para selecionar</span>
                       </p>
                       <p className="text-xs text-[#8C98B4]">
-                        Formatos suportados: <strong>Excel (.xlsx, .csv)</strong>, <strong>PDF (.pdf)</strong> e <strong>Imagens/Fotos (.png, .jpg, .jpeg)</strong>
+                        Formatos suportados: <strong>Excel (.xlsx, .csv)</strong>, <strong>PDF (.pdf)</strong> e <strong>Imagens/Fotos (.png, .jpg, .jpeg, prints)</strong>
                       </p>
                     </div>
 
@@ -515,7 +600,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         📄 PDFs de matrículas & editais
                       </span>
                       <span className="text-[11px] bg-[#1F3057] text-[#8C98B4] px-2.5 py-1 rounded-full border border-[#2B3D63]">
-                        📸 Prints de WhatsApp ou listas impressas
+                        📸 Prints de WhatsApp (Cole com Ctrl+V)
                       </span>
                     </div>
                   </div>
@@ -538,7 +623,23 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                     />
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!textInput.trim()) {
+                          alert('Cole ou digite algum texto antes de processar.');
+                          return;
+                        }
+                        processFastLocalText(textInput);
+                      }}
+                      disabled={!textInput.trim()}
+                      className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-white border border-[#2B3D63] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Zap className="w-4 h-4 text-[#34D399]" />
+                      <span>Extração Rápida Local</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -552,7 +653,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                       className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer disabled:opacity-50"
                     >
                       <Sparkles className="w-4 h-4" />
-                      <span>Detectar Contatos com IA</span>
+                      <span>Detectar com IA Gemini</span>
                     </button>
                   </div>
                 </div>

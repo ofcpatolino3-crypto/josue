@@ -51,16 +51,94 @@ export function excelDateToStr(v: unknown): string {
   return '';
 }
 
+export function normalizeRawPhoneValue(val: unknown): string {
+  if (val === null || val === undefined) return '';
+
+  // Handle Excel numbers (e.g. 5591981234567 or scientific notation 5.59198E+12)
+  if (typeof val === 'number') {
+    if (isNaN(val)) return '';
+    return val.toLocaleString('fullwide', { useGrouping: false, maximumFractionDigits: 0 });
+  }
+
+  let s = String(val).trim();
+  // Handle scientific notation formatted as string "5.59198E+12"
+  if (/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)$/.test(s)) {
+    try {
+      const num = Number(s);
+      if (!isNaN(num)) {
+        return num.toLocaleString('fullwide', { useGrouping: false, maximumFractionDigits: 0 });
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  // Remove trailing .0 if Excel exported integer as float string
+  if (/\.0+$/.test(s)) {
+    s = s.replace(/\.0+$/, '');
+  }
+
+  return s;
+}
+
+export function cleanPhone(tel: unknown): string {
+  const rawStr = normalizeRawPhoneValue(tel);
+  if (!rawStr) return '';
+
+  // Remove all non-digits
+  let digits = rawStr.replace(/\D/g, '');
+  if (!digits) return '';
+
+  // Handle leading zeroes (e.g. 091981234567 -> 91981234567 or 05591981234567 -> 5591981234567)
+  while (digits.startsWith('0') && digits.length > 10) {
+    digits = digits.slice(1);
+  }
+
+  // Handle 55 DDI prefix (Brazil international code)
+  if (digits.startsWith('55') && (digits.length === 12 || digits.length === 13)) {
+    // 55 + DDD (2) + 8 or 9 digits -> strip 55 to keep standard DDD+Number
+    return digits.slice(2);
+  } else if (digits.startsWith('550') && digits.length === 14) {
+    // 550 + DDD (2) + 9 digits -> strip 550
+    return digits.slice(3);
+  }
+
+  return digits;
+}
+
+export function isLikelyPhone(val: unknown): boolean {
+  const digits = cleanPhone(val);
+  return digits.length >= 8 && digits.length <= 13;
+}
+
+export function formatPhoneDisplay(tel: unknown): string {
+  const digits = cleanPhone(tel);
+  if (!digits) return '';
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 9) {
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  }
+  if (digits.length === 8) {
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  }
+  return digits;
+}
+
 export function cleanTemperature(val: string): Temperature {
   const v = val.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  if (v.includes('pago') || v.includes('pagou') || v.includes('comprou') || v.includes('matriculado')) return 'Pagou';
-  if (v.includes('quente') || v.includes('hot')) return 'Quente';
-  if (v.includes('potencial') || v.includes('alto')) return 'Potencial';
-  if (v.includes('morno') || v.includes('warm') || v.includes('medio')) return 'Morno';
+  if (v.includes('pago') || v.includes('pagou') || v.includes('comprou') || v.includes('matriculado') || v.includes('aluno')) return 'Pagou';
+  if (v.includes('quente') || v.includes('hot') || v.includes('urgente') || v.includes('fechar')) return 'Quente';
+  if (v.includes('potencial') || v.includes('alto') || v.includes('negociando') || v.includes('proposta')) return 'Potencial';
+  if (v.includes('morno') || v.includes('warm') || v.includes('medio') || v.includes('duvida')) return 'Morno';
   return 'Frio';
 }
 
-export function mapRowToContact(row: Record<string, unknown>): Partial<Contact> {
+export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number): Partial<Contact> {
   const out: Partial<Contact> = {
     nome: '',
     whatsapp: '',
@@ -74,45 +152,282 @@ export function mapRowToContact(row: Record<string, unknown>): Partial<Contact> 
     observacao: '',
   };
 
+  let separateDDD = '';
+  let phoneCandidate = '';
+  let courseCandidate = '';
+  let nameCandidate = '';
+  let noteCandidate = '';
+
   for (const [k, raw] of Object.entries(row)) {
     const n = normHeader(k);
-    const v = raw === undefined || raw === null ? '' : String(raw).trim();
+    const rawVal = raw === undefined || raw === null ? '' : raw;
+    const vStr = normalizeRawPhoneValue(rawVal);
+    const v = String(rawVal).trim();
+
+    // Check specific DDD column
+    if (n === 'ddd' || n === 'codigodearea' || n === 'prefixo') {
+      const dddDigits = v.replace(/\D/g, '');
+      if (dddDigits.length === 2) {
+        separateDDD = dddDigits;
+      }
+      continue;
+    }
 
     if (n.includes('proximocontato') || n.includes('proximo') || n.includes('retorno') || n.includes('agendamento')) {
-      out.proximoContato = excelDateToStr(raw);
-    } else if (n.includes('ultimocontato') || n.includes('ultimo')) {
-      out.ultimoContato = excelDateToStr(raw);
-    } else if (n.includes('datacontato') || n === 'data' || n.includes('criadoem')) {
-      out.dataContato = excelDateToStr(raw);
-    } else if (n.includes('temperatura') || n.includes('temp')) {
+      out.proximoContato = excelDateToStr(rawVal);
+    } else if (n.includes('ultimocontato') || n.includes('ultimo') || n.includes('atendido')) {
+      out.ultimoContato = excelDateToStr(rawVal);
+    } else if (n.includes('datacontato') || n === 'data' || n.includes('criadoem') || n.includes('cadastro') || n.includes('datacadastro')) {
+      out.dataContato = excelDateToStr(rawVal);
+    } else if (n.includes('temperatura') || n.includes('temp') || n.includes('etiqueta') || n.includes('tag') || n.includes('prioridade')) {
       out.temperatura = cleanTemperature(v);
-    } else if (n.includes('status') || n.includes('situacao') || n.includes('fase')) {
+    } else if (n.includes('status') || n.includes('situacao') || n.includes('fase') || n.includes('etapa')) {
       out.status = v;
-    } else if (n.includes('observ') || n.includes('obs') || n.includes('nota') || n.includes('comentario')) {
+    } else if (n.includes('observ') || n.includes('obs') || n.includes('nota') || n.includes('comentario') || n.includes('detalhe') || n.includes('historico')) {
       out.observacao = v;
-    } else if (n.includes('email') || n.includes('correio') || n.includes('mail')) {
-      out.email = v;
-    } else if (n.includes('whatsapp') || n.includes('telefone') || n.includes('celular') || n.includes('fone') || n.includes('wpp') || n.includes('tel')) {
-      out.whatsapp = v;
-    } else if (n.includes('curso') || n.includes('interesse') || n.includes('edital') || n.includes('concurso') || n.includes('cargo')) {
+    } else if (n.includes('email') || n.includes('correio') || n.includes('mail') || n.includes('e-mail')) {
+      out.email = v.toLowerCase();
+    } else if (
+      n.includes('whatsapp') ||
+      n.includes('whats') ||
+      n.includes('wpp') ||
+      n.includes('zap') ||
+      n.includes('celular') ||
+      n.includes('cel') ||
+      n.includes('telefone') ||
+      n.includes('tel') ||
+      n.includes('fone') ||
+      n.includes('mobile') ||
+      n.includes('phone') ||
+      n.includes('numero') ||
+      n.includes('num')
+    ) {
+      const cleaned = cleanPhone(vStr);
+      if (cleaned) {
+        out.whatsapp = cleaned;
+      } else if (v) {
+        out.whatsapp = v;
+      }
+    } else if (
+      n.includes('curso') ||
+      n.includes('concurso') ||
+      n.includes('edital') ||
+      n.includes('cargo') ||
+      n.includes('carreira') ||
+      n.includes('orgao') ||
+      n.includes('interesse') ||
+      n.includes('materia') ||
+      n.includes('produto') ||
+      n.includes('turma')
+    ) {
       out.curso = v;
-    } else if (n.includes('nome') || n === 'aluno' || n === 'cliente' || n === 'lead' || n === 'contato') {
+    } else if (
+      n.includes('nome') ||
+      n.includes('name') ||
+      n.includes('aluno') ||
+      n.includes('cliente') ||
+      n.includes('lead') ||
+      n.includes('candidato') ||
+      n.includes('estudante') ||
+      n.includes('participante') ||
+      n.includes('pessoa') ||
+      n.includes('destinatario')
+    ) {
       out.nome = v;
+    } else if (n.includes('contato')) {
+      // "Contato" could be a name or a phone number
+      if (isLikelyPhone(vStr)) {
+        if (!out.whatsapp) out.whatsapp = cleanPhone(vStr);
+      } else if (!out.nome && v.length > 2) {
+        out.nome = v;
+      }
+    } else {
+      // Capture unmapped columns as candidates
+      if (!phoneCandidate && isLikelyPhone(vStr)) {
+        phoneCandidate = cleanPhone(vStr);
+      } else if (!courseCandidate && (v.toLowerCase().includes('polic') || v.toLowerCase().includes('inss') || v.toLowerCase().includes('tj') || v.toLowerCase().includes('concurso'))) {
+        courseCandidate = v;
+      } else if (!nameCandidate && v.length > 3 && /^[A-Za-zÀ-ÿ\s]+$/.test(v) && v.includes(' ')) {
+        nameCandidate = v;
+      }
     }
   }
 
-  // Also check values for email pattern if header didn't catch it explicitly
+  // Apply separate DDD if number is only 8 or 9 digits
+  if (separateDDD && out.whatsapp && (out.whatsapp.length === 8 || out.whatsapp.length === 9)) {
+    out.whatsapp = `${separateDDD}${out.whatsapp}`;
+  }
+
+  // FALLBACK SCANNER: If phone is still missing, scan ALL cells in the row
+  if (!out.whatsapp) {
+    if (phoneCandidate) {
+      out.whatsapp = phoneCandidate;
+    } else {
+      for (const raw of Object.values(row)) {
+        const v = normalizeRawPhoneValue(raw);
+        if (isLikelyPhone(v)) {
+          const cp = cleanPhone(v);
+          if (cp.length >= 8) {
+            out.whatsapp = cp;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Combine separate DDD with fallback phone if needed
+  if (separateDDD && out.whatsapp && (out.whatsapp.length === 8 || out.whatsapp.length === 9)) {
+    out.whatsapp = `${separateDDD}${out.whatsapp}`;
+  }
+
+  // FALLBACK SCANNER for Email
   if (!out.email) {
     for (const raw of Object.values(row)) {
       const v = String(raw ?? '').trim();
       if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-        out.email = v;
+        out.email = v.toLowerCase();
         break;
       }
     }
   }
 
+  // FALLBACK SCANNER for Course
+  if (!out.curso && courseCandidate) {
+    out.curso = courseCandidate;
+  }
+
+  // FALLBACK SCANNER for Name
+  if (!out.nome) {
+    if (nameCandidate) {
+      out.nome = nameCandidate;
+    } else {
+      // Look for any string that looks like a person name (letters and spaces, not email, not date)
+      for (const raw of Object.values(row)) {
+        const v = String(raw ?? '').trim();
+        if (
+          v.length >= 3 &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) &&
+          !isLikelyPhone(v) &&
+          !/^\d{4}-\d{2}-\d{2}/.test(v) &&
+          /^[A-Za-zÀ-ÿ\s.\-']+$/.test(v) &&
+          !['frio', 'morno', 'quente', 'pagou', 'potencial', 'novo lead', 'pendente', 'ativo', 'inativo'].includes(v.toLowerCase())
+        ) {
+          out.nome = v;
+          break;
+        }
+      }
+    }
+  }
+
+  // If name is STILL empty, generate a polite fallback so the contact is NEVER lost!
+  if (!out.nome || !out.nome.trim()) {
+    if (out.whatsapp) {
+      out.nome = `Contato (${formatPhoneDisplay(out.whatsapp)})`;
+    } else if (out.email) {
+      out.nome = out.email.split('@')[0];
+    } else {
+      out.nome = `Aluno ${rowIndex !== undefined ? rowIndex + 1 : 'Lead'}`;
+    }
+  }
+
   return out;
+}
+
+/**
+ * Super-fast local parser for pasted text (from WhatsApp, CSV, Notepad, or clipboard)
+ */
+export function parseRawTextToContacts(rawText: string): Partial<Contact>[] {
+  if (!rawText || !rawText.trim()) return [];
+
+  const lines = rawText
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  const results: Partial<Contact>[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Check if line contains a phone pattern
+    const phoneMatch = line.match(/(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}/);
+    let extractedPhone = '';
+    if (phoneMatch) {
+      extractedPhone = cleanPhone(phoneMatch[0]);
+    }
+
+    // Check for email
+    const emailMatch = line.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    const extractedEmail = emailMatch ? emailMatch[0].toLowerCase() : '';
+
+    // Split by common delimiters (tab, comma, semicolon, pipe, dash, colon)
+    const tokens = line
+      .split(/[\t;,|]|\s+-\s+|\s+:\s+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
+    let nome = '';
+    let curso = '';
+    let observacao = '';
+    let temperatura: Temperature = 'Morno';
+
+    if (line.toLowerCase().includes('pagou') || line.toLowerCase().includes('matriculado')) temperatura = 'Pagou';
+    else if (line.toLowerCase().includes('quente')) temperatura = 'Quente';
+    else if (line.toLowerCase().includes('potencial')) temperatura = 'Potencial';
+    else if (line.toLowerCase().includes('frio')) temperatura = 'Frio';
+
+    for (const token of tokens) {
+      if (isLikelyPhone(token)) {
+        if (!extractedPhone) extractedPhone = cleanPhone(token);
+      } else if (token.includes('@')) {
+        // already handled
+      } else if (
+        token.toLowerCase().includes('polic') ||
+        token.toLowerCase().includes('pm') ||
+        token.toLowerCase().includes('pc') ||
+        token.toLowerCase().includes('pf') ||
+        token.toLowerCase().includes('prf') ||
+        token.toLowerCase().includes('inss') ||
+        token.toLowerCase().includes('tj') ||
+        token.toLowerCase().includes('tribunal') ||
+        token.toLowerCase().includes('edital') ||
+        token.toLowerCase().includes('concurso') ||
+        token.toLowerCase().includes('oab') ||
+        token.toLowerCase().includes('banco')
+      ) {
+        curso = token;
+      } else if (!nome && /^[A-Za-zÀ-ÿ\s]+$/.test(token) && token.length >= 2) {
+        nome = token;
+      } else if (!observacao && token.length > 2) {
+        observacao = token;
+      }
+    }
+
+    // Fallback name if missing
+    if (!nome) {
+      if (extractedPhone) {
+        nome = `Contato (${formatPhoneDisplay(extractedPhone)})`;
+      } else {
+        nome = `Lead ${i + 1}`;
+      }
+    }
+
+    if (extractedPhone || extractedEmail || nome !== `Lead ${i + 1}`) {
+      results.push({
+        nome: nome.trim(),
+        whatsapp: extractedPhone,
+        email: extractedEmail,
+        curso: curso.trim(),
+        temperatura,
+        status: 'Novo Lead',
+        observacao: observacao.trim(),
+        dataContato: todayStr(),
+      });
+    }
+  }
+
+  return results;
 }
 
 export type WhatsAppTargetMode = 'same_tab' | 'desktop_app' | 'new_tab';
@@ -137,37 +452,15 @@ export function setWhatsAppTargetMode(mode: WhatsAppTargetMode) {
   }
 }
 
-export function cleanPhone(tel: string): string {
-  const digits = (tel || '').replace(/\D/g, '');
-  if (!digits) return '';
-  // Se começar com 55 e tiver 12 ou 13 dígitos, remove o DDI para manter DDD+número
-  if (digits.startsWith('55') && (digits.length === 12 || digits.length === 13)) {
-    return digits.slice(2);
-  }
-  return digits;
-}
-
-export function formatPhoneDisplay(tel: string): string {
-  const digits = cleanPhone(tel);
-  if (!digits) return '';
-  if (digits.length === 11) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  }
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  }
-  return digits;
-}
-
 export function waLink(tel: string): string | null {
-  const digits = (tel || '').replace(/\D/g, '');
+  const digits = cleanPhone(tel);
   if (!digits) return null;
   const full = digits.length <= 11 ? '55' + digits : digits;
   return `https://web.whatsapp.com/send?phone=${full}`;
 }
 
 export function waLinkWithMessage(tel: string, message?: string): string | null {
-  const digits = (tel || '').replace(/\D/g, '');
+  const digits = cleanPhone(tel);
   if (!digits) return null;
   const full = digits.length <= 11 ? '55' + digits : digits;
   const base = `https://web.whatsapp.com/send?phone=${full}`;
@@ -188,7 +481,7 @@ export function openWhatsAppDirect(
   message?: string,
   customMode?: WhatsAppTargetMode
 ): boolean {
-  const digits = (tel || '').replace(/\D/g, '');
+  const digits = cleanPhone(tel);
   if (!digits) return false;
   const full = digits.length <= 11 ? '55' + digits : digits;
   const mode = customMode || getWhatsAppTargetMode();

@@ -24,6 +24,14 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const isImageOrPdf = ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'jfif', 'bmp'].includes(ext) || file.type.startsWith('image/') || file.type === 'application/pdf';
+
+    if (isImageOrPdf && onOpenSmartImport) {
+      onOpenSmartImport();
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -35,13 +43,26 @@ export const Dropzone: React.FC<DropzoneProps> = ({
           throw new Error('Nenhuma planilha encontrada no arquivo.');
         }
         const sheet = wb.Sheets[sheetName];
-        const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
-        const mapped = rawRows.map(mapRowToContact);
+        
+        // Try formatted string mode first to capture phone numbers and currency nicely
+        let rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: false });
+        if (rawRows.length === 0) {
+          rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: true });
+        }
+
+        const mapped = rawRows
+          .map((row, idx) => mapRowToContact(row, idx))
+          .filter((c) => Boolean(c.nome || c.whatsapp || c.email));
+
+        if (mapped.length === 0) {
+          throw new Error('Nenhum contato com número ou nome identificado na planilha.');
+        }
+
         const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
         onImportRows(mapped, fileNameWithoutExt);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert('Não foi possível ler o arquivo. Verifique se o formato é .xlsx, .xls ou .csv.');
+        alert(err.message || 'Não foi possível ler o arquivo. Verifique se o formato é .xlsx, .xls ou .csv.');
       }
     };
     reader.readAsArrayBuffer(file);

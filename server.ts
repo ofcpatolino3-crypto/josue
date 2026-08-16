@@ -233,55 +233,117 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
 
       parts.push({ text: promptText });
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.7-flash',
-        contents: { parts },
-        config: {
-          systemInstruction,
-          temperature: 0.2,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              contacts: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    nome: { type: Type.STRING, description: 'Nome completo do aluno' },
-                    whatsapp: { type: Type.STRING, description: 'Telefone ou WhatsApp apenas dígitos com DDD' },
-                    email: { type: Type.STRING, description: 'E-mail do aluno se houver' },
-                    curso: { type: Type.STRING, description: 'Concurso ou curso de interesse' },
-                    temperatura: { type: Type.STRING, description: 'Quente, Morno ou Frio' },
-                    observacao: { type: Type.STRING, description: 'Observação ou notas' },
-                    valorPago: { type: Type.NUMBER, description: 'Valor já pago se mencionado' },
-                    status: { type: Type.STRING, description: 'Status inicial' },
-                  },
-                  required: ['nome'],
-                },
-              },
-              summary: { type: Type.STRING, description: 'Resumo breve do que foi detectado no arquivo' },
-              totalDetected: { type: Type.INTEGER, description: 'Total de contatos detectados' },
-            },
-            required: ['contacts'],
-          },
-        },
-      });
+      let responseText = '';
+      const modelsToTry = ['gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-2.5-pro'];
+      let lastErr: any = null;
 
-      const responseText = response.text || '{}';
+      for (const modelName of modelsToTry) {
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: { parts },
+            config: {
+              systemInstruction,
+              temperature: 0.1,
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  contacts: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        nome: { type: Type.STRING, description: 'Nome completo do aluno ou lead' },
+                        whatsapp: { type: Type.STRING, description: 'Telefone ou WhatsApp apenas dígitos com DDD' },
+                        email: { type: Type.STRING, description: 'E-mail do aluno se houver' },
+                        curso: { type: Type.STRING, description: 'Concurso ou curso de interesse' },
+                        temperatura: { type: Type.STRING, description: 'Quente, Morno ou Frio' },
+                        observacao: { type: Type.STRING, description: 'Observação ou notas' },
+                        valorPago: { type: Type.NUMBER, description: 'Valor já pago se mencionado' },
+                        status: { type: Type.STRING, description: 'Status inicial' },
+                      },
+                      required: ['nome'],
+                    },
+                  },
+                  summary: { type: Type.STRING, description: 'Resumo breve do que foi detectado no arquivo' },
+                  totalDetected: { type: Type.INTEGER, description: 'Total de contatos detectados' },
+                },
+                required: ['contacts'],
+              },
+            },
+          });
+
+          if (response && response.text) {
+            responseText = response.text;
+            break;
+          }
+        } catch (mErr: any) {
+          lastErr = mErr;
+          console.warn(`Model ${modelName} failed, attempting next:`, mErr.message);
+        }
+      }
+
+      if (!responseText && lastErr) {
+        throw lastErr;
+      }
+
       let parsedData: any = {};
       try {
-        parsedData = JSON.parse(responseText);
+        // Strip markdown code fences if present
+        let cleanedJson = responseText.trim();
+        if (cleanedJson.startsWith('```json')) {
+          cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (cleanedJson.startsWith('```')) {
+          cleanedJson = cleanedJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        parsedData = JSON.parse(cleanedJson);
       } catch (err) {
         console.error('Failed to parse Gemini JSON output:', responseText);
         parsedData = { contacts: [] };
       }
 
+      const rawContacts: Array<any> = Array.isArray(parsedData.contacts) ? parsedData.contacts : [];
+
+      // Post-process and sanitize contacts
+      const sanitizedContacts = rawContacts.map((c: any, index: number) => {
+        let phoneDigits = (c.whatsapp || '').toString().replace(/\D/g, '');
+        if (phoneDigits.startsWith('55') && (phoneDigits.length === 12 || phoneDigits.length === 13)) {
+          phoneDigits = phoneDigits.slice(2);
+        }
+        while (phoneDigits.startsWith('0') && phoneDigits.length > 10) {
+          phoneDigits = phoneDigits.slice(1);
+        }
+
+        let nome = (c.nome || '').trim();
+        if (!nome) {
+          nome = phoneDigits ? `Contato (${phoneDigits})` : `Lead ${index + 1}`;
+        }
+
+        let temp = (c.temperatura || 'Morno').trim();
+        if (/quente/i.test(temp)) temp = 'Quente';
+        else if (/pag/i.test(temp) || /matriculado/i.test(temp)) temp = 'Pagou';
+        else if (/potencial/i.test(temp) || /alto/i.test(temp)) temp = 'Potencial';
+        else if (/frio/i.test(temp)) temp = 'Frio';
+        else temp = 'Morno';
+
+        return {
+          nome,
+          whatsapp: phoneDigits,
+          email: (c.email || '').toString().trim().toLowerCase(),
+          curso: (c.curso || '').toString().trim(),
+          temperatura: temp,
+          observacao: (c.observacao || '').toString().trim(),
+          valorPago: typeof c.valorPago === 'number' ? c.valorPago : 0,
+          status: (c.status || 'Novo Lead').toString().trim(),
+        };
+      });
+
       return res.json({
         success: true,
-        contacts: parsedData.contacts || [],
-        summary: parsedData.summary || `Foram identificados ${parsedData.contacts?.length || 0} contatos com sucesso.`,
-        totalDetected: parsedData.contacts?.length || 0,
+        contacts: sanitizedContacts,
+        summary: parsedData.summary || `Foram identificados ${sanitizedContacts.length} contatos com sucesso.`,
+        totalDetected: sanitizedContacts.length,
       });
     } catch (error: any) {
       console.error('Error in contact extraction:', error);
