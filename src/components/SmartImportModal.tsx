@@ -344,14 +344,35 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
 
       setLoadingMsg('Identificando Nomes, Telefones/WhatsApp, Cursos e Detalhes com IA...');
 
-      const res = await fetch('/api/ai/extract-contacts', {
+      let res = await fetch('/api/ai/extract-contacts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
+      // Fallback endpoint for Vercel / serverless deployments
+      if (res.status === 404) {
+        res = await fetch('/api/extract-contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
+        let errData: any = {};
+        try {
+          errData = await res.json();
+        } catch {
+          // If HTML response or raw 404 from static host
+        }
+
+        if (res.status === 404) {
+          throw new Error(
+            'O endpoint de IA retornou 404 no seu domínio atual. Certifique-se de configurar a variável GEMINI_API_KEY no painel da Vercel (Settings > Environment Variables) e fazer um novo Deploy.'
+          );
+        }
+
         throw new Error(errData.error || `Erro na análise do servidor (${res.status})`);
       }
 

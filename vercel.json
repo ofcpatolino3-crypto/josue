@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/ai/extract-contacts",
+      "destination": "/api/extract-contacts"
+    },
+    {
+      "source": "/api/ai/chat",
+      "destination": "/api/chat"
+    },
+    {
+      "source": "/api/ai/generate-pitch",
+      "destination": "/api/generate-pitch"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
