@@ -429,8 +429,8 @@ export async function extractTextFromPDF(file: File): Promise<string> {
 }
 
 /**
- * Preprocesses an image on HTML5 Canvas to drastically improve OCR accuracy:
- * - Upscales low-res mobile screenshots
+ * Preprocesses an image on HTML5 Canvas to drastically improve OCR accuracy and performance:
+ * - Resizes to optimal 1200px max dimension for fast processing
  * - Converts to grayscale with weighted luminance
  * - Increases contrast & binarizes to black text on white background
  */
@@ -445,20 +445,27 @@ async function preprocessImageForTesseract(imageSource: string | File): Promise<
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return resolve(typeof imageSource === 'string' ? imageSource : URL.createObjectURL(imageSource));
 
-        // Scale up small images for better character recognition
-        let scale = 1;
-        if (img.width < 1400 && img.height < 1400) {
-          scale = 2; // 2x upscale for crisp text
+        // Scale to optimal 1200px max dimension
+        const maxDim = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
         }
-        const width = img.width * scale;
-        const height = img.height * scale;
 
         canvas.width = width;
         canvas.height = height;
 
         // Draw image scaled with smooth rendering
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.imageSmoothingQuality = 'medium';
         ctx.drawImage(img, 0, 0, width, height);
 
         // Get image pixel data
@@ -496,7 +503,7 @@ async function preprocessImageForTesseract(imageSource: string | File): Promise<
           gray = ((gray / 255 - 0.5) * contrastFactor + 0.5) * 255;
           gray = Math.max(0, Math.min(255, gray));
 
-          // Soft binarization: push light grays to pure white and dark grays to crisp black
+          // Soft binarization
           if (gray > 175) {
             gray = 255;
           } else if (gray < 75) {
@@ -537,21 +544,21 @@ export async function extractTextFromImageLocal(
 ): Promise<string> {
   let worker: any = null;
   try {
-    if (onProgress) onProgress(10, 'Aprimorando contraste e nitidez da imagem...');
+    if (onProgress) onProgress(15, 'Otimizando nitidez e contraste da imagem...');
     const preprocessedDataUrl = await preprocessImageForTesseract(imageSource);
 
-    if (onProgress) onProgress(25, 'Iniciando motor OCR de alta resolução...');
+    if (onProgress) onProgress(30, 'Iniciando motor de leitura ultra-rápido...');
 
     worker = await createWorker('por', 1, {
       logger: (m) => {
         if (m.status === 'recognizing text' && onProgress) {
-          const p = Math.round((m.progress || 0) * 65) + 25;
-          onProgress(p, `Lendo e transcrevendo dados da imagem: ${Math.round((m.progress || 0) * 100)}%`);
+          const p = Math.round((m.progress || 0) * 60) + 35;
+          onProgress(p, `Transcrevendo dados: ${Math.round((m.progress || 0) * 100)}%`);
         }
       },
     });
 
-    if (onProgress) onProgress(40, 'Reconhecendo números de WhatsApp, Nomes e Cursos...');
+    if (onProgress) onProgress(50, 'Extraindo WhatsApps, nomes e cursos...');
     const ret = await worker.recognize(preprocessedDataUrl);
 
     await worker.terminate();

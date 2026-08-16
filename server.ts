@@ -278,19 +278,23 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
       });
 
       let responseText = '';
-      const modelsToTry = ['gemini-3.7-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+      const modelsToTry = ['gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.1-flash-lite'];
       let lastErr: any = null;
 
       for (const modelName of modelsToTry) {
         try {
+          const config: any = {
+            systemInstruction,
+            temperature: 0.1,
+            responseMimeType: 'application/json',
+          };
+          if (modelName === 'gemini-3.7-flash') {
+            config.thinkingConfig = { thinkingBudget: 0 };
+          }
           const response = await ai.models.generateContent({
             model: modelName,
             contents: parts,
-            config: {
-              systemInstruction,
-              temperature: 0.1,
-              responseMimeType: 'application/json',
-            },
+            config,
           });
 
           if (response && response.text) {
