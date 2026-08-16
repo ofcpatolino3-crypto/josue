@@ -46,6 +46,8 @@ export interface Contact {
   assignedToName?: string;
   batchId?: string; // ID da planilha de importação
   batchName?: string;
+  assignedAt?: number;
+  isSeenByAttendant?: boolean;
   lastMessageAt?: number; // Timestamp da última mensagem enviada pelo vendedor
   lastMessageText?: string; // Resumo ou texto da última mensagem enviada
   lastMessageType?: 'whatsapp' | 'template' | 'assistente' | 'manual';
@@ -68,7 +70,7 @@ export interface Plan {
   destaque?: boolean;
 }
 
-export type TabFilter = 'pendente' | 'enviado' | 'todos';
+export type TabFilter = 'novos' | 'pendente' | 'enviado' | 'todos';
 export type ViewTab = 'contatos' | 'disparos' | 'dashboard' | 'mensagens' | 'objecoes' | 'planos' | 'admin';
 
 export interface BroadcastLog {

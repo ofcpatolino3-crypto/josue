@@ -83,6 +83,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { FastBroadcastView } from './components/FastBroadcastView';
 import { ToastContainer } from './components/Toast';
 import { SmartImportModal, SmartImportResult } from './components/SmartImportModal';
+import { NewLeadsAlertBanner, playNewLeadChime } from './components/NewLeadsAlertBanner';
 
 const STORAGE_CONTACTS = 'contacts_v3';
 const STORAGE_OBJECTIONS = 'objections_v3';
@@ -597,6 +598,9 @@ export default function App() {
           ...c,
           assignedTo: targetUserUid,
           assignedToEmail: targetUserEmail,
+          assignedAt: Date.now(),
+          isSeenByAttendant: false,
+          status: c.status === 'Enviado' ? c.status : 'Novo Lead',
         };
 
         // 1. Save in target user's contacts
@@ -633,6 +637,9 @@ export default function App() {
           ...contact,
           assignedTo: assignedUser.uid,
           assignedToEmail: assignedUser.email,
+          assignedAt: Date.now(),
+          isSeenByAttendant: false,
+          status: contact.status === 'Enviado' ? contact.status : 'Novo Lead',
         };
 
         const targetRef = doc(db, 'users', assignedUser.uid, 'contacts', contact.id);
@@ -915,7 +922,69 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // --- DERIVED METRICS ---
+  // --- DERIVED METRICS & NEW LEADS NOTIFICATION ---
+  // Set of dismissed or seen lead IDs for this user
+  const [dismissedLeadIds, setDismissedLeadIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`portal_dismissed_leads_${currentProfile?.uid || 'guest'}`);
+      if (saved) {
+        return new Set(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return new Set<string>();
+  });
+
+  const prevNewLeadsCount = useRef<number>(-1);
+
+  // Newly received leads for this attendant (not yet contacted and not dismissed)
+  const newReceivedContacts = useMemo(() => {
+    return contacts.filter((c) => {
+      // If contact was already contacted or has a message, it's not a new lead
+      if (c.ultimoContato || (c.messagesSentCount && c.messagesSentCount > 0)) return false;
+      // If dismissed by attendant
+      if (dismissedLeadIds.has(c.id)) return false;
+      // If explicitly marked as unseen or status is 'Novo Lead'
+      if (c.isSeenByAttendant === false || c.status === 'Novo Lead') return true;
+      // If assigned or created in the last 48 hours without contact
+      const timeRef = c.assignedAt || c.createdAt || 0;
+      if (timeRef > 0 && Date.now() - timeRef < 48 * 60 * 60 * 1000) return true;
+      return false;
+    });
+  }, [contacts, dismissedLeadIds]);
+
+  // Audio alert and notification when new leads arrive
+  useEffect(() => {
+    if (prevNewLeadsCount.current >= 0 && newReceivedContacts.length > prevNewLeadsCount.current) {
+      const diff = newReceivedContacts.length - prevNewLeadsCount.current;
+      playNewLeadChime();
+      addToast(`🔔 Você recebeu +${diff} novo(s) lead(s) para atendimento!`, 'info');
+    }
+    prevNewLeadsCount.current = newReceivedContacts.length;
+  }, [newReceivedContacts.length]);
+
+  const handleDismissAllNewLeads = () => {
+    const newSet = new Set(dismissedLeadIds);
+    newReceivedContacts.forEach((c) => newSet.add(c.id));
+    setDismissedLeadIds(newSet);
+    try {
+      localStorage.setItem(
+        `portal_dismissed_leads_${currentProfile?.uid || 'guest'}`,
+        JSON.stringify(Array.from(newSet))
+      );
+    } catch (e) {
+      console.warn(e);
+    }
+    addToast('Novos leads marcados como vistos!', 'info');
+  };
+
+  const handleStartImmediateQueue = () => {
+    setTabFilter('novos');
+    setSortBy('recentes');
+    addToast('🎯 Fila de novos leads ativada! Inicie o primeiro contato rápido.', 'success');
+  };
+
   const pendingContacts = useMemo(
     () => contacts.filter((c) => !c.ultimoContato),
     [contacts]
@@ -940,7 +1009,9 @@ export default function App() {
   // Filtered & Sorted contacts list
   const filteredContacts = useMemo(() => {
     let pool =
-      tabFilter === 'pendente'
+      tabFilter === 'novos'
+        ? newReceivedContacts
+        : tabFilter === 'pendente'
         ? pendingContacts
         : tabFilter === 'enviado'
         ? contactedContacts
@@ -1501,6 +1572,13 @@ export default function App() {
         {/* VIEW 1: CONTATOS (Listagem, Filtros, Cards de Contato) */}
         {activeView === 'contatos' && (
           <div className="space-y-4">
+            {/* New Leads Notification Alert Banner for Attendant */}
+            <NewLeadsAlertBanner
+              newLeads={newReceivedContacts}
+              onStartImmediateQueue={handleStartImmediateQueue}
+              onDismissAll={handleDismissAllNewLeads}
+            />
+
             {/* Dropzone & Import Bar */}
             <Dropzone
               onImportRows={handleImportRows}
@@ -1535,8 +1613,32 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Status Tabs: Pendentes, Contatados, Todos */}
-                <div className="flex items-center rounded-lg bg-[#101B2D] p-1 border border-[#2B3D63] self-start md:self-auto shrink-0">
+                {/* Status Tabs: Novos Recebidos, Pendentes, Contatados, Todos */}
+                <div className="flex items-center rounded-lg bg-[#101B2D] p-1 border border-[#2B3D63] self-start md:self-auto shrink-0 flex-wrap gap-1">
+                  {newReceivedContacts.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setTabFilter('novos')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                        tabFilter === 'novos'
+                          ? 'bg-emerald-500 text-[#101B2D] shadow-sm font-black'
+                          : 'text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30'
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Novos Leads</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          tabFilter === 'novos'
+                            ? 'bg-[#101B2D]/30 text-[#101B2D]'
+                            : 'bg-emerald-500/20 text-emerald-300'
+                        }`}
+                      >
+                        {newReceivedContacts.length}
+                      </span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => setTabFilter('pendente')}
@@ -1787,6 +1889,7 @@ export default function App() {
 
                       <ContactCard
                         contact={c}
+                        isNewLead={newReceivedContacts.some((nc) => nc.id === c.id)}
                         onMarkToday={handleMarkToday}
                         onUndoContact={handleUndoContact}
                         onUpdateField={handleUpdateField}

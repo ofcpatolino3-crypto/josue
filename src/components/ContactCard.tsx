@@ -26,6 +26,7 @@ import {
 
 interface CardProps {
   contact: Contact;
+  isNewLead?: boolean;
   onMarkToday: (id: string) => void;
   onUndoContact: (id: string) => void;
   onUpdateField: (id: string, field: keyof Contact, value: string) => void;
@@ -36,6 +37,7 @@ interface CardProps {
 
 export const ContactCard: React.FC<CardProps> = ({
   contact,
+  isNewLead = false,
   onMarkToday,
   onUndoContact,
   onUpdateField,
@@ -85,6 +87,8 @@ export const ContactCard: React.FC<CardProps> = ({
           ? 'border-[#DC2626]/70 shadow-[0_0_14px_rgba(220,38,38,0.18)] ring-1 ring-[#DC2626]/30'
           : overdue
           ? 'border-[#B14432] shadow-[0_0_12px_rgba(177,68,50,0.15)]'
+          : isNewLead && !contact.ultimoContato
+          ? 'border-emerald-500/70 shadow-[0_0_14px_rgba(16,185,129,0.18)] ring-1 ring-emerald-500/30'
           : 'border-[#2B3D63] hover:border-[#2B3D63]'
       }`}
     >
@@ -95,6 +99,18 @@ export const ContactCard: React.FC<CardProps> = ({
             <h3 className="font-semibold text-base sm:text-[17px] text-[#EDE6D6] tracking-tight">
               {contact.nome || 'Sem Nome'}
             </h3>
+
+            {/* New Lead Badge */}
+            {isNewLead && !contact.ultimoContato && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-sm animate-pulse"
+                title="Novo lead recebido recentemente para primeiro atendimento!"
+              >
+                <Sparkles className="w-3 h-3 text-emerald-400" />
+                Novo Lead
+              </span>
+            )}
+
             {/* Color Tag Badge */}
             {(() => {
               const temp = contact.temperatura || 'Frio';
