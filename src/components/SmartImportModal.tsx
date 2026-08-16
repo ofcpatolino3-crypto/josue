@@ -252,6 +252,68 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
     }
   };
 
+  // Optimize and resize image on client side before sending to AI to guarantee fast & successful OCR
+  const prepareImageForAI = async (file: File): Promise<{ base64: string; mimeType: string }> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const rawDataUrl = e.target?.result as string;
+        if (!rawDataUrl) {
+          return resolve({ base64: '', mimeType: file.type || 'image/jpeg' });
+        }
+
+        // For non-images (like PDF), return raw data url
+        if (!file.type.startsWith('image/') && !['png', 'jpg', 'jpeg', 'webp', 'bmp'].some((ext) => file.name.toLowerCase().endsWith(ext))) {
+          return resolve({ base64: rawDataUrl, mimeType: file.type || 'application/pdf' });
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const maxDim = 2048;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            if (ctx) {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, width, height);
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+              resolve({ base64: compressedDataUrl, mimeType: 'image/jpeg' });
+              return;
+            }
+          } catch (err) {
+            console.warn('Canvas resize failed, falling back to original image:', err);
+          }
+          resolve({ base64: rawDataUrl, mimeType: file.type || 'image/jpeg' });
+        };
+        img.onerror = () => {
+          resolve({ base64: rawDataUrl, mimeType: file.type || 'image/jpeg' });
+        };
+        img.src = rawDataUrl;
+      };
+      reader.onerror = () => {
+        resolve({ base64: '', mimeType: file.type || 'image/jpeg' });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Process PDF or Image with Gemini AI
   const processWithAI = async (file?: File, rawText?: string) => {
     setLoading(true);
@@ -261,27 +323,16 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
       let payload: { fileData?: string; mimeType?: string; fileName?: string; text?: string } = {};
 
       if (file) {
-        setLoadingMsg(`Enviando ${file.name} para Visão Computacional Gemini IA...`);
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        setLoadingMsg(`Preparando e otimizando "${file.name}" para OCR da IA...`);
+        const { base64, mimeType } = await prepareImageForAI(file);
 
-        let detectedMime = file.type || 'image/jpeg';
-        const nameLower = file.name.toLowerCase();
-        if (nameLower.endsWith('.pdf') || detectedMime.includes('pdf')) {
-          detectedMime = 'application/pdf';
-        } else if (nameLower.endsWith('.png')) {
-          detectedMime = 'image/png';
-        } else if (nameLower.endsWith('.webp')) {
-          detectedMime = 'image/webp';
+        if (!base64) {
+          throw new Error('Não foi possível ler os dados da foto ou arquivo selecionado.');
         }
 
         payload = {
           fileData: base64,
-          mimeType: detectedMime,
+          mimeType,
           fileName: file.name,
         };
       } else if (rawText) {
@@ -291,7 +342,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
         };
       }
 
-      setLoadingMsg('Detectando Nomes, Telefones/WhatsApp, Cursos e Observações com IA...');
+      setLoadingMsg('Identificando Nomes, Telefones/WhatsApp, Cursos e Detalhes com IA...');
 
       const res = await fetch('/api/ai/extract-contacts', {
         method: 'POST',
@@ -301,12 +352,12 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Erro do servidor (${res.status})`);
+        throw new Error(errData.error || `Erro na análise do servidor (${res.status})`);
       }
 
       const data = await res.json();
       if (!data.contacts || data.contacts.length === 0) {
-        throw new Error('A IA não conseguiu identificar contatos legíveis no documento ou imagem fornecido.');
+        throw new Error('A IA analisou a imagem/documento, mas não encontrou nenhum nome ou número de telefone legível. Tente tirar uma foto mais nítida ou aproximada da lista.');
       }
 
       const defaultName = file

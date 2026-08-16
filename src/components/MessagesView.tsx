@@ -20,8 +20,8 @@ import { fillTemplate } from '../utils/excel';
 
 interface MessagesViewProps {
   templates: MessageTemplate[];
-  onUpdateTemplate: (id: string, updated: Partial<MessageTemplate>) => void;
-  onAddTemplate: (newTmpl: Omit<MessageTemplate, 'id'>) => void;
+  onUpdateTemplate: (template: MessageTemplate) => void;
+  onAddTemplate: (newTmpl: MessageTemplate) => void;
   onDeleteTemplate: (id: string) => void;
   onResetTemplates: () => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
@@ -81,14 +81,18 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       return;
     }
 
-    onUpdateTemplate(id, {
+    const currentTmpl = templates.find((t) => t.id === id);
+
+    onUpdateTemplate({
+      id,
       titulo: editTitle.trim(),
       categoria: editCategory,
-      gatilho: editGatilho.trim(),
-      emocao: editEmocao.trim(),
-      logica: editLogica.trim(),
-      descricao: editDesc.trim(),
+      gatilho: editGatilho.trim() || undefined,
+      emocao: editEmocao.trim() || undefined,
+      logica: editLogica.trim() || undefined,
+      descricao: editDesc.trim() || undefined,
       texto: editText.trim(),
+      tags: currentTmpl?.tags,
     });
 
     setEditingId(null);
@@ -102,7 +106,10 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       return;
     }
 
+    const newId = 't_custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+
     onAddTemplate({
+      id: newId,
       titulo: newTitle.trim(),
       categoria: newCategory,
       gatilho: newGatilho.trim() || undefined,
@@ -119,7 +126,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
     setNewDesc('');
     setNewText('');
     setShowAddForm(false);
-    onToast('Novo modelo de mensagem criado!', 'success');
+    onToast('Novo modelo de mensagem criado com sucesso!', 'success');
   };
 
   const handleCopyPreview = (tmpl: MessageTemplate) => {

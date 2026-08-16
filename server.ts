@@ -207,9 +207,18 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
 
       if (fileData) {
         // Support base64 encoded PDFs and Images
-        const cleanBase64 = fileData.includes('base64,') ? fileData.split('base64,')[1] : fileData;
-        
+        let cleanBase64 = fileData;
         let detectedMime = mimeType || 'image/jpeg';
+
+        if (fileData.includes('base64,')) {
+          const splitArr = fileData.split('base64,');
+          cleanBase64 = splitArr[1];
+          const mimeMatch = splitArr[0].match(/data:([^;]+)/);
+          if (mimeMatch && mimeMatch[1]) {
+            detectedMime = mimeMatch[1];
+          }
+        }
+
         const nameLower = (fileName || '').toLowerCase();
         if (detectedMime.includes('pdf') || nameLower.endsWith('.pdf')) {
           detectedMime = 'application/pdf';
@@ -217,14 +226,14 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
           detectedMime = 'image/png';
         } else if (detectedMime.includes('webp') || nameLower.endsWith('.webp')) {
           detectedMime = 'image/webp';
-        } else {
+        } else if (!detectedMime.startsWith('image/')) {
           detectedMime = 'image/jpeg';
         }
 
         parts.push({
           inlineData: {
             mimeType: detectedMime,
-            data: cleanBase64,
+            data: cleanBase64.trim(),
           },
         });
       }
@@ -235,46 +244,23 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
         });
       }
 
-      parts.push({ text: promptText });
+      parts.push({
+        text: `${promptText}\nIMPORTANTE: Retorne a lista de contatos em formato JSON com o objeto { "contacts": [ { "nome": "...", "whatsapp": "...", "email": "...", "curso": "...", "temperatura": "...", "observacao": "..." } ], "summary": "...", "totalDetected": 0 }`,
+      });
 
       let responseText = '';
-      const modelsToTry = ['gemini-3.7-flash', 'gemini-3.1-flash-lite'];
+      const modelsToTry = ['gemini-3.7-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
       let lastErr: any = null;
 
       for (const modelName of modelsToTry) {
         try {
           const response = await ai.models.generateContent({
             model: modelName,
-            contents: { parts },
+            contents: parts,
             config: {
               systemInstruction,
               temperature: 0.1,
               responseMimeType: 'application/json',
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  contacts: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        nome: { type: Type.STRING, description: 'Nome completo do aluno ou lead' },
-                        whatsapp: { type: Type.STRING, description: 'Telefone ou WhatsApp apenas dígitos com DDD' },
-                        email: { type: Type.STRING, description: 'E-mail do aluno se houver' },
-                        curso: { type: Type.STRING, description: 'Concurso ou curso de interesse' },
-                        temperatura: { type: Type.STRING, description: 'Quente, Morno ou Frio' },
-                        observacao: { type: Type.STRING, description: 'Observação ou notas' },
-                        valorPago: { type: Type.NUMBER, description: 'Valor já pago se mencionado' },
-                        status: { type: Type.STRING, description: 'Status inicial' },
-                      },
-                      required: ['nome'],
-                    },
-                  },
-                  summary: { type: Type.STRING, description: 'Resumo breve do que foi detectado no arquivo' },
-                  totalDetected: { type: Type.INTEGER, description: 'Total de contatos detectados' },
-                },
-                required: ['contacts'],
-              },
             },
           });
 
@@ -284,7 +270,7 @@ Extraia com fidelidade TODOS os contatos válidos encontrados, não interrompa a
           }
         } catch (mErr: any) {
           lastErr = mErr;
-          console.warn(`Model ${modelName} failed, attempting next:`, mErr.message);
+          console.warn(`Model ${modelName} failed in OCR extraction:`, mErr.message);
         }
       }
 
