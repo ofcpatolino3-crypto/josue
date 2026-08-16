@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Contact, Temperature, UserProfile } from '../types';
 import { mapRowToContact, cleanPhone, formatPhoneDisplay, parseRawTextToContacts } from '../utils/excel';
+import { extractContactsFromRawText, extractTextFromImageLocal, extractTextFromPDF } from '../utils/clientOcr';
 
 export interface SmartImportResult {
   contacts: Partial<Contact>[];
@@ -344,51 +345,81 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
 
       setLoadingMsg('Identificando Nomes, Telefones/WhatsApp, Cursos e Detalhes com IA...');
 
-      let res = await fetch('/api/ai/extract-contacts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      let data: any = null;
 
-      // Fallback endpoint for Vercel / serverless deployments
-      if (res.status === 404) {
-        res = await fetch('/api/extract-contacts', {
+      try {
+        let res = await fetch('/api/ai/extract-contacts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-      }
 
-      if (!res.ok) {
-        let errData: any = {};
-        try {
-          errData = await res.json();
-        } catch {
-          // If HTML response or raw 404 from static host
-        }
-
+        // Fallback endpoint for Vercel / serverless deployments
         if (res.status === 404) {
-          throw new Error(
-            'O endpoint de IA retornou 404 no seu domínio atual. Certifique-se de configurar a variável GEMINI_API_KEY no painel da Vercel (Settings > Environment Variables) e fazer um novo Deploy.'
-          );
+          res = await fetch('/api/extract-contacts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
         }
 
-        throw new Error(errData.error || `Erro na análise do servidor (${res.status})`);
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (fetchErr) {
+        console.warn('Backend OCR endpoint failed or unreachable, trying local browser engine...', fetchErr);
       }
 
-      const data = await res.json();
-      if (!data.contacts || data.contacts.length === 0) {
-        throw new Error('A IA analisou a imagem/documento, mas não encontrou nenhum nome ou número de telefone legível. Tente tirar uma foto mais nítida ou aproximada da lista.');
+      // If backend was not available or no API key, execute Client-Side OCR locally
+      if (!data || !data.contacts || data.contacts.length === 0) {
+        if (file) {
+          const ext = file.name.split('.').pop()?.toLowerCase() || '';
+          let extractedText = '';
+
+          if (ext === 'pdf' || file.type === 'application/pdf') {
+            setLoadingMsg('Extraindo texto do documento PDF diretamente no navegador...');
+            extractedText = await extractTextFromPDF(file);
+          } else {
+            setLoadingMsg('Processando imagem com OCR Local (Sem necessidade de chave API)...');
+            extractedText = await extractTextFromImageLocal(file, (p, status) => {
+              setLoadingMsg(status);
+            });
+          }
+
+          if (extractedText) {
+            const parsedContacts = extractContactsFromRawText(extractedText);
+            if (parsedContacts.length > 0) {
+              data = {
+                contacts: parsedContacts,
+                totalDetected: parsedContacts.length,
+                summary: `${parsedContacts.length} contatos identificados com sucesso via OCR no seu navegador.`,
+              };
+            }
+          }
+        } else if (rawText) {
+          const parsedContacts = extractContactsFromRawText(rawText);
+          if (parsedContacts.length > 0) {
+            data = {
+              contacts: parsedContacts,
+              totalDetected: parsedContacts.length,
+              summary: `${parsedContacts.length} contatos identificados e formatados no texto.`,
+            };
+          }
+        }
+      }
+
+      if (!data || !data.contacts || data.contacts.length === 0) {
+        throw new Error('Não foi possível identificar contatos legíveis na imagem ou documento. Verifique se a foto está nítida ou copie e cole o texto dos contatos.');
       }
 
       const defaultName = file
         ? `Lote ${file.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Foto'} - ${file.name.replace(/\.[^/.]+$/, '')}`
-        : `Lote Texto IA - ${new Date().toLocaleDateString('pt-BR')}`;
+        : `Lote Texto - ${new Date().toLocaleDateString('pt-BR')}`;
 
       populateExtractedList(data.contacts, defaultName, data.summary);
     } catch (err: any) {
-      console.error('AI extraction error:', err);
-      setErrorMsg(err.message || 'Não foi possível extrair contatos com a IA.');
+      console.error('AI / OCR extraction error:', err);
+      setErrorMsg(err.message || 'Não foi possível extrair contatos.');
     } finally {
       setLoading(false);
     }
