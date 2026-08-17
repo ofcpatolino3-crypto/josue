@@ -53,7 +53,6 @@ import {
   DEFAULT_OBJECTIONS,
   DEFAULT_PLANS,
   DEFAULT_TEMPLATES,
-  SAMPLE_CONTACTS,
   TEMP_ORDER,
 } from './data/defaults';
 import {
@@ -140,12 +139,25 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_CONTACTS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          // Strictly purge any legacy demo contacts
+          return parsed.filter(
+            (c: Contact) =>
+              c &&
+              c.id &&
+              !c.id.startsWith('c_demo_') &&
+              c.nome !== 'Ana Carolina Mendes' &&
+              c.nome !== 'Rodrigo Silveira Ramos' &&
+              c.nome !== 'Beatriz Vasconcelos' &&
+              c.nome !== 'Lucas Albuquerque' &&
+              c.nome !== 'Mariana Duarte Costa'
+          );
+        }
       }
     } catch (e) {
       console.error(e);
     }
-    return SAMPLE_CONTACTS;
+    return [];
   });
 
   const [templates, setTemplates] = useState<MessageTemplate[]>(() => {
@@ -287,7 +299,15 @@ export default function App() {
         globalContactsRef,
         (snapshot) => {
           const list: Contact[] = [];
-          snapshot.forEach((d) => list.push(d.data() as Contact));
+          snapshot.forEach((d) => {
+            const data = d.data() as Contact;
+            if (data && !data.id?.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
+              list.push(data);
+            } else if (data?.id?.startsWith('c_demo_')) {
+              // Automatically cleanup demo document from cloud
+              deleteDoc(doc(db, 'global_contacts', data.id)).catch(() => {});
+            }
+          });
           setGlobalContacts(list);
         },
         (err) => console.warn('Firestore global contacts info:', err)
@@ -299,7 +319,14 @@ export default function App() {
         batchesRef,
         (snapshot) => {
           const list: LeadBatch[] = [];
-          snapshot.forEach((d) => list.push(d.data() as LeadBatch));
+          snapshot.forEach((d) => {
+            const batch = d.data() as LeadBatch;
+            if (batch && !batch.name?.includes('Demonstrativo')) {
+              list.push(batch);
+            } else if (batch?.id) {
+              deleteDoc(doc(db, 'lead_batches', batch.id)).catch(() => {});
+            }
+          });
           setLeadBatches(list);
         },
         (err) => console.warn('Firestore batches info:', err)
@@ -328,12 +355,20 @@ export default function App() {
           if (!snapshot.empty) {
             const cloudContacts: Contact[] = [];
             snapshot.forEach((d) => {
-              cloudContacts.push(d.data() as Contact);
+              const data = d.data() as Contact;
+              if (data && !data.id?.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
+                cloudContacts.push(data);
+              } else if (data?.id?.startsWith('c_demo_')) {
+                deleteDoc(doc(db, 'users', currentProfile.uid, 'contacts', data.id)).catch(() => {});
+              }
             });
             cloudContacts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             setContacts(cloudContacts);
           } else if (!initialCloudLoadDone.current && contacts.length > 0 && currentProfile?.status === 'approved') {
-            syncInitialDataToCloud(currentProfile.uid, contacts);
+            const realContacts = contacts.filter((c) => !c.id?.startsWith('c_demo_'));
+            if (realContacts.length > 0) {
+              syncInitialDataToCloud(currentProfile.uid, realContacts);
+            }
           }
           initialCloudLoadDone.current = true;
         },
@@ -1434,12 +1469,6 @@ export default function App() {
     clearAllContactsFromCloud(contacts);
     setContacts([]);
     addToast('Todos os contatos foram apagados.', 'info');
-  };
-
-  const handleLoadSample = () => {
-    setContacts(SAMPLE_CONTACTS);
-    saveBatchContactsToCloud(SAMPLE_CONTACTS, 'Lote Demonstrativo');
-    addToast('Contatos de exemplo recarregados!', 'success');
   };
 
   // Templates

@@ -37,8 +37,8 @@ export function excelDateToStr(v: unknown): string {
   const s = String(v).trim();
   if (!s) return '';
 
-  // Match DD/MM/YYYY or DD-MM-YYYY
-  const br = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  // Match DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+  const br = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
   if (br) {
     let [, d, m, y] = br;
     if (y.length === 2) y = '20' + y;
@@ -152,12 +152,16 @@ export function formatPhoneDisplay(tel: unknown): string {
 export function cleanTemperature(val: string): Temperature {
   const v = val.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (v.includes('pago') || v.includes('pagou') || v.includes('comprou') || v.includes('matriculado') || v.includes('aluno')) return 'Pagou';
-  if (v.includes('quente') || v.includes('hot') || v.includes('urgente') || v.includes('fechar')) return 'Quente';
-  if (v.includes('potencial') || v.includes('alto') || v.includes('negociando') || v.includes('proposta')) return 'Potencial';
-  if (v.includes('morno') || v.includes('warm') || v.includes('medio') || v.includes('duvida')) return 'Morno';
+  if (v.includes('quente') || v.includes('hot') || v.includes('urgente') || v.includes('fechar') || v.includes('alta') || v.includes('alto')) return 'Quente';
+  if (v.includes('potencial') || v.includes('medio') || v.includes('negociando') || v.includes('proposta') || v.includes('retornar')) return 'Potencial';
+  if (v.includes('morno') || v.includes('warm') || v.includes('duvida') || v.includes('interessado')) return 'Morno';
   return 'Frio';
 }
 
+/**
+ * Universal Mapper that maps any spreadsheet row to a Contact,
+ * 100% independent of column order or header naming variations.
+ */
 export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number): Partial<Contact> {
   const out: Partial<Contact> = {
     nome: '',
@@ -183,9 +187,10 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
     const rawVal = raw === undefined || raw === null ? '' : raw;
     const vStr = normalizeRawPhoneValue(rawVal);
     const v = String(rawVal).trim();
+    if (!v && !vStr) continue;
 
-    // Check specific DDD column
-    if (n === 'ddd' || n === 'codigodearea' || n === 'prefixo') {
+    // 1. Check separate DDD column
+    if (n === 'ddd' || n === 'codigodearea' || n === 'prefixo' || n === 'areacode' || n === 'dddcelular' || n === 'dddtelefone') {
       const dddDigits = v.replace(/\D/g, '');
       if (dddDigits.length === 2) {
         separateDDD = dddDigits;
@@ -193,21 +198,107 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
       continue;
     }
 
-    if (n.includes('proximocontato') || n.includes('proximo') || n.includes('retorno') || n.includes('agendamento')) {
+    // 2. Next Contact / Return date
+    if (
+      n.includes('proximocontato') ||
+      n.includes('proximo') ||
+      n.includes('retorno') ||
+      n.includes('agendamento') ||
+      n.includes('proximaretorno') ||
+      n.includes('dataretorno') ||
+      n.includes('followup') ||
+      n.includes('nextcontact')
+    ) {
       out.proximoContato = excelDateToStr(rawVal);
-    } else if (n.includes('ultimocontato') || n.includes('ultimo') || n.includes('atendido')) {
+    }
+    // 3. Last contact / Interaction
+    else if (
+      n.includes('ultimocontato') ||
+      n.includes('ultimainteracao') ||
+      n.includes('ultimo') ||
+      n.includes('ultimochat') ||
+      n.includes('atendido') ||
+      n.includes('lastcontact')
+    ) {
       out.ultimoContato = excelDateToStr(rawVal);
-    } else if (n.includes('datacontato') || n === 'data' || n.includes('criadoem') || n.includes('cadastro') || n.includes('datacadastro')) {
+    }
+    // 4. Contact Date / Creation / Registration
+    else if (
+      n.includes('datacontato') ||
+      n === 'data' ||
+      n.includes('criadoem') ||
+      n.includes('cadastro') ||
+      n.includes('datacadastro') ||
+      n.includes('datadecadastro') ||
+      n.includes('datadolead') ||
+      n.includes('datadeentrada') ||
+      n.includes('dataenvio') ||
+      n.includes('createdat') ||
+      n.includes('date')
+    ) {
       out.dataContato = excelDateToStr(rawVal);
-    } else if (n.includes('temperatura') || n.includes('temp') || n.includes('etiqueta') || n.includes('tag') || n.includes('prioridade')) {
+    }
+    // 5. Temperature / Lead Qualification
+    else if (
+      n.includes('temperatura') ||
+      n.includes('temp') ||
+      n.includes('etiqueta') ||
+      n.includes('tag') ||
+      n.includes('prioridade') ||
+      n.includes('classificacao') ||
+      n.includes('qualificacao') ||
+      n.includes('grau') ||
+      n.includes('score')
+    ) {
       out.temperatura = cleanTemperature(v);
-    } else if (n.includes('status') || n.includes('situacao') || n.includes('fase') || n.includes('etapa')) {
+    }
+    // 6. Status / Funnel Stage
+    else if (
+      n.includes('status') ||
+      n.includes('situacao') ||
+      n.includes('fase') ||
+      n.includes('etapa') ||
+      n.includes('condicao') ||
+      n.includes('estado') ||
+      n.includes('estatus') ||
+      n.includes('stage')
+    ) {
       out.status = v;
-    } else if (n.includes('observ') || n.includes('obs') || n.includes('nota') || n.includes('comentario') || n.includes('detalhe') || n.includes('historico')) {
-      out.observacao = v;
-    } else if (n.includes('email') || n.includes('correio') || n.includes('mail') || n.includes('e-mail')) {
+    }
+    // 7. Observations / Notes / Comments / History
+    else if (
+      n.includes('observ') ||
+      n.includes('obs') ||
+      n.includes('nota') ||
+      n.includes('comentario') ||
+      n.includes('detalhe') ||
+      n.includes('historico') ||
+      n.includes('descricao') ||
+      n.includes('anotacao') ||
+      n.includes('anotacoes') ||
+      n.includes('informacao') ||
+      n.includes('informacoes') ||
+      n.includes('mensagem') ||
+      n.includes('origem') ||
+      n.includes('fonte') ||
+      n.includes('campanha') ||
+      n.includes('notes') ||
+      n.includes('comments')
+    ) {
+      out.observacao = out.observacao ? `${out.observacao} | ${v}` : v;
+    }
+    // 8. Email
+    else if (
+      n.includes('email') ||
+      n.includes('correio') ||
+      n.includes('mail') ||
+      n.includes('e-mail') ||
+      n.includes('electronicmail')
+    ) {
       out.email = v.toLowerCase();
-    } else if (
+    }
+    // 9. Phone / WhatsApp / Mobile (Regardless of column order or synonym)
+    else if (
       n.includes('whatsapp') ||
       n.includes('whats') ||
       n.includes('wpp') ||
@@ -220,65 +311,112 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
       n.includes('mobile') ||
       n.includes('phone') ||
       n.includes('numero') ||
-      n.includes('num')
+      n.includes('num') ||
+      n.includes('tel1') ||
+      n.includes('tel2') ||
+      n.includes('cel1') ||
+      n.includes('cel2') ||
+      n.includes('fone1') ||
+      n.includes('fone2')
     ) {
       const cleaned = cleanPhone(vStr);
       if (cleaned) {
-        out.whatsapp = cleaned;
-      } else if (v) {
+        if (!out.whatsapp || cleaned.length >= out.whatsapp.length) {
+          out.whatsapp = cleaned;
+        }
+      } else if (v && !out.whatsapp) {
         out.whatsapp = v;
       }
-    } else if (
+    }
+    // 10. Course / Exam / Position / Area / Interest
+    else if (
       n.includes('curso') ||
       n.includes('concurso') ||
-      n.includes('edital') ||
       n.includes('cargo') ||
       n.includes('carreira') ||
       n.includes('orgao') ||
-      n.includes('interesse') ||
+      n.includes('edital') ||
+      n.includes('turma') ||
       n.includes('materia') ||
+      n.includes('disciplina') ||
       n.includes('produto') ||
-      n.includes('turma')
+      n.includes('area') ||
+      n.includes('interesse') ||
+      n.includes('plano') ||
+      n.includes('modalidade') ||
+      n.includes('pacote') ||
+      n.includes('modulo') ||
+      n.includes('mentoria') ||
+      n.includes('inscricao') ||
+      n.includes('course') ||
+      n.includes('product')
     ) {
       out.curso = v;
-    } else if (
+    }
+    // 11. Student Name / Lead Name / Full Name
+    else if (
       n.includes('nome') ||
       n.includes('name') ||
       n.includes('aluno') ||
+      n.includes('aluna') ||
       n.includes('cliente') ||
       n.includes('lead') ||
       n.includes('candidato') ||
+      n.includes('candidata') ||
       n.includes('estudante') ||
       n.includes('participante') ||
       n.includes('pessoa') ||
-      n.includes('destinatario')
+      n.includes('destinatario') ||
+      n.includes('titular') ||
+      n.includes('assinante') ||
+      n.includes('usuario') ||
+      n.includes('student') ||
+      n.includes('customer')
     ) {
-      out.nome = v;
-    } else if (n.includes('contato')) {
-      // "Contato" could be a name or a phone number
+      // Don't overwrite if it's "nomedocurso"
+      if (n.includes('curso') || n.includes('concurso')) {
+        if (!out.curso) out.curso = v;
+      } else {
+        out.nome = v;
+      }
+    }
+    // 12. Generic "Contato" Column
+    else if (n.includes('contato')) {
       if (isLikelyPhone(vStr)) {
         if (!out.whatsapp) out.whatsapp = cleanPhone(vStr);
       } else if (!out.nome && v.length > 2) {
         out.nome = v;
       }
-    } else {
-      // Capture unmapped columns as candidates
+    }
+    // 13. Fallback Heuristic Candidates for Unlabeled / Mystery Columns
+    else {
       if (!phoneCandidate && isLikelyPhone(vStr)) {
         phoneCandidate = cleanPhone(vStr);
-      } else if (!courseCandidate && (v.toLowerCase().includes('polic') || v.toLowerCase().includes('inss') || v.toLowerCase().includes('tj') || v.toLowerCase().includes('concurso'))) {
+      } else if (
+        !courseCandidate &&
+        (v.toLowerCase().includes('polic') ||
+          v.toLowerCase().includes('pm') ||
+          v.toLowerCase().includes('pc') ||
+          v.toLowerCase().includes('inss') ||
+          v.toLowerCase().includes('tj') ||
+          v.toLowerCase().includes('concurso') ||
+          v.toLowerCase().includes('oab'))
+      ) {
         courseCandidate = v;
       } else if (!nameCandidate && v.length > 3 && /^[A-Za-zÀ-ÿ\s]+$/.test(v) && v.includes(' ')) {
         nameCandidate = v;
+      } else if (!noteCandidate && v.length > 5) {
+        noteCandidate = v;
       }
     }
   }
 
-  // Apply separate DDD if number is only 8 or 9 digits
+  // Prepend separate DDD if phone number has only 8 or 9 digits
   if (separateDDD && out.whatsapp && (out.whatsapp.length === 8 || out.whatsapp.length === 9)) {
     out.whatsapp = `${separateDDD}${out.whatsapp}`;
   }
 
-  // FALLBACK SCANNER: If phone is still missing, scan ALL cells in the row
+  // FALLBACK SCANNER 1: Phone number detection from unmapped cells
   if (!out.whatsapp) {
     if (phoneCandidate) {
       out.whatsapp = phoneCandidate;
@@ -296,12 +434,12 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
     }
   }
 
-  // Combine separate DDD with fallback phone if needed
+  // Re-apply separate DDD to fallback phone if applicable
   if (separateDDD && out.whatsapp && (out.whatsapp.length === 8 || out.whatsapp.length === 9)) {
     out.whatsapp = `${separateDDD}${out.whatsapp}`;
   }
 
-  // FALLBACK SCANNER for Email
+  // FALLBACK SCANNER 2: Email detection
   if (!out.email) {
     for (const raw of Object.values(row)) {
       const v = String(raw ?? '').trim();
@@ -312,17 +450,16 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
     }
   }
 
-  // FALLBACK SCANNER for Course
+  // FALLBACK SCANNER 3: Course detection
   if (!out.curso && courseCandidate) {
     out.curso = courseCandidate;
   }
 
-  // FALLBACK SCANNER for Name
+  // FALLBACK SCANNER 4: Name detection
   if (!out.nome) {
     if (nameCandidate) {
       out.nome = nameCandidate;
     } else {
-      // Look for any string that looks like a person name (letters and spaces, not email, not date)
       for (const raw of Object.values(row)) {
         const v = String(raw ?? '').trim();
         if (
@@ -340,18 +477,143 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
     }
   }
 
-  // If name is STILL empty, generate a polite fallback so the contact is NEVER lost!
+  // FALLBACK SCANNER 5: Notes
+  if (!out.observacao && noteCandidate) {
+    out.observacao = noteCandidate;
+  }
+
+  // Polite Name Fallback: NEVER lose a contact that has phone, email, or data!
   if (!out.nome || !out.nome.trim()) {
     if (out.whatsapp) {
       out.nome = `Contato (${formatPhoneDisplay(out.whatsapp)})`;
     } else if (out.email) {
       out.nome = out.email.split('@')[0];
     } else {
-      out.nome = `Aluno ${rowIndex !== undefined ? rowIndex + 1 : 'Lead'}`;
+      out.nome = `Lead ${rowIndex !== undefined ? rowIndex + 1 : ''}`.trim();
     }
   }
 
   return out;
+}
+
+/**
+ * Universal Intelligent Spreadsheet Buffer Parser.
+ * Automatically scans rows to locate the header row (even if on row 2, 3, 4...),
+ * detects columns in any arbitrary order, reads multiple sheets, and extracts all contacts reliably.
+ */
+export function parseSpreadsheetBuffer(buffer: ArrayBuffer): {
+  contacts: Partial<Contact>[];
+  sheetNames: string[];
+  totalRows: number;
+  detectedHeaders: string[];
+} {
+  const data = new Uint8Array(buffer);
+  const wb = XLSX.read(data, { type: 'array', cellDates: false });
+
+  if (!wb.SheetNames || wb.SheetNames.length === 0) {
+    throw new Error('Nenhuma aba ou planilha encontrada no arquivo.');
+  }
+
+  const allContacts: Partial<Contact>[] = [];
+  const allDetectedHeaders: Set<string> = new Set();
+  let totalProcessedRows = 0;
+
+  const headerKeywords = [
+    'nome', 'name', 'aluno', 'cliente', 'lead', 'candidato', 'pessoa', 'contato',
+    'telefone', 'whatsapp', 'whats', 'wpp', 'zap', 'celular', 'tel', 'fone', 'numero', 'phone', 'ddd',
+    'email', 'mail', 'correio',
+    'curso', 'concurso', 'cargo', 'orgao', 'carreira', 'edital', 'turma', 'materia', 'produto', 'interesse', 'plano',
+    'data', 'cadastro', 'datacontato', 'criadoem', 'retorno', 'proximo', 'ultimo',
+    'status', 'situacao', 'fase', 'etapa', 'temperatura', 'prioridade', 'etiqueta', 'tag',
+    'observacao', 'obs', 'nota', 'comentario', 'detalhe', 'historico', 'descricao'
+  ];
+
+  for (const sheetName of wb.SheetNames) {
+    const sheet = wb.Sheets[sheetName];
+    if (!sheet) continue;
+
+    // Read sheet as 2D array (formatted and raw)
+    const rows2D = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '', raw: false });
+    const rows2DRaw = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '', raw: true });
+
+    if (!rows2D || rows2D.length === 0) continue;
+
+    // 1. Locate the best header row in the first 25 rows
+    let bestHeaderRowIdx = 0;
+    let maxHeaderScore = 0;
+
+    const maxSearchRows = Math.min(25, rows2D.length);
+    for (let r = 0; r < maxSearchRows; r++) {
+      const rowCells = rows2D[r];
+      if (!Array.isArray(rowCells)) continue;
+
+      let score = 0;
+      for (const cell of rowCells) {
+        const norm = normHeader(cell);
+        if (!norm) continue;
+        for (const kw of headerKeywords) {
+          if (norm.includes(kw)) {
+            score++;
+            break;
+          }
+        }
+      }
+
+      if (score > maxHeaderScore) {
+        maxHeaderScore = score;
+        bestHeaderRowIdx = r;
+      }
+    }
+
+    // Header strings
+    const headerRow = rows2D[bestHeaderRowIdx] || [];
+    const headers: string[] = [];
+    for (let col = 0; col < headerRow.length; col++) {
+      const hStr = String(headerRow[col] ?? '').trim();
+      const finalHeader = hStr || `Coluna_${col + 1}`;
+      headers.push(finalHeader);
+      allDetectedHeaders.add(finalHeader);
+    }
+
+    // 2. Process data rows starting from after the header row
+    const startDataRow = maxHeaderScore >= 1 ? bestHeaderRowIdx + 1 : 0;
+
+    for (let r = startDataRow; r < rows2D.length; r++) {
+      const rowFormatted = rows2D[r];
+      const rowRaw = rows2DRaw[r] || [];
+      if (!Array.isArray(rowFormatted) || rowFormatted.length === 0) continue;
+
+      // Build row record
+      const rowRecord: Record<string, unknown> = {};
+      let hasAnyValue = false;
+
+      for (let c = 0; c < Math.max(headers.length, rowFormatted.length); c++) {
+        const colName = headers[c] || `Coluna_${c + 1}`;
+        const rawVal = rowRaw[c] !== undefined && rowRaw[c] !== '' ? rowRaw[c] : rowFormatted[c];
+        rowRecord[colName] = rawVal;
+        if (rawVal !== undefined && rawVal !== '' && rawVal !== null) {
+          hasAnyValue = true;
+        }
+      }
+
+      if (!hasAnyValue) continue;
+
+      totalProcessedRows++;
+      const contact = mapRowToContact(rowRecord, totalProcessedRows);
+
+      // Keep contact if it has name, phone, email, or course
+      if (contact.whatsapp || contact.email || (contact.nome && !contact.nome.startsWith('Lead '))) {
+        allContacts.push(contact);
+      }
+    }
+  }
+
+  return {
+    contacts: allContacts,
+    sheetNames: wb.SheetNames,
+    totalRows: totalProcessedRows,
+    detectedHeaders: Array.from(allDetectedHeaders),
+  };
 }
 
 /**

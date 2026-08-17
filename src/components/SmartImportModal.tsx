@@ -1,12 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import * as XLSX from 'xlsx';
 import {
   X,
   Sparkles,
   UploadCloud,
   FileSpreadsheet,
-  FileText,
-  Image as ImageIcon,
   CheckCircle2,
   AlertTriangle,
   Trash2,
@@ -15,14 +12,12 @@ import {
   Layers,
   Loader2,
   FileCheck,
-  ArrowRight,
   Info,
   Edit3,
   Zap,
 } from 'lucide-react';
 import { Contact, Temperature, UserProfile } from '../types';
-import { mapRowToContact, cleanPhone, formatPhoneDisplay, parseRawTextToContacts } from '../utils/excel';
-import { extractContactsFromRawText, extractTextFromImageLocal, extractTextFromPDF } from '../utils/clientOcr';
+import { cleanPhone, parseSpreadsheetBuffer, parseRawTextToContacts } from '../utils/excel';
 
 export interface SmartImportResult {
   contacts: Partial<Contact>[];
@@ -56,7 +51,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
   users,
   currentProfile,
 }) => {
-  const [step, setStep] = useState<'upload' | 'review' | 'distribute'>('upload');
+  const [step, setStep] = useState<'upload' | 'review'>('upload');
   const [inputTab, setInputTab] = useState<'file' | 'text'>('file');
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -64,14 +59,10 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [textInput, setTextInput] = useState('');
   
-  // File details
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
-  
   // Extracted contacts for review
   const [extractedList, setExtractedList] = useState<ExtractedItem[]>([]);
   const [batchName, setBatchName] = useState('');
-  const [aiSummary, setAiSummary] = useState('');
+  const [summaryInfo, setSummaryInfo] = useState('');
 
   // Distribution settings
   const [distMode, setDistMode] = useState<'unassigned' | 'equal' | 'single' | 'self'>('unassigned');
@@ -87,13 +78,11 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
   const resetState = () => {
     setStep('upload');
     setInputTab('file');
-    setSelectedFile(null);
-    if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl);
-    setFilePreviewUrl(null);
     setExtractedList([]);
     setBatchName('');
-    setAiSummary('');
+    setSummaryInfo('');
     setErrorMsg('');
+    setTextInput('');
     setDistMode('unassigned');
     setSingleTargetUid('');
     setSelectedAttendantUids(approvedAttendants.map((a) => a.uid));
@@ -140,84 +129,37 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
 
     setExtractedList(formatted);
     setBatchName(defaultBatch);
-    setAiSummary(summary || `Foram encontrados ${formatted.length} contatos prontos para conferência.`);
+    setSummaryInfo(summary || `Foram encontrados ${formatted.length} contatos prontos para conferência.`);
     setStep('review');
   };
 
-  // Clipboard paste support (Ctrl+V)
-  useEffect(() => {
-    if (!isOpen || step !== 'upload' || loading) return;
-
-    const handlePaste = (e: ClipboardEvent) => {
-      // Check for image files in clipboard
-      if (e.clipboardData?.items) {
-        for (let i = 0; i < e.clipboardData.items.length; i++) {
-          const item = e.clipboardData.items[i];
-          if (item.type.startsWith('image/')) {
-            const file = item.getAsFile();
-            if (file) {
-              e.preventDefault();
-              handleFilePicked(file);
-              return;
-            }
-          }
-        }
-      }
-
-      // If user pasted text and tab is text
-      const pastedText = e.clipboardData?.getData('text');
-      if (pastedText && pastedText.trim() && inputTab === 'file') {
-        // Auto-switch to text tab or process directly if there are phone patterns
-        if (/(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}/.test(pastedText)) {
-          setTextInput(pastedText);
-          setInputTab('text');
-        }
-      }
-    };
-
-    window.addEventListener('paste', handlePaste);
-    return () => window.removeEventListener('paste', handlePaste);
-  }, [isOpen, step, loading, inputTab]);
-
-  // Process Excel/CSV locally with deep scanning
+  // Process Excel/CSV locally with deep multi-sheet & arbitrary column order scanning
   const processSpreadsheet = (file: File) => {
     setLoading(true);
-    setLoadingMsg('Lendo colunas e números da planilha...');
+    setLoadingMsg('Lendo colunas, números e dados da planilha...');
     setErrorMsg('');
 
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const buffer = e.target?.result as ArrayBuffer;
-        const data = new Uint8Array(buffer);
-        const wb = XLSX.read(data, { type: 'array', cellDates: false });
-        const sheetName = wb.SheetNames[0];
-        if (!sheetName) throw new Error('Nenhuma aba encontrada na planilha.');
-        const sheet = wb.Sheets[sheetName];
-        
-        // Try formatted strings first (preserves phone formatting & currency)
-        let rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: false });
-        if (rawRows.length === 0) {
-          rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: true });
-        }
-        
-        const mapped = rawRows
-          .map((row, idx) => mapRowToContact(row, idx))
-          .filter((c) => Boolean(c.nome || c.whatsapp || c.email));
+        const result = parseSpreadsheetBuffer(buffer);
 
-        if (mapped.length === 0) {
-          throw new Error('Nenhum contato com número ou nome identificado na planilha.');
+        if (result.contacts.length === 0) {
+          throw new Error('Nenhum contato válido (com telefone, e-mail ou nome) foi identificado na planilha.');
         }
 
         const fileNameClean = file.name.replace(/\.[^/.]+$/, '');
+        const summary = `Planilha processada! ${result.contacts.length} contatos detectados em ${result.sheetNames.length} aba(s). Colunas identificadas automaticamente.`;
+
         populateExtractedList(
-          mapped,
+          result.contacts,
           `Lote Planilha - ${fileNameClean}`,
-          `Planilha processada com sucesso! ${mapped.length} contatos e números identificados.`
+          summary
         );
       } catch (err: any) {
-        console.error(err);
-        setErrorMsg(err.message || 'Erro ao processar planilha. Verifique o formato do arquivo.');
+        console.error('Spreadsheet parsing error:', err);
+        setErrorMsg(err.message || 'Erro ao processar planilha. Verifique se o arquivo está em formato .xlsx, .xls ou .csv.');
       } finally {
         setLoading(false);
       }
@@ -229,22 +171,22 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
     reader.readAsArrayBuffer(file);
   };
 
-  // Instant local text extraction without AI (0ms delay)
+  // Instant local text extraction for copied spreadsheet cells or list
   const processFastLocalText = (rawText: string) => {
     if (!rawText || !rawText.trim()) return;
     setLoading(true);
-    setLoadingMsg('Processando lista de contatos instantaneamente...');
+    setLoadingMsg('Processando linhas e colunas copiadas...');
     setErrorMsg('');
 
     try {
       const contacts = parseRawTextToContacts(rawText);
       if (contacts.length === 0) {
-        throw new Error('Nenhum contato com número ou nome encontrado no texto colado.');
+        throw new Error('Nenhum contato com número ou nome foi encontrado no texto colado.');
       }
       populateExtractedList(
         contacts,
         `Lote Texto - ${new Date().toLocaleDateString('pt-BR')}`,
-        `Processamento instantâneo: ${contacts.length} contatos extraídos com sucesso!`
+        `Leitura instantânea: ${contacts.length} contatos identificados e estruturados com sucesso!`
       );
     } catch (err: any) {
       setErrorMsg(err.message || 'Não foi possível interpretar o texto colado.');
@@ -253,206 +195,15 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
     }
   };
 
-  // Optimize and resize image on client side before sending to AI to guarantee lightning-fast upload & OCR
-  const prepareImageForAI = async (file: File): Promise<{ base64: string; mimeType: string }> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const rawDataUrl = e.target?.result as string;
-        if (!rawDataUrl) {
-          return resolve({ base64: '', mimeType: file.type || 'image/jpeg' });
-        }
-
-        // For non-images (like PDF), return raw data url
-        if (!file.type.startsWith('image/') && !['png', 'jpg', 'jpeg', 'webp', 'bmp'].some((ext) => file.name.toLowerCase().endsWith(ext))) {
-          return resolve({ base64: rawDataUrl, mimeType: file.type || 'application/pdf' });
-        }
-
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const maxDim = 1280; // Optimal 1280px for ultra-sharp text reading with 10x smaller payload (~150KB)
-            let width = img.width;
-            let height = img.height;
-
-            if (width > maxDim || height > maxDim) {
-              if (width > height) {
-                height = Math.round((height * maxDim) / width);
-                width = maxDim;
-              } else {
-                width = Math.round((width * maxDim) / height);
-                height = maxDim;
-              }
-            }
-
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-
-            if (ctx) {
-              ctx.fillStyle = '#FFFFFF';
-              ctx.fillRect(0, 0, width, height);
-              ctx.drawImage(img, 0, 0, width, height);
-              // 0.82 JPEG quality creates a lightweight ~100-200KB payload that transfers in <50ms
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
-              resolve({ base64: compressedDataUrl, mimeType: 'image/jpeg' });
-              return;
-            }
-          } catch (err) {
-            console.warn('Canvas resize failed, falling back to original image:', err);
-          }
-          resolve({ base64: rawDataUrl, mimeType: file.type || 'image/jpeg' });
-        };
-        img.onerror = () => {
-          resolve({ base64: rawDataUrl, mimeType: file.type || 'image/jpeg' });
-        };
-        img.src = rawDataUrl;
-      };
-      reader.onerror = () => {
-        resolve({ base64: '', mimeType: file.type || 'image/jpeg' });
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  // Process PDF or Image with Gemini AI
-  const processWithAI = async (file?: File, rawText?: string) => {
-    setLoading(true);
-    setErrorMsg('');
-
-    try {
-      let payload: { fileData?: string; mimeType?: string; fileName?: string; text?: string } = {};
-
-      if (file) {
-        setLoadingMsg(`Otimizando "${file.name}" para leitura ultra-rápida...`);
-        const { base64, mimeType } = await prepareImageForAI(file);
-
-        if (!base64) {
-          throw new Error('Não foi possível ler os dados da foto ou arquivo selecionado.');
-        }
-
-        payload = {
-          fileData: base64,
-          mimeType,
-          fileName: file.name,
-        };
-      } else if (rawText) {
-        setLoadingMsg('Analisando texto e estruturando contatos com IA...');
-        payload = {
-          text: rawText,
-        };
-      }
-
-      setLoadingMsg('Lendo contatos, números e cursos em alta velocidade...');
-
-      let data: any = null;
-
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-
-        let res = await fetch('/api/ai/extract-contacts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        });
-
-        // Fallback endpoint for Vercel / serverless deployments
-        if (res.status === 404) {
-          res = await fetch('/api/extract-contacts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: controller.signal,
-          });
-        }
-
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          data = await res.json();
-        }
-      } catch (fetchErr) {
-        console.warn('Backend OCR endpoint failed or unreachable, trying local browser engine...', fetchErr);
-      }
-
-      // If backend was not available or no API key, execute Client-Side OCR locally
-      if (!data || !data.contacts || data.contacts.length === 0) {
-        if (file) {
-          const ext = file.name.split('.').pop()?.toLowerCase() || '';
-          let extractedText = '';
-
-          if (ext === 'pdf' || file.type === 'application/pdf') {
-            setLoadingMsg('Extraindo texto do documento PDF diretamente no navegador...');
-            extractedText = await extractTextFromPDF(file);
-          } else {
-            setLoadingMsg('Processando imagem com OCR Local (Sem necessidade de chave API)...');
-            extractedText = await extractTextFromImageLocal(file, (p, status) => {
-              setLoadingMsg(status);
-            });
-          }
-
-          if (extractedText) {
-            const parsedContacts = extractContactsFromRawText(extractedText);
-            if (parsedContacts.length > 0) {
-              data = {
-                contacts: parsedContacts,
-                totalDetected: parsedContacts.length,
-                summary: `${parsedContacts.length} contatos identificados com sucesso via OCR no seu navegador.`,
-              };
-            }
-          }
-        } else if (rawText) {
-          const parsedContacts = extractContactsFromRawText(rawText);
-          if (parsedContacts.length > 0) {
-            data = {
-              contacts: parsedContacts,
-              totalDetected: parsedContacts.length,
-              summary: `${parsedContacts.length} contatos identificados e formatados no texto.`,
-            };
-          }
-        }
-      }
-
-      if (!data || !data.contacts || data.contacts.length === 0) {
-        throw new Error('Não foi possível identificar contatos legíveis na imagem ou documento. Verifique se a foto está nítida ou copie e cole o texto dos contatos.');
-      }
-
-      const defaultName = file
-        ? `Lote ${file.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Foto'} - ${file.name.replace(/\.[^/.]+$/, '')}`
-        : `Lote Texto - ${new Date().toLocaleDateString('pt-BR')}`;
-
-      populateExtractedList(data.contacts, defaultName, data.summary);
-    } catch (err: any) {
-      console.error('AI / OCR extraction error:', err);
-      setErrorMsg(err.message || 'Não foi possível extrair contatos.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Handle file select
   const handleFilePicked = (file: File) => {
-    setSelectedFile(file);
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
     const isSpreadsheet = ['xlsx', 'xls', 'csv'].includes(ext) || file.type.includes('sheet') || file.type.includes('csv');
-    const isPdf = ext === 'pdf' || file.type === 'application/pdf';
-    const isImage = ['png', 'jpg', 'jpeg', 'webp', 'jfif', 'bmp', 'heic', 'heif', 'gif'].includes(ext) || file.type.startsWith('image/');
 
     if (isSpreadsheet) {
-      setFilePreviewUrl(null);
       processSpreadsheet(file);
-    } else if (isImage) {
-      const url = URL.createObjectURL(file);
-      setFilePreviewUrl(url);
-      processWithAI(file);
-    } else if (isPdf) {
-      setFilePreviewUrl(null);
-      processWithAI(file);
     } else {
-      setErrorMsg('Formato não suportado. Utilize .xlsx, .csv, .pdf, .png, .jpg ou cole o texto.');
+      setErrorMsg('Formato não suportado. Por favor, envie uma planilha no formato .xlsx, .xls ou .csv.');
     }
   };
 
@@ -594,19 +345,19 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#2B3D63] bg-[#101B2D]">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-[#C9A227] to-[#8C6D1F] text-[#101B2D] shadow-md">
-              <Sparkles className="w-5 h-5" />
+              <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-white">
-                  Importação Inteligente de Contatos
+                  Importador Inteligente de Planilhas
                 </h3>
                 <span className="bg-[#C9A227]/20 border border-[#C9A227]/40 text-[#C9A227] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  IA Multimodal Gemini
+                  Ordem de Colunas 100% Automática
                 </span>
               </div>
               <p className="text-xs text-[#8C98B4]">
-                Importe planilhas (.xlsx, .csv), documentos PDF, fotos de listas ou texto corrido com detecção automática.
+                Importe planilhas (.xlsx, .xls, .csv) com reconhecimento automático de qualquer cabeçalho ou ordem.
               </p>
             </div>
           </div>
@@ -637,8 +388,8 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                       : 'text-[#8C98B4] hover:text-white hover:bg-[#1F3057]'
                   }`}
                 >
-                  <UploadCloud className="w-4 h-4" />
-                  <span>Arquivo (Planilha, PDF ou Foto)</span>
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Planilha Excel / CSV (.xlsx, .xls, .csv)</span>
                 </button>
 
                 <button
@@ -651,7 +402,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                   }`}
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>Colar Texto / Lista de Contatos</span>
+                  <span>Colar Linhas de Tabela / Contatos</span>
                 </button>
               </div>
 
@@ -666,7 +417,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         handleFilePicked(e.target.files[0]);
                       }
                     }}
-                    accept=".xlsx,.xls,.csv,.pdf,.png,.jpg,.jpeg,.webp,.jfif,.bmp,image/*,application/pdf"
+                    accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
                     className="hidden"
                   />
 
@@ -682,37 +433,32 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         : 'border-[#2B3D63] hover:border-[#C9A227]/60 bg-[#101B2D]/50 hover:bg-[#101B2D]'
                     }`}
                   >
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="p-3 bg-[#10B981]/15 text-[#34D399] border border-[#10B981]/30 rounded-xl shadow-sm" title="Planilhas Excel">
-                        <FileSpreadsheet className="w-6 h-6" />
-                      </div>
-                      <div className="p-3 bg-[#EF4444]/15 text-[#F87171] border border-[#EF4444]/30 rounded-xl shadow-sm" title="Documentos PDF">
-                        <FileText className="w-6 h-6" />
-                      </div>
-                      <div className="p-3 bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30 rounded-xl shadow-sm" title="Fotos e Prints">
-                        <ImageIcon className="w-6 h-6" />
-                      </div>
+                    <div className="p-3.5 bg-[#10B981]/15 text-[#34D399] border border-[#10B981]/30 rounded-2xl shadow-sm">
+                      <FileSpreadsheet className="w-8 h-8" />
                     </div>
 
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-white">
-                        Arraste e solte o arquivo aqui ou <span className="text-[#C9A227] underline">clique para selecionar</span>
+                        Arraste e solte a planilha aqui ou <span className="text-[#C9A227] underline">clique para selecionar</span>
                       </p>
                       <p className="text-xs text-[#8C98B4]">
-                        Formatos suportados: <strong>Excel (.xlsx, .csv)</strong>, <strong>PDF (.pdf)</strong> e <strong>Imagens/Fotos (.png, .jpg, .jpeg, prints)</strong>
+                        Formatos aceitos: <strong>.xlsx</strong>, <strong>.xls</strong> e <strong>.csv</strong>
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-                      <span className="text-[11px] bg-[#1F3057] text-[#8C98B4] px-2.5 py-1 rounded-full border border-[#2B3D63]">
-                        📊 Planilhas com colunas automáticas
-                      </span>
-                      <span className="text-[11px] bg-[#1F3057] text-[#8C98B4] px-2.5 py-1 rounded-full border border-[#2B3D63]">
-                        📄 PDFs de matrículas & editais
-                      </span>
-                      <span className="text-[11px] bg-[#1F3057] text-[#8C98B4] px-2.5 py-1 rounded-full border border-[#2B3D63]">
-                        📸 Prints de WhatsApp (Cole com Ctrl+V)
-                      </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 max-w-xl text-left">
+                      <div className="text-[11px] bg-[#1F3057] text-[#8C98B4] p-2 rounded-lg border border-[#2B3D63] flex items-center gap-1.5">
+                        <span className="text-[#34D399] font-bold">✓</span> Independente da ordem das colunas
+                      </div>
+                      <div className="text-[11px] bg-[#1F3057] text-[#8C98B4] p-2 rounded-lg border border-[#2B3D63] flex items-center gap-1.5">
+                        <span className="text-[#34D399] font-bold">✓</span> Detecta cabeçalhos em qualquer linha
+                      </div>
+                      <div className="text-[11px] bg-[#1F3057] text-[#8C98B4] p-2 rounded-lg border border-[#2B3D63] flex items-center gap-1.5">
+                        <span className="text-[#34D399] font-bold">✓</span> Suporte a DDD separado ou junto
+                      </div>
+                      <div className="text-[11px] bg-[#1F3057] text-[#8C98B4] p-2 rounded-lg border border-[#2B3D63] flex items-center gap-1.5">
+                        <span className="text-[#34D399] font-bold">✓</span> Múltiplas abas lidas automaticamente
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -723,18 +469,18 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-[#8C98B4]">
-                      Cole aqui sua lista de contatos (mensagens do WhatsApp, tabela copiada ou anotações):
+                      Cole aqui as linhas copiadas do Excel, Google Sheets, WhatsApp ou bloco de notas:
                     </label>
                     <textarea
                       rows={8}
                       value={textInput}
                       onChange={(e) => setTextInput(e.target.value)}
-                      placeholder={`Exemplo de texto:\n1. Carlos Silva - 11987654321 - Polícia Federal - Quente - Já pagou R$ 150 no isolado\n2. Maria Santos - maria@gmail.com - (21) 99123-4567 - Concurso INSS\n3. João Pereira - 31976543210 - Tribunais`}
+                      placeholder={`Exemplo de linhas copiadas:\nCarlos Silva\t11987654321\tPolícia Federal\tQuente\nMaria Santos\t(21) 99123-4567\tmaria@gmail.com\tConcurso INSS\nJoão Pereira\t31976543210\tTribunais\tMorno`}
                       className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-xl p-3 text-xs sm:text-sm text-white placeholder-[#8C98B4] focus:outline-none focus:border-[#C9A227] font-mono leading-relaxed resize-none"
                     />
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-end gap-2">
+                  <div className="flex items-center justify-end">
                     <button
                       type="button"
                       onClick={() => {
@@ -745,26 +491,10 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         processFastLocalText(textInput);
                       }}
                       disabled={!textInput.trim()}
-                      className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-white border border-[#2B3D63] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+                      className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md cursor-pointer disabled:opacity-50"
                     >
-                      <Zap className="w-4 h-4 text-[#34D399]" />
-                      <span>Extração Rápida Local</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!textInput.trim()) {
-                          alert('Cole ou digite algum texto antes de processar.');
-                          return;
-                        }
-                        processWithAI(undefined, textInput);
-                      }}
-                      disabled={!textInput.trim()}
-                      className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      <span>Detectar com IA Gemini</span>
+                      <Zap className="w-4 h-4" />
+                      <span>Processar Linhas Copiadas</span>
                     </button>
                   </div>
                 </div>
@@ -784,10 +514,10 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
             <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
               <div className="relative">
                 <div className="w-16 h-16 rounded-full border-4 border-[#2B3D63] border-t-[#C9A227] animate-spin" />
-                <Sparkles className="w-6 h-6 text-[#C9A227] absolute inset-0 m-auto animate-pulse" />
+                <FileSpreadsheet className="w-6 h-6 text-[#C9A227] absolute inset-0 m-auto animate-pulse" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-base font-bold text-white">Processando com Inteligência Artificial</h4>
+                <h4 className="text-base font-bold text-white">Processando Planilha</h4>
                 <p className="text-xs text-[#C9A227] animate-pulse">{loadingMsg}</p>
                 <p className="text-[11px] text-[#8C98B4]">Identificando e limpando nomes, números de WhatsApp, cursos e dados de venda...</p>
               </div>
@@ -812,7 +542,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                         {selectedCount} selecionados
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#8C98B4]">{aiSummary}</p>
+                    <p className="text-[11px] text-[#8C98B4]">{summaryInfo}</p>
                   </div>
                 </div>
 
@@ -850,7 +580,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                   type="text"
                   value={batchName}
                   onChange={(e) => setBatchName(e.target.value)}
-                  placeholder="Ex: Lote PDF - Polícia Federal 15/08"
+                  placeholder="Ex: Lote Planilha - Concurso PF 2026"
                   className="flex-1 w-full bg-[#172644] border border-[#2B3D63] rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white focus:outline-none focus:border-[#C9A227]"
                 />
               </div>
@@ -1137,12 +867,12 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
               disabled={isSubmitting}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#8C98B4] hover:text-white hover:bg-[#1F3057] transition-colors cursor-pointer"
             >
-              ← Voltar ao Envio
+              ← Escolher Outra Planilha
             </button>
           ) : (
             <div className="text-xs text-[#8C98B4] flex items-center gap-1.5">
               <Info className="w-3.5 h-3.5 text-[#C9A227]" />
-              <span>Detecção de contatos com OCR e IA Gemini integrada.</span>
+              <span>Importação compatível com planilhas Excel (.xlsx, .xls) e arquivos CSV.</span>
             </div>
           )}
 

@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
-import * as XLSX from 'xlsx';
-import { UploadCloud, FileSpreadsheet, Sparkles, Trash2, Layers } from 'lucide-react';
-import { mapRowToContact } from '../utils/excel';
+import { UploadCloud, FileSpreadsheet, Sparkles, Trash2, Layers, CheckCircle2 } from 'lucide-react';
+import { parseSpreadsheetBuffer } from '../utils/excel';
 import { Contact } from '../types';
 
 interface DropzoneProps {
@@ -24,46 +23,25 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = (file: File) => {
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    const isImageOrPdf = ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'jfif', 'bmp'].includes(ext) || file.type.startsWith('image/') || file.type === 'application/pdf';
-
-    if (isImageOrPdf && onOpenSmartImport) {
-      onOpenSmartImport();
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const buffer = e.target?.result as ArrayBuffer;
-        const data = new Uint8Array(buffer);
-        const wb = XLSX.read(data, { type: 'array', cellDates: false });
-        const sheetName = wb.SheetNames[0];
-        if (!sheetName) {
-          throw new Error('Nenhuma planilha encontrada no arquivo.');
-        }
-        const sheet = wb.Sheets[sheetName];
-        
-        // Try formatted string mode first to capture phone numbers and currency nicely
-        let rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: false });
-        if (rawRows.length === 0) {
-          rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '', raw: true });
-        }
+        const result = parseSpreadsheetBuffer(buffer);
 
-        const mapped = rawRows
-          .map((row, idx) => mapRowToContact(row, idx))
-          .filter((c) => Boolean(c.nome || c.whatsapp || c.email));
-
-        if (mapped.length === 0) {
-          throw new Error('Nenhum contato com número ou nome identificado na planilha.');
+        if (result.contacts.length === 0) {
+          throw new Error('Nenhum contato válido (com telefone, e-mail ou nome) foi encontrado na planilha.');
         }
 
         const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-        onImportRows(mapped, fileNameWithoutExt);
+        onImportRows(result.contacts, fileNameWithoutExt);
       } catch (err: any) {
-        console.error(err);
-        alert(err.message || 'Não foi possível ler o arquivo. Verifique se o formato é .xlsx, .xls ou .csv.');
+        console.error('Spreadsheet parse error:', err);
+        alert(err.message || 'Não foi possível ler o arquivo. Certifique-se de que é uma planilha válida (.xlsx, .xls ou .csv).');
       }
+    };
+    reader.onerror = () => {
+      alert('Falha ao abrir arquivo do seu computador.');
     };
     reader.readAsArrayBuffer(file);
   };
@@ -115,7 +93,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] text-[#101B2D] px-3 py-1 rounded-md font-bold transition-all shadow-sm cursor-pointer hover:brightness-110"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Importar Planilha / PDF / Foto (IA)</span>
+                <span>Importador de Planilhas (Com Distribuição)</span>
               </button>
             )}
 
@@ -125,7 +103,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] px-2.5 py-1 rounded-md font-semibold border border-[#2B3D63] transition-colors cursor-pointer"
             >
               <UploadCloud className="w-3.5 h-3.5 text-[#C9A227]" />
-              {isAdmin ? 'Importar Planilha Simples' : 'Importar (.xlsx, .csv)'}
+              {isAdmin ? 'Importar Planilha Direta' : 'Importar (.xlsx, .csv)'}
             </button>
             <button
               type="button"
@@ -173,12 +151,12 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               <div>
                 <div className="text-sm font-semibold text-[#EDE6D6] flex items-center justify-center sm:justify-start gap-2">
                   {isAdmin
-                    ? 'Importar nova planilha para distribuir à equipe (.csv, .xlsx)'
-                    : 'Importar planilha (.csv, .xlsx, .xls)'}
+                    ? 'Importar planilha para distribuir à equipe (.xlsx, .xls, .csv)'
+                    : 'Importar planilha (.xlsx, .xls, .csv)'}
                   <UploadCloud className="w-4 h-4 text-[#8C98B4]" />
                 </div>
                 <div className="text-xs text-[#8C98B4] mt-1 leading-relaxed">
-                  Reconhece colunas: <span className="text-[#EDE6D6]">Nome, WhatsApp, E-mail, Curso/Interesse, Temperatura, Datas, Status, Observação</span>.
+                  ✓ Reconhecimento automático em <strong className="text-[#EDE6D6]">qualquer ordem de colunas</strong>: Nome, WhatsApp, E-mail, Curso, Temperatura, Datas, Observações.
                 </div>
               </div>
             </div>
@@ -194,7 +172,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                   className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] hover:brightness-110 text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-md cursor-pointer whitespace-nowrap"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>Importar PDF / Foto / IA</span>
+                  <span>Importador com Distribuição</span>
                 </button>
               )}
 
