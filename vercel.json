@@ -2,6 +2,14 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/email/send-batch",
+      "destination": "/api/email-send-batch"
+    },
+    {
+      "source": "/api/email/status",
+      "destination": "/api/email-status"
+    },
+    {
       "source": "/api/ai/extract-contacts",
       "destination": "/api/extract-contacts"
     },

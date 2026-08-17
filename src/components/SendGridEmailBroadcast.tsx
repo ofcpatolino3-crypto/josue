@@ -362,7 +362,13 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      let data: any = null;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseErr) {
+        data = { error: `Servidor retornou resposta inesperada (${response.status})` };
+      }
 
       if (!response.ok) {
         if (data.code === 'SENDGRID_KEY_MISSING') {
@@ -372,7 +378,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             'error'
           );
         } else {
-          onToast(data.error || 'Erro no envio de e-mails.', 'error');
+          onToast(data.error || `Erro HTTP ${response.status} no envio de e-mails.`, 'error');
         }
         setIsSending(false);
         return;
