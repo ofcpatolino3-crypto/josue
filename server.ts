@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import dotenv from 'dotenv';
@@ -465,6 +466,17 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
         return res.status(500).json({ error: 'Falha ao inicializar o cliente SendGrid.' });
       }
 
+      // Load official brand logo PNG for inline CID email attachment
+      let logoBase64 = '';
+      try {
+        const logoPath = path.join(process.cwd(), 'public', 'logo.png');
+        if (fs.existsSync(logoPath)) {
+          logoBase64 = fs.readFileSync(logoPath).toString('base64');
+        }
+      } catch (err) {
+        console.warn('Failed reading logo.png for email:', err);
+      }
+
       const results: Array<{
         id: string;
         email: string;
@@ -564,27 +576,21 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
                   <table width="100%" max-width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);" border="0" cellspacing="0" cellpadding="0">
                     <!-- Header with Official Logo -->
                     <tr>
-                      <td style="background-color: #0f172a; padding: 20px 28px; border-bottom: 2px solid #C9A227;">
+                      <td style="background-color: #0f172a; padding: 22px 28px; border-bottom: 2px solid #C9A227;">
                         <table border="0" cellspacing="0" cellpadding="0" width="100%">
                           <tr>
                             <td style="vertical-align: middle;">
                               <table border="0" cellspacing="0" cellpadding="0">
                                 <tr>
                                   <td style="vertical-align: middle; padding-right: 14px;">
-                                    <!-- Embedded Vector Logo Icon -->
-                                    <svg width="42" height="42" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-                                      <circle cx="100" cy="100" r="96" fill="#ffffff"/>
-                                      <path d="M100 12C51.4 12 12 51.4 12 100C12 148.6 51.4 188 100 188C148.6 188 188 148.6 188 100C188 51.4 148.6 12 100 12ZM100 162C65.8 162 38 134.2 38 100C38 65.8 65.8 38 100 38C134.2 38 162 65.8 162 100C162 134.2 134.2 162 100 162Z" fill="#0D1B3E"/>
-                                      <circle cx="100" cy="100" r="54" fill="#ffffff"/>
-                                      <path d="M68 78L94 90V136L68 124V78Z" fill="#0077E6"/>
-                                      <path d="M106 90L132 78V124L106 136V90Z" fill="#E52320"/>
-                                    </svg>
+                                    <!-- Official PNG Logo (Embedded via CID for full Gmail/Outlook/Apple Mail support) -->
+                                    <img src="cid:portal_logo" width="46" height="46" alt="Portal Concursos" style="display: block; width: 46px; height: 46px; border-radius: 50%; border: 0; outline: none; text-decoration: none;" />
                                   </td>
                                   <td style="vertical-align: middle;">
-                                    <div style="font-size: 18px; font-weight: 900; color: #EDE6D6; letter-spacing: 0.05em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.1;">
+                                    <div style="font-size: 19px; font-weight: 900; color: #EDE6D6; letter-spacing: 0.05em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.1;">
                                       PORTAL
                                     </div>
-                                    <div style="font-size: 9px; font-weight: 800; color: #C9A227; letter-spacing: 0.18em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase;">
+                                    <div style="font-size: 10px; font-weight: 800; color: #C9A227; letter-spacing: 0.18em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase;">
                                       CONCURSOS E OAB
                                     </div>
                                   </td>
@@ -592,7 +598,7 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
                               </table>
                             </td>
                             <td align="right" style="vertical-align: middle;">
-                              <span style="font-size: 11px; color: #94a3b8; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                              <span style="display: inline-block; font-size: 11px; color: #94a3b8; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #1e293b; padding: 4px 10px; border-radius: 9999px; border: 1px solid #334155;">
                                 Canal Oficial
                               </span>
                             </td>
@@ -623,7 +629,7 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
         `;
 
         try {
-          await sgMail.send({
+          const mailPayload: any = {
             to: rawEmail,
             from: {
               email: senderEmail,
@@ -632,7 +638,21 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
             subject: personalizedSubject,
             text: personalizedBody,
             html: fullHtml,
-          });
+          };
+
+          if (logoBase64) {
+            mailPayload.attachments = [
+              {
+                content: logoBase64,
+                filename: 'portal_logo.png',
+                type: 'image/png',
+                disposition: 'inline',
+                content_id: 'portal_logo',
+              },
+            ];
+          }
+
+          await sgMail.send(mailPayload);
 
           sentCount++;
           results.push({
