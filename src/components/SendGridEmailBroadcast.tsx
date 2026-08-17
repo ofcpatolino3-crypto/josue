@@ -1646,10 +1646,25 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
               {/* Email Content Frame */}
               <div className="p-5 bg-slate-50 space-y-4 max-h-[480px] overflow-y-auto">
-                {/* Brand Banner */}
-                <div className="bg-slate-900 p-3.5 rounded-lg text-white font-extrabold tracking-tight text-sm flex items-center justify-between">
-                  <span>PORTAL <span className="text-emerald-400">CONCURSOS</span></span>
-                  <span className="text-[10px] font-normal text-slate-400">Comunicação Oficial</span>
+                {/* Brand Banner with Official Logo */}
+                <div className="bg-slate-900 p-3.5 rounded-lg text-white flex items-center justify-between border-b-2 border-[#C9A227]">
+                  <div className="flex items-center gap-2.5">
+                    {/* Official Portal Icon */}
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-0.5 shadow">
+                      <svg width="28" height="28" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="96" fill="#ffffff"/>
+                        <path d="M100 12C51.4 12 12 51.4 12 100C12 148.6 51.4 188 100 188C148.6 188 188 148.6 188 100C188 51.4 148.6 12 100 12ZM100 162C65.8 162 38 134.2 38 100C38 65.8 65.8 38 100 38C134.2 38 162 65.8 162 100C162 134.2 134.2 162 100 162Z" fill="#0D1B3E"/>
+                        <circle cx="100" cy="100" r="54" fill="#ffffff"/>
+                        <path d="M68 78L94 90V136L68 124V78Z" fill="#0077E6"/>
+                        <path d="M106 90L132 78V124L106 136V90Z" fill="#E52320"/>
+                      </svg>
+                    </div>
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-sm font-black tracking-wider text-[#EDE6D6] uppercase">PORTAL</span>
+                      <span className="text-[8px] font-extrabold tracking-widest text-[#C9A227] uppercase">CONCURSOS E OAB</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-medium text-slate-400">Comunicação Oficial</span>
                 </div>
 
                 {/* Email Body */}
