@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { PortalLogo } from './BrandLogo';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -115,14 +116,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative">
         {/* Header */}
         <div className="bg-[#101B2D] p-5 border-b border-[#2B3D63] flex items-center justify-between relative">
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#C9A227] uppercase tracking-wider mb-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              Portal Concurso • Acesso Equipe
+          <div className="flex items-center gap-3">
+            <div className="p-1 bg-[#172644] border border-[#2B3D63] rounded-xl shadow-md shrink-0 flex items-center justify-center">
+              <PortalLogo size={36} />
             </div>
-            <h3 className="text-xl font-bold font-serif text-[#EDE6D6]">
-              {tab === 'login' ? 'Entrar no Sistema' : 'Novo Cadastro de Atendente'}
-            </h3>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#C9A227] uppercase tracking-wider mb-0.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                Portal Concursos e OAB
+              </div>
+              <h3 className="text-lg font-bold font-sans text-[#EDE6D6]">
+                {tab === 'login' ? 'Acesso ao Sistema' : 'Novo Cadastro de Atendente'}
+              </h3>
+            </div>
           </div>
           <button
             onClick={onClose}

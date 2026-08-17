@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { ViewTab, UserProfile } from '../types';
 import { getWhatsAppTargetMode, setWhatsAppTargetMode, WhatsAppTargetMode } from '../utils/excel';
+import { PortalLogo } from './BrandLogo';
 
 interface HeaderProps {
   activeView: ViewTab;
@@ -49,18 +50,23 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="mb-5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2B3D63] pb-4">
-        <div>
-          <div className="text-[11px] font-bold tracking-wider uppercase text-[#C9A227] mb-1 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            Portal Concursos · Central de Atendimento & Vendas
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2B3D63] pb-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-1 bg-[#172644] border border-[#2B3D63] rounded-xl shadow-md shrink-0 flex items-center justify-center">
+            <PortalLogo size={44} />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6] tracking-tight">
-            Painel Operacional
-          </h1>
-          <p className="text-xs text-[#8C98B4] mt-0.5">
-            Gestão ágil de contatos, disparos no WhatsApp, controle de equipe e fechamento de matrículas.
-          </p>
+          <div>
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[#C9A227] mb-0.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#C9A227]" />
+              <span>Portal Concursos e OAB · Vendas & Atendimento</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black font-sans text-[#EDE6D6] tracking-tight">
+              Painel Operacional
+            </h1>
+            <p className="text-xs text-[#8C98B4] mt-0.5">
+              Gestão de contatos, disparos no WhatsApp, controle de equipe e fechamento de matrículas.
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 self-start md:self-center flex-wrap">

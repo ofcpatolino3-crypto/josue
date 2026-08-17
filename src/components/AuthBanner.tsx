@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, LogIn, LogOut, CloudCheck, CloudOff, RefreshCw, Shield, Clock, AlertOctagon, Key, UserCheck } from 'lucide-react';
 import { UserProfile } from '../types';
+import { PortalLogo } from './BrandLogo';
 
 interface AuthBannerProps {
   user: UserProfile | null;
@@ -156,14 +157,14 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
   return (
     <div className="bg-[#172644] border border-[#C9A227]/40 rounded-xl p-3.5 sm:p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md bg-gradient-to-r from-[#172644] to-[#1a2c4e]">
       <div className="flex items-start sm:items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-[#C9A227]/10 border border-[#C9A227]/30 flex items-center justify-center text-[#C9A227] shrink-0 mt-0.5 sm:mt-0">
-          <Key className="w-5 h-5" />
+        <div className="p-1 bg-[#101B2D] border border-[#2B3D63] rounded-lg shrink-0 mt-0.5 sm:mt-0 shadow-sm flex items-center justify-center">
+          <PortalLogo size={32} />
         </div>
         <div>
           <div className="text-xs sm:text-sm font-semibold text-[#EDE6D6] flex items-center gap-2">
-            Portal Concurso • Acesso da Equipe
+            Portal Concursos e OAB • Acesso da Equipe
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/30 uppercase">
-              Netlify Ready
+              Oficial
             </span>
           </div>
           <p className="text-xs text-[#8C98B4] mt-0.5">

@@ -84,6 +84,7 @@ import { FastBroadcastView } from './components/FastBroadcastView';
 import { ToastContainer } from './components/Toast';
 import { SmartImportModal, SmartImportResult } from './components/SmartImportModal';
 import { NewLeadsAlertBanner, playNewLeadChime } from './components/NewLeadsAlertBanner';
+import { PortalWatermarkBackground } from './components/BrandLogo';
 
 const STORAGE_CONTACTS = 'contacts_v3';
 const STORAGE_OBJECTIONS = 'objections_v3';
@@ -1511,8 +1512,11 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-[#101B2D] text-[#EDE6D6] font-sans antialiased p-3 sm:p-6 lg:p-8 flex flex-col">
-      <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
+    <div className="min-h-screen bg-[#101B2D] text-[#EDE6D6] font-sans antialiased p-3 sm:p-6 lg:p-8 flex flex-col relative overflow-x-hidden">
+      {/* Semi-transparent Portal Concursos e OAB background watermark (Foto 1) */}
+      <PortalWatermarkBackground />
+
+      <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col relative z-10">
         {/* Top Header with Navigation Tabs */}
         <Header
           activeView={activeView}
