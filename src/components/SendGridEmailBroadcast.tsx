@@ -106,38 +106,81 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
   const [copiedBcc, setCopiedBcc] = useState<boolean>(false);
   const [showConfigGuide, setShowConfigGuide] = useState<boolean>(false);
 
+  const [directApiKey, setDirectApiKey] = useState<string>(() => {
+    return localStorage.getItem('portal_sendgrid_custom_key') || '';
+  });
+  const [directFromEmail, setDirectFromEmail] = useState<string>(() => {
+    return localStorage.getItem('portal_sendgrid_custom_from') || '';
+  });
+
   // Check backend SendGrid status
   const checkStatus = async () => {
     try {
       setSendGridStatus((prev) => ({ ...prev, loading: true }));
       const res = await fetch('/api/email/status');
+      const savedKey = localStorage.getItem('portal_sendgrid_custom_key');
+      const savedFrom = localStorage.getItem('portal_sendgrid_custom_from');
+
       if (res.ok) {
         const data = await res.json();
+        const isConfigured = !!data.configured || !!(savedKey && savedKey.startsWith('SG.'));
+        const effectiveFrom = data.fromEmail || savedFrom || null;
+
         setSendGridStatus({
-          configured: !!data.configured,
-          hasFromEmail: !!data.hasFromEmail,
-          fromEmail: data.fromEmail || null,
+          configured: isConfigured,
+          hasFromEmail: !!effectiveFrom,
+          fromEmail: effectiveFrom,
           loading: false,
         });
-        if (data.fromEmail && !fromEmail) {
-          setFromEmail(data.fromEmail);
+
+        if (effectiveFrom && !fromEmail) {
+          setFromEmail(effectiveFrom);
         }
       } else {
+        const isConfigured = !!(savedKey && savedKey.startsWith('SG.'));
         setSendGridStatus({
-          configured: false,
-          hasFromEmail: false,
-          fromEmail: null,
+          configured: isConfigured,
+          hasFromEmail: !!savedFrom,
+          fromEmail: savedFrom || null,
           loading: false,
         });
       }
     } catch (e) {
+      const savedKey = localStorage.getItem('portal_sendgrid_custom_key');
+      const savedFrom = localStorage.getItem('portal_sendgrid_custom_from');
       setSendGridStatus({
-        configured: false,
-        hasFromEmail: false,
-        fromEmail: null,
+        configured: !!(savedKey && savedKey.startsWith('SG.')),
+        hasFromEmail: !!savedFrom,
+        fromEmail: savedFrom || null,
         loading: false,
       });
     }
+  };
+
+  const handleSaveDirectKey = () => {
+    const trimmedKey = directApiKey.trim();
+    const trimmedEmail = directFromEmail.trim();
+
+    if (trimmedKey && !trimmedKey.startsWith('SG.')) {
+      onToast('A chave do SendGrid deve começar com "SG."', 'error');
+      return;
+    }
+
+    if (trimmedKey) {
+      localStorage.setItem('portal_sendgrid_custom_key', trimmedKey);
+    } else {
+      localStorage.removeItem('portal_sendgrid_custom_key');
+    }
+
+    if (trimmedEmail) {
+      localStorage.setItem('portal_sendgrid_custom_from', trimmedEmail);
+      setFromEmail(trimmedEmail);
+    } else {
+      localStorage.removeItem('portal_sendgrid_custom_from');
+    }
+
+    onToast('Configurações do SendGrid salvas com sucesso!', 'success');
+    checkStatus();
   };
 
   useEffect(() => {
@@ -301,6 +344,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
     onToast(`🚀 Iniciando disparo em lote para ${targetContacts.length} contatos...`, 'info');
 
     try {
+      const savedCustomKey = localStorage.getItem('portal_sendgrid_custom_key');
       const payload = {
         contacts: targetContacts,
         subjectTemplate: subject,
@@ -309,6 +353,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
         fromNameCustom: fromName,
         ctaLink: includeCta && effectiveCtaLink ? effectiveCtaLink : undefined,
         ctaText: includeCta && ctaText.trim() ? ctaText.trim() : undefined,
+        customApiKey: savedCustomKey || undefined,
       };
 
       const response = await fetch('/api/email/send-batch', {
@@ -438,12 +483,65 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
           </div>
         </div>
 
-        {/* Configuration Guide Dropdown */}
+        {/* Configuration Guide & Direct Key Input Dropdown */}
         {showConfigGuide && (
-          <div className="mt-4 pt-4 border-t border-[#2B3D63] bg-[#101B2D] p-4 rounded-lg text-xs space-y-3">
-            <div className="flex items-center gap-2 text-[#C9A227] font-bold">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Passo a passo rápido para ativar o SendGrid:</span>
+          <div className="mt-4 pt-4 border-t border-[#2B3D63] bg-[#101B2D] p-4 rounded-lg text-xs space-y-4">
+            {/* Direct Key Activation Input Box */}
+            <div className="bg-[#172644] p-3.5 rounded-lg border border-[#C9A227]/40 space-y-3">
+              <div className="flex items-center gap-2 text-[#C9A227] font-bold">
+                <Key className="w-4 h-4" />
+                <span>Colar Chave do SendGrid Diretamente no Painel (Ativação Instantânea)</span>
+              </div>
+              <p className="text-[#8C98B4] text-[11px]">
+                Você pode colar sua chave diretamente aqui para ativar na hora sem precisar de variáveis de ambiente.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#EDE6D6] font-semibold mb-1">
+                    Chave de API (Começa com SG.)
+                  </label>
+                  <input
+                    type="password"
+                    value={directApiKey}
+                    onChange={(e) => setDirectApiKey(e.target.value)}
+                    placeholder="SG.xxxxxxxxxxxxxxxxxxxxxxxx..."
+                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] font-mono focus:outline-none focus:border-[#C9A227]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#EDE6D6] font-semibold mb-1">
+                    E-mail do Remetente (Verificado no SendGrid)
+                  </label>
+                  <input
+                    type="email"
+                    value={directFromEmail}
+                    onChange={(e) => setDirectFromEmail(e.target.value)}
+                    placeholder="ofcpatolino3@gmail.com"
+                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[10px] text-[#8C98B4]">
+                  🔒 A chave fica salva de forma segura na sua sessão local.
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSaveDirectKey}
+                  className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-4 py-1.5 rounded-lg transition-colors cursor-pointer text-xs flex items-center gap-1.5 shadow"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Salvar e Ativar Chave</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-[#EDE6D6] font-bold pt-1">
+              <ShieldCheck className="w-4 h-4 text-blue-400" />
+              <span>Como pegar sua chave no SendGrid:</span>
             </div>
             <ol className="list-decimal list-inside space-y-2 text-[#CBD5E1] leading-relaxed">
               <li>
@@ -453,15 +551,9 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <strong className="text-white">Copiar a Chave:</strong> Copie a chave gerada (ela começa com <code className="bg-black/40 text-emerald-400 px-1 py-0.5 rounded font-mono">SG.xxxxxxxx...</code>).
               </li>
               <li>
-                <strong className="text-white">Verificar Remetente (Single Sender):</strong> No SendGrid, vá em <em>Settings</em> → <em>Sender Authentication</em> → <em>Verify a Single Sender</em> e cadastre o e-mail de remetente (ex: <code className="text-blue-300">contato@seusite.com.br</code> ou seu e-mail).
-              </li>
-              <li>
-                <strong className="text-white">Salvar nos Secrets / Variáveis de Ambiente:</strong> Defina as variáveis <code className="text-[#C9A227]">SENDGRID_API_KEY</code> e <code className="text-[#C9A227]">SENDGRID_FROM_EMAIL</code>.
+                <strong className="text-white">Verificar Remetente (Single Sender):</strong> No SendGrid, vá em <em>Settings</em> → <em>Sender Authentication</em> → <em>Verify a Single Sender</em> e cadastre o e-mail de remetente (ex: <code className="text-blue-300">ofcpatolino3@gmail.com</code>).
               </li>
             </ol>
-            <p className="text-[11px] text-[#8C98B4] italic">
-              💡 Enquanto configura, você também pode usar o botão "Copiar Lista CCO" abaixo para disparar via Gmail/Outlook imediatamente!
-            </p>
           </div>
         )}
       </div>

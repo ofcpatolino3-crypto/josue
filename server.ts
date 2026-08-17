@@ -400,8 +400,8 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
   app.post('/api/ai/ocr', handleExtractContacts);
 
   // SendGrid Lazy Client & Status
-  const getSendGridClient = () => {
-    const apiKey = process.env.SENDGRID_API_KEY;
+  const getSendGridClient = (customApiKey?: string) => {
+    const apiKey = customApiKey || process.env.SENDGRID_API_KEY;
     if (!apiKey) return null;
     try {
       // Dynamic require / import
@@ -437,6 +437,7 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
         fromNameCustom = 'Portal Concursos',
         ctaLink,
         ctaText,
+        customApiKey,
       } = req.body;
 
       if (!Array.isArray(contacts) || contacts.length === 0) {
@@ -447,11 +448,11 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
         return res.status(400).json({ error: 'Assunto e Mensagem são obrigatórios.' });
       }
 
-      const apiKey = process.env.SENDGRID_API_KEY;
+      const apiKey = customApiKey || process.env.SENDGRID_API_KEY;
       if (!apiKey) {
         return res.status(503).json({
           error:
-            'Chave SENDGRID_API_KEY não configurada no servidor. Configure a chave no menu de Configurações/Secrets.',
+            'Chave SENDGRID_API_KEY não configurada. Configure a chave no menu de Configurações/Secrets ou insira diretamente no painel.',
           code: 'SENDGRID_KEY_MISSING',
         });
       }
@@ -459,7 +460,7 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
       const senderEmail =
         fromEmailCustom || process.env.SENDGRID_FROM_EMAIL || 'notificacoes@portalconcurso.com.br';
 
-      const sgMail = getSendGridClient();
+      const sgMail = getSendGridClient(apiKey);
       if (!sgMail) {
         return res.status(500).json({ error: 'Falha ao inicializar o cliente SendGrid.' });
       }
