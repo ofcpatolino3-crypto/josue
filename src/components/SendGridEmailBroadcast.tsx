@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Mail,
   Send,
@@ -26,6 +26,7 @@ import {
   MessageCircle,
   Phone,
   Link2,
+  StopCircle,
 } from 'lucide-react';
 import { Contact, MessageTemplate } from '../types';
 import { todayStr } from '../utils/excel';
@@ -95,6 +96,18 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
   // Dispatch Queue Execution State
   const [isSending, setIsSending] = useState<boolean>(false);
+  const stopSendingRef = useRef<boolean>(false);
+  const [sendProgress, setSendProgress] = useState<{
+    processed: number;
+    total: number;
+    percent: number;
+    currentName: string;
+    currentEmail: string;
+    sent: number;
+    failed: number;
+    skipped: number;
+  } | null>(null);
+
   const [dispatchResults, setDispatchResults] = useState<{
     sent: number;
     failed: number;
@@ -186,6 +199,13 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
   useEffect(() => {
     checkStatus();
   }, []);
+
+  // Test Email State
+  const [showTestModal, setShowTestModal] = useState<boolean>(false);
+  const [testEmailAddress, setTestEmailAddress] = useState<string>(() => {
+    return localStorage.getItem('portal_last_test_email') || 'ofcpatolino3@gmail.com';
+  });
+  const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
 
   // Filter contacts with emails
   const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -316,7 +336,87 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
     .replace(/{primeironome}/gi, previewFirstName)
     .replace(/{curso}/gi, previewContact.curso || 'Concursos');
 
-  // 1-Click Mass Dispatch via SendGrid API
+  // Stop active dispatch
+  const handleStopSending = () => {
+    stopSendingRef.current = true;
+    onToast('🛑 Parando envio em lote...', 'info');
+  };
+
+  // Send single instant test email
+  const handleSendSingleTestEmail = async () => {
+    const trimmedEmail = testEmailAddress.trim();
+    if (!trimmedEmail || !validEmailRegex.test(trimmedEmail)) {
+      onToast('Digite um e-mail válido para o teste.', 'error');
+      return;
+    }
+
+    if (!subject.trim() || !body.trim()) {
+      onToast('Por favor, preencha o assunto e o texto da mensagem antes de testar.', 'error');
+      return;
+    }
+
+    setIsSendingTest(true);
+    localStorage.setItem('portal_last_test_email', trimmedEmail);
+    onToast(`🧪 Enviando e-mail de teste para ${trimmedEmail}...`, 'info');
+
+    try {
+      const savedCustomKey = localStorage.getItem('portal_sendgrid_custom_key');
+      const testContact = {
+        id: 'test-user',
+        nome: 'Josué (Teste)',
+        email: trimmedEmail,
+        curso: previewContact.curso || 'Concurso Polícia Militar',
+        whatsapp: waPhoneNumber || '11999999999',
+      };
+
+      const payload = {
+        contacts: [testContact],
+        subjectTemplate: `[TESTE] ${subject}`,
+        bodyTemplate: body,
+        fromEmailCustom: fromEmail || sendGridStatus.fromEmail || undefined,
+        fromNameCustom: fromName,
+        ctaLink: includeCta && effectiveCtaLink ? effectiveCtaLink : undefined,
+        ctaText: includeCta && ctaText.trim() ? ctaText.trim() : undefined,
+        customApiKey: savedCustomKey || undefined,
+      };
+
+      const response = await fetch('/api/email/send-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      let data: any = null;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseErr) {
+        data = { error: `Erro na resposta do servidor (${response.status})` };
+      }
+
+      if (!response.ok) {
+        if (data?.code === 'SENDGRID_KEY_MISSING') {
+          setShowConfigGuide(true);
+          onToast('⚠️ Chave do SendGrid ausente. Cole sua chave no painel!', 'error');
+        } else {
+          onToast(data?.error || `Falha no envio de teste (HTTP ${response.status})`, 'error');
+        }
+      } else if (data.sentCount > 0) {
+        onToast(`✅ E-mail de teste enviado com sucesso para ${trimmedEmail}! Olhe na sua Caixa de Entrada / Spam.`, 'success');
+        setShowTestModal(false);
+      } else {
+        const errDetail = data.results?.[0]?.error || 'Erro desconhecido';
+        onToast(`Falha ao entregar teste: ${errDetail}`, 'error');
+      }
+    } catch (err) {
+      console.error('Test email error:', err);
+      onToast('Erro de conexão ao enviar e-mail de teste.', 'error');
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
+  // 1-Click Mass Dispatch via SendGrid API with Real-time Chunking & Progress Bar
   const handleExecuteBatchSend = async () => {
     if (targetContacts.length === 0) {
       onToast('Nenhum contato selecionado com e-mail válido.', 'error');
@@ -340,74 +440,167 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
     if (!window.confirm(confirmMsg)) return;
 
     setIsSending(true);
+    stopSendingRef.current = false;
     setDispatchResults(null);
-    onToast(`🚀 Iniciando disparo em lote para ${targetContacts.length} contatos...`, 'info');
+
+    const totalContacts = targetContacts.length;
+    setSendProgress({
+      processed: 0,
+      total: totalContacts,
+      percent: 0,
+      currentName: targetContacts[0]?.nome || 'Iniciando...',
+      currentEmail: targetContacts[0]?.email || '',
+      sent: 0,
+      failed: 0,
+      skipped: 0,
+    });
+
+    onToast(`🚀 Iniciando disparo progressivo para ${totalContacts} contatos...`, 'info');
+
+    const savedCustomKey = localStorage.getItem('portal_sendgrid_custom_key');
+    const CHUNK_SIZE = 3; // Send in micro-batches of 3 for fast response & smooth real-time progress
+    let accumulatedSent = 0;
+    let accumulatedFailed = 0;
+    let accumulatedSkipped = 0;
+    const accumulatedLogs: Array<{ id: string; email: string; nome: string; status: string; error?: string }> = [];
 
     try {
-      const savedCustomKey = localStorage.getItem('portal_sendgrid_custom_key');
-      const payload = {
-        contacts: targetContacts,
-        subjectTemplate: subject,
-        bodyTemplate: body,
-        fromEmailCustom: fromEmail || sendGridStatus.fromEmail || undefined,
-        fromNameCustom: fromName,
-        ctaLink: includeCta && effectiveCtaLink ? effectiveCtaLink : undefined,
-        ctaText: includeCta && ctaText.trim() ? ctaText.trim() : undefined,
-        customApiKey: savedCustomKey || undefined,
-      };
-
-      const response = await fetch('/api/email/send-batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      let data: any = null;
-      try {
-        const text = await response.text();
-        data = text ? JSON.parse(text) : {};
-      } catch (parseErr) {
-        data = { error: `Servidor retornou resposta inesperada (${response.status})` };
-      }
-
-      if (!response.ok) {
-        if (data.code === 'SENDGRID_KEY_MISSING') {
-          setShowConfigGuide(true);
-          onToast(
-            '⚠️ A chave SENDGRID_API_KEY ainda não foi salva no servidor. Veja o guia abaixo para configurar!',
-            'error'
-          );
-        } else {
-          onToast(data.error || `Erro HTTP ${response.status} no envio de e-mails.`, 'error');
+      for (let i = 0; i < totalContacts; i += CHUNK_SIZE) {
+        if (stopSendingRef.current) {
+          onToast('Envio interrompido pelo usuário.', 'info');
+          break;
         }
-        setIsSending(false);
-        return;
+
+        const chunk = targetContacts.slice(i, i + CHUNK_SIZE);
+        const currentContact = chunk[0];
+
+        setSendProgress({
+          processed: i,
+          total: totalContacts,
+          percent: Math.round((i / totalContacts) * 100),
+          currentName: currentContact?.nome || 'Processando...',
+          currentEmail: currentContact?.email || '',
+          sent: accumulatedSent,
+          failed: accumulatedFailed,
+          skipped: accumulatedSkipped,
+        });
+
+        const payload = {
+          contacts: chunk,
+          subjectTemplate: subject,
+          bodyTemplate: body,
+          fromEmailCustom: fromEmail || sendGridStatus.fromEmail || undefined,
+          fromNameCustom: fromName,
+          ctaLink: includeCta && effectiveCtaLink ? effectiveCtaLink : undefined,
+          ctaText: includeCta && ctaText.trim() ? ctaText.trim() : undefined,
+          customApiKey: savedCustomKey || undefined,
+        };
+
+        try {
+          const response = await fetch('/api/email/send-batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          let data: any = null;
+          try {
+            const text = await response.text();
+            data = text ? JSON.parse(text) : {};
+          } catch (parseErr) {
+            data = { error: `Resposta inválida do servidor (${response.status})` };
+          }
+
+          if (!response.ok) {
+            if (data?.code === 'SENDGRID_KEY_MISSING') {
+              setShowConfigGuide(true);
+              onToast(
+                '⚠️ Chave do SendGrid não configurada. Cole sua chave no painel acima!',
+                'error'
+              );
+              break;
+            }
+            // Mark this chunk as failed and keep going
+            chunk.forEach((c) => {
+              accumulatedFailed++;
+              accumulatedLogs.push({
+                id: c.id,
+                email: c.email || '',
+                nome: c.nome,
+                status: 'failed',
+                error: data?.error || `Erro HTTP ${response.status}`,
+              });
+            });
+          } else {
+            const chunkSent = data.sentCount || 0;
+            const chunkFailed = data.failedCount || 0;
+            const chunkSkipped = data.skippedCount || 0;
+            const chunkResults = data.results || [];
+
+            accumulatedSent += chunkSent;
+            accumulatedFailed += chunkFailed;
+            accumulatedSkipped += chunkSkipped;
+            accumulatedLogs.push(...chunkResults);
+
+            // Mark contacted in CRM
+            if (Array.isArray(chunkResults) && onMarkContacted) {
+              chunkResults.forEach((r: any) => {
+                if (r.status === 'sent' && r.id) {
+                  onMarkContacted(r.id);
+                }
+              });
+            }
+          }
+        } catch (fetchErr: any) {
+          chunk.forEach((c) => {
+            accumulatedFailed++;
+            accumulatedLogs.push({
+              id: c.id,
+              email: c.email || '',
+              nome: c.nome,
+              status: 'failed',
+              error: 'Erro de conexão/timeout',
+            });
+          });
+        }
+
+        const currentProcessed = Math.min(i + chunk.length, totalContacts);
+        setSendProgress({
+          processed: currentProcessed,
+          total: totalContacts,
+          percent: Math.round((currentProcessed / totalContacts) * 100),
+          currentName: chunk[chunk.length - 1]?.nome || '',
+          currentEmail: chunk[chunk.length - 1]?.email || '',
+          sent: accumulatedSent,
+          failed: accumulatedFailed,
+          skipped: accumulatedSkipped,
+        });
+
+        // Small delay between micro-chunks for smooth rate limiting
+        if (i + CHUNK_SIZE < totalContacts && !stopSendingRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        }
       }
 
       setDispatchResults({
-        sent: data.sentCount || 0,
-        failed: data.failedCount || 0,
-        skipped: data.skippedCount || 0,
-        total: data.total || targetContacts.length,
-        logs: data.results || [],
+        sent: accumulatedSent,
+        failed: accumulatedFailed,
+        skipped: accumulatedSkipped,
+        total: totalContacts,
+        logs: accumulatedLogs,
       });
 
-      // Mark contacted in CRM
-      if (data.results && Array.isArray(data.results) && onMarkContacted) {
-        data.results.forEach((r: any) => {
-          if (r.status === 'sent' && r.id) {
-            onMarkContacted(r.id);
-          }
-        });
+      if (accumulatedSent > 0) {
+        onToast(
+          `🎉 Disparo concluído! ${accumulatedSent} de ${totalContacts} e-mails entregues com sucesso!`,
+          'success'
+        );
+      } else if (accumulatedFailed > 0) {
+        onToast(`Falha no envio de ${accumulatedFailed} e-mails. Verifique as credenciais.`, 'error');
       }
-
-      onToast(
-        `🎉 Disparo concluído! ${data.sentCount} e-mails enviados com sucesso!`,
-        'success'
-      );
     } catch (err: any) {
       console.error('Batch email error:', err);
-      onToast('Erro de conexão ao disparar e-mails. Verifique sua internet.', 'error');
+      onToast('Erro durante o processamento do envio.', 'error');
     } finally {
       setIsSending(false);
     }
@@ -468,7 +661,16 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowTestModal(true)}
+              className="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-3.5 py-2 rounded-lg border border-blue-400/40 flex items-center gap-1.5 transition-all shadow-md cursor-pointer hover:scale-105"
+            >
+              <span>🧪</span>
+              <span>Enviar Teste para Mim</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowConfigGuide(!showConfigGuide)}
@@ -929,13 +1131,80 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               </div>
             </div>
 
+            {/* Live Progress Bar Section */}
+            {isSending && sendProgress && (
+              <div className="bg-[#101B2D] border-2 border-emerald-500/50 rounded-xl p-4 space-y-3 animate-fadeIn shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-sm font-bold text-emerald-400">
+                      Disparando E-mails ({sendProgress.processed} de {sendProgress.total})
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-mono font-bold text-white bg-emerald-950/80 px-2.5 py-0.5 rounded border border-emerald-700/60">
+                      {sendProgress.percent}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleStopSending}
+                      className="bg-red-600/80 hover:bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Interromper envio agora"
+                    >
+                      <StopCircle className="w-3.5 h-3.5" />
+                      <span>Parar</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Progress Bar Track */}
+                <div className="w-full bg-[#172644] h-3.5 rounded-full overflow-hidden border border-[#2B3D63] relative">
+                  <div
+                    className="bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-300 relative overflow-hidden shadow"
+                    style={{ width: `${Math.max(sendProgress.percent, 3)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Current Contact and Live Stats */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs pt-1">
+                  <div className="text-[#8C98B4] truncate flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>Enviando agora:</span>
+                    <strong className="text-[#EDE6D6] truncate">
+                      {sendProgress.currentName} {sendProgress.currentEmail ? `(${sendProgress.currentEmail})` : ''}
+                    </strong>
+                  </div>
+
+                  <div className="flex items-center gap-3 font-mono text-[11px] shrink-0">
+                    <span className="text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
+                      ✓ {sendProgress.sent} enviados
+                    </span>
+                    {sendProgress.failed > 0 && (
+                      <span className="text-red-400 font-bold bg-red-950/60 px-2 py-0.5 rounded border border-red-800/40">
+                        ✗ {sendProgress.failed} falhas
+                      </span>
+                    )}
+                    <span className="text-slate-400">
+                      ⏳ {sendProgress.total - sendProgress.processed} restantes
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <button
               type="button"
               disabled={isSending || targetContacts.length === 0}
               onClick={handleExecuteBatchSend}
               className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer ${
                 isSending
-                  ? 'bg-emerald-800 text-slate-300 cursor-not-allowed'
+                  ? 'bg-emerald-800/60 text-slate-300 cursor-not-allowed border border-emerald-500/30'
                   : targetContacts.length === 0
                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-white ring-2 ring-emerald-400/40 hover:scale-[1.01]'
@@ -943,8 +1212,8 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             >
               {isSending ? (
                 <>
-                  <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>Enviando {targetContacts.length} E-mails em Segundo Plano...</span>
+                  <RefreshCw className="w-5 h-5 animate-spin text-emerald-400" />
+                  <span>Enviando em Tempo Real ({sendProgress ? `${sendProgress.processed}/${sendProgress.total}` : 'Iniciando...'})</span>
                 </>
               ) : (
                 <>
@@ -1089,12 +1358,106 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               </div>
             </div>
 
+            {/* Action Buttons for Preview */}
+            <div className="pt-3 border-t border-[#2B3D63] flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => setShowTestModal(true)}
+                className="w-full bg-[#101B2D] hover:bg-[#1A2D52] text-blue-400 hover:text-blue-300 font-bold text-xs py-2.5 px-4 rounded-lg border border-blue-500/40 flex items-center justify-center gap-2 transition-all cursor-pointer shadow"
+              >
+                <span>🧪</span>
+                <span>Enviar E-mail de Teste para o Meu Próprio Gmail</span>
+              </button>
+            </div>
+
             <p className="text-[11px] text-[#8C98B4] mt-3 text-center">
               As tags como <code className="text-emerald-400 font-mono">&#123;primeiro_nome&#125;</code> são substituídas automaticamente pelos dados de cada aluno no momento exato do disparo.
             </p>
           </div>
         </div>
       </div>
+
+      {/* Test Email Modal Popup */}
+      {showTestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-[#172644] border-2 border-blue-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#2B3D63] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                  🧪
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#EDE6D6] text-base">Enviar E-mail de Teste</h3>
+                  <p className="text-[11px] text-[#8C98B4]">Receba na hora exatamente como o aluno verá</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTestModal(false)}
+                className="text-[#8C98B4] hover:text-white p-1 rounded hover:bg-[#101B2D] text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[#EDE6D6] font-semibold mb-1">
+                  Seu E-mail de Destino (Onde você quer receber):
+                </label>
+                <input
+                  type="email"
+                  value={testEmailAddress}
+                  onChange={(e) => setTestEmailAddress(e.target.value)}
+                  placeholder="exemplo@gmail.com"
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2.5 text-[#EDE6D6] focus:outline-none focus:border-blue-400 font-medium"
+                />
+              </div>
+
+              <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63] space-y-1 text-[#CBD5E1] text-[11px]">
+                <p>
+                  <strong>Assunto:</strong> [TESTE] {subject || '(Sem assunto)'}
+                </p>
+                <p>
+                  <strong>Remetente:</strong> {fromName} &lt;{fromEmail || 'SendGrid Verified'}&gt;
+                </p>
+              </div>
+
+              <p className="text-[10px] text-[#8C98B4]">
+                💡 O e-mail de teste não afeta sua lista de contatos e gasta apenas 1 crédito de envio.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2B3D63]">
+              <button
+                type="button"
+                onClick={() => setShowTestModal(false)}
+                className="px-4 py-2 rounded-lg bg-[#101B2D] text-[#8C98B4] hover:text-white text-xs font-semibold"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isSendingTest || !testEmailAddress.trim()}
+                onClick={handleSendSingleTestEmail}
+                className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg cursor-pointer disabled:opacity-50"
+              >
+                {isSendingTest ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Enviando Teste...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Enviar Teste Agora</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
