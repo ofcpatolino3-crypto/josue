@@ -37,6 +37,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { Contact, MessageTemplate, BroadcastLog, Temperature } from '../types';
+import { SendGridEmailBroadcast } from './SendGridEmailBroadcast';
 import {
   fillTemplate,
   waLinkWithMessage,
@@ -62,8 +63,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   onMarkContacted,
   onToast,
 }) => {
-  // Mode: single quick broadcast, batch queue broadcast, automated mass broadcast (zero tabs), history
-  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'auto_mass' | 'history'>('auto_mass');
+  // Mode: single quick broadcast, batch queue broadcast, automated mass broadcast (zero tabs), email mass (SendGrid), history
+  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'auto_mass' | 'email_mass' | 'history'>('auto_mass');
 
   // Single Broadcast Form States
   const [selectedContactId, setSelectedContactId] = useState<string>('');
@@ -536,6 +537,11 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
     return Array.from(set);
   }, [contacts]);
 
+  // Total contacts with valid email
+  const contactsWithEmailCount = useMemo(() => {
+    return contacts.filter((c) => c.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email.trim())).length;
+  }, [contacts]);
+
   // Filtered contacts with valid WhatsApp for automated mass broadcast
   const filteredMassContacts = useMemo(() => {
     const today = todayStr();
@@ -772,6 +778,22 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               <span>Disparo Automático (Zero Abas)</span>
               <span className="text-[10px] bg-emerald-950 text-[#34D399] px-1.5 py-0.2 rounded-full font-mono border border-emerald-700/50">
                 {filteredMassContacts.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('email_mass')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                activeTab === 'email_mass'
+                  ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+            >
+              <Mail className="w-3.5 h-3.5 text-blue-400" />
+              <span>E-mails em Massa (SendGrid)</span>
+              <span className="text-[10px] bg-blue-950 text-blue-300 px-1.5 py-0.2 rounded-full font-mono border border-blue-700/50">
+                {contactsWithEmailCount}
               </span>
             </button>
 
@@ -2029,6 +2051,16 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             )}
           </div>
         </div>
+      )}
+
+      {/* TAB: SENDGRID MASS EMAIL BROADCAST */}
+      {activeTab === 'email_mass' && (
+        <SendGridEmailBroadcast
+          contacts={contacts}
+          templates={templates}
+          onMarkContacted={onMarkContacted}
+          onToast={onToast}
+        />
       )}
 
       {/* TAB 3: BROADCAST HISTORY */}

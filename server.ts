@@ -399,6 +399,228 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
   app.post('/api/contacts/extract', handleExtractContacts);
   app.post('/api/ai/ocr', handleExtractContacts);
 
+  // SendGrid Lazy Client & Status
+  const getSendGridClient = () => {
+    const apiKey = process.env.SENDGRID_API_KEY;
+    if (!apiKey) return null;
+    try {
+      // Dynamic require / import
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(apiKey);
+      return sgMail;
+    } catch (err) {
+      console.warn('Failed to load @sendgrid/mail:', err);
+      return null;
+    }
+  };
+
+  // Check SendGrid Configuration
+  app.get('/api/email/status', (req, res) => {
+    const apiKey = process.env.SENDGRID_API_KEY;
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+    res.json({
+      configured: !!apiKey,
+      hasFromEmail: !!fromEmail,
+      fromEmail: fromEmail || null,
+      provider: 'sendgrid',
+    });
+  });
+
+  // Batch Email Dispatcher
+  app.post('/api/email/send-batch', async (req, res) => {
+    try {
+      const {
+        contacts,
+        subjectTemplate,
+        bodyTemplate,
+        fromEmailCustom,
+        fromNameCustom = 'Portal Concursos',
+        ctaLink,
+        ctaText,
+      } = req.body;
+
+      if (!Array.isArray(contacts) || contacts.length === 0) {
+        return res.status(400).json({ error: 'Nenhum contato fornecido para envio.' });
+      }
+
+      if (!subjectTemplate || !bodyTemplate) {
+        return res.status(400).json({ error: 'Assunto e Mensagem são obrigatórios.' });
+      }
+
+      const apiKey = process.env.SENDGRID_API_KEY;
+      if (!apiKey) {
+        return res.status(503).json({
+          error:
+            'Chave SENDGRID_API_KEY não configurada no servidor. Configure a chave no menu de Configurações/Secrets.',
+          code: 'SENDGRID_KEY_MISSING',
+        });
+      }
+
+      const senderEmail =
+        fromEmailCustom || process.env.SENDGRID_FROM_EMAIL || 'notificacoes@portalconcurso.com.br';
+
+      const sgMail = getSendGridClient();
+      if (!sgMail) {
+        return res.status(500).json({ error: 'Falha ao inicializar o cliente SendGrid.' });
+      }
+
+      const results: Array<{
+        id: string;
+        email: string;
+        nome: string;
+        status: 'sent' | 'failed' | 'skipped';
+        error?: string;
+      }> = [];
+
+      let sentCount = 0;
+      let failedCount = 0;
+      let skippedCount = 0;
+
+      // Filter valid emails
+      const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      for (const contact of contacts) {
+        const rawEmail = (contact.email || '').trim().toLowerCase();
+
+        if (!rawEmail || !validEmailRegex.test(rawEmail)) {
+          skippedCount++;
+          results.push({
+            id: contact.id || '',
+            email: rawEmail,
+            nome: contact.nome || 'Aluno',
+            status: 'skipped',
+            error: 'E-mail ausente ou inválido',
+          });
+          continue;
+        }
+
+        // Variable Replacements
+        const firstName = (contact.nome || 'Aluno').trim().split(' ')[0];
+        const replaceVars = (template: string) => {
+          return template
+            .replace(/{nome}/gi, contact.nome || 'Aluno')
+            .replace(/{primeiro_nome}/gi, firstName)
+            .replace(/{primeironome}/gi, firstName)
+            .replace(/{curso}/gi, contact.curso || 'Concursos Públicos')
+            .replace(/{whatsapp}/gi, contact.whatsapp || '')
+            .replace(/{telefone}/gi, contact.whatsapp || '')
+            .replace(/{email}/gi, contact.email || '')
+            .replace(/{observacao}/gi, contact.observacao || '')
+            .replace(/{status}/gi, contact.status || '')
+            .replace(/{temperatura}/gi, contact.temperatura || '');
+        };
+
+        const personalizedSubject = replaceVars(subjectTemplate);
+        const personalizedBody = replaceVars(bodyTemplate);
+
+        // Convert body text to formatted HTML
+        const paragraphs = personalizedBody
+          .split('\n\n')
+          .map((p: string) => `<p style="margin: 0 0 16px 0; line-height: 1.6;">${p.replace(/\n/g, '<br/>')}</p>`)
+          .join('');
+
+        const ctaHtml =
+          ctaLink && ctaText
+            ? `<div style="text-align: center; margin: 32px 0 24px 0;">
+                <a href="${ctaLink}" target="_blank" style="background-color: #059669; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                  ${ctaText}
+                </a>
+              </div>`
+            : '';
+
+        const fullHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${personalizedSubject}</title>
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td align="center">
+                  <table width="100%" max-width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);" border="0" cellspacing="0" cellpadding="0">
+                    <!-- Header -->
+                    <tr>
+                      <td style="background-color: #0f172a; padding: 24px 32px; text-align: left;">
+                        <span style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">
+                          PORTAL <span style="color: #34d399;">CONCURSOS</span>
+                        </span>
+                      </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding: 32px; font-size: 16px; color: #334155;">
+                        ${paragraphs}
+                        ${ctaHtml}
+                      </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background-color: #f1f5f9; padding: 20px 32px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0;">
+                        <p style="margin: 0 0 4px 0; font-weight: 600; color: #475569;">Portal Concurso - Central de Carreiras e Aprovações</p>
+                        <p style="margin: 0;">Você recebeu esta mensagem porque é um aluno cadastrado no Portal Concurso.</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
+        `;
+
+        try {
+          await sgMail.send({
+            to: rawEmail,
+            from: {
+              email: senderEmail,
+              name: fromNameCustom,
+            },
+            subject: personalizedSubject,
+            text: personalizedBody,
+            html: fullHtml,
+          });
+
+          sentCount++;
+          results.push({
+            id: contact.id || '',
+            email: rawEmail,
+            nome: contact.nome || 'Aluno',
+            status: 'sent',
+          });
+        } catch (sendErr: any) {
+          failedCount++;
+          const errDetail =
+            sendErr.response?.body?.errors?.[0]?.message || sendErr.message || 'Erro de envio';
+          results.push({
+            id: contact.id || '',
+            email: rawEmail,
+            nome: contact.nome || 'Aluno',
+            status: 'failed',
+            error: errDetail,
+          });
+        }
+      }
+
+      return res.json({
+        success: true,
+        sentCount,
+        failedCount,
+        skippedCount,
+        total: contacts.length,
+        results,
+        message: `Disparo concluído: ${sentCount} e-mails enviados com sucesso, ${failedCount} falhas, ${skippedCount} ignorados.`,
+      });
+    } catch (error: any) {
+      console.error('Error in /api/email/send-batch:', error);
+      return res.status(500).json({
+        error: error.message || 'Erro inesperado no disparo de e-mails em lote.',
+      });
+    }
+  });
+
   // Vite middleware for development vs static build in production
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
