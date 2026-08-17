@@ -17,6 +17,8 @@ import {
   Filter,
   Layers,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Info,
   Sliders,
   CheckSquare,
@@ -27,14 +29,19 @@ import {
   Phone,
   Link2,
   StopCircle,
+  Shield,
+  UserCheck,
+  AlertTriangle,
+  Eye,
 } from 'lucide-react';
 import { Contact, MessageTemplate } from '../types';
-import { todayStr } from '../utils/excel';
+import { todayStr, formatDateBR } from '../utils/excel';
 
 interface SendGridEmailBroadcastProps {
   contacts: Contact[];
   templates: MessageTemplate[];
   onMarkContacted?: (id: string) => void;
+  onMarkEmailContacted?: (id: string, emailSubject?: string) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
@@ -42,6 +49,7 @@ export const SendGridEmailBroadcast: React.FC<SendGridEmailBroadcastProps> = ({
   contacts,
   templates,
   onMarkContacted,
+  onMarkEmailContacted,
   onToast,
 }) => {
   // SendGrid Status
@@ -57,12 +65,17 @@ export const SendGridEmailBroadcast: React.FC<SendGridEmailBroadcastProps> = ({
     loading: true,
   });
 
-  // Filters
+  // Filters & Deduplication States
   const [courseFilter, setCourseFilter] = useState<string>('');
   const [tempFilter, setTempFilter] = useState<string>('');
   const [batchFilter, setBatchFilter] = useState<string>('');
   const [search, setSearch] = useState<string>('');
   const [onlyPending, setOnlyPending] = useState<boolean>(false);
+  const [emailStatusFilter, setEmailStatusFilter] = useState<'all' | 'uncontacted' | 'contacted' | 'uncontacted_today'>('all');
+  const [avoidDuplicates, setAvoidDuplicates] = useState<boolean>(() => {
+    return localStorage.getItem('portal_sendgrid_dedup') !== 'false';
+  });
+  const [showRecipientDrawer, setShowRecipientDrawer] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Email Content
@@ -210,7 +223,8 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
   // Filter contacts with emails
   const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const contactsWithEmail = useMemo(() => {
+  // 1. Raw filtered contacts before deduplication
+  const rawFilteredContacts = useMemo(() => {
     const today = todayStr();
     return contacts.filter((c) => {
       const emailValid = c.email && validEmailRegex.test(c.email.trim());
@@ -218,6 +232,12 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
       if (courseFilter && c.curso !== courseFilter) return false;
       if (tempFilter && c.temperatura !== tempFilter) return false;
       if (batchFilter && c.batchName !== batchFilter) return false;
+
+      // Status do E-mail
+      if (emailStatusFilter === 'uncontacted' && c.lastEmailSentAt) return false;
+      if (emailStatusFilter === 'contacted' && !c.lastEmailSentAt) return false;
+      if (emailStatusFilter === 'uncontacted_today' && (c.ultimoContato === today || c.dataContato === today)) return false;
+
       if (onlyPending && (c.ultimoContato === today || c.dataContato === today)) return false;
       if (search) {
         const q = search.toLowerCase();
@@ -228,7 +248,58 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
       }
       return true;
     });
-  }, [contacts, courseFilter, tempFilter, batchFilter, onlyPending, search]);
+  }, [contacts, courseFilter, tempFilter, batchFilter, emailStatusFilter, onlyPending, search]);
+
+  // 2. Global and filtered duplicate stats
+  const duplicateStats = useMemo(() => {
+    const emailCounts = new Map<string, number>();
+    rawFilteredContacts.forEach((c) => {
+      const emailKey = (c.email || '').trim().toLowerCase();
+      emailCounts.set(emailKey, (emailCounts.get(emailKey) || 0) + 1);
+    });
+
+    let duplicateEntriesCount = 0;
+    emailCounts.forEach((count) => {
+      if (count > 1) {
+        duplicateEntriesCount += count - 1;
+      }
+    });
+
+    // Counts for email statuses
+    let uncontactedCount = 0;
+    let contactedCount = 0;
+    rawFilteredContacts.forEach((c) => {
+      if (c.lastEmailSentAt) contactedCount++;
+      else uncontactedCount++;
+    });
+
+    return {
+      emailCounts,
+      duplicateEntriesCount,
+      uniqueEmailsCount: emailCounts.size,
+      totalRaw: rawFilteredContacts.length,
+      uncontactedCount,
+      contactedCount,
+    };
+  }, [rawFilteredContacts]);
+
+  // 3. Contacts list with deduplication applied
+  const contactsWithEmail = useMemo(() => {
+    if (!avoidDuplicates) {
+      return rawFilteredContacts;
+    }
+    const seen = new Set<string>();
+    const deduplicated: Contact[] = [];
+
+    for (const c of rawFilteredContacts) {
+      const emailKey = (c.email || '').trim().toLowerCase();
+      if (!seen.has(emailKey)) {
+        seen.add(emailKey);
+        deduplicated.push(c);
+      }
+    }
+    return deduplicated;
+  }, [rawFilteredContacts, avoidDuplicates]);
 
   // Target contacts based on explicit selection or all filtered
   const targetContacts = useMemo(() => {
@@ -252,10 +323,37 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
     return Array.from(set);
   }, [contacts]);
 
+  const handleToggleDeduplication = () => {
+    const nextVal = !avoidDuplicates;
+    setAvoidDuplicates(nextVal);
+    localStorage.setItem('portal_sendgrid_dedup', String(nextVal));
+    if (nextVal) {
+      onToast('🛡️ Anti-Duplicação ATIVADA: Apenas 1 envio por endereço de e-mail!', 'success');
+    } else {
+      onToast('⚠️ Anti-Duplicação DESATIVADA: E-mails repetidos poderão receber cópias.', 'info');
+    }
+  };
+
   const handleSelectFirst100 = () => {
     const first100 = contactsWithEmail.slice(0, 100).map((c) => c.id);
     setSelectedIds(first100);
-    onToast(`🎯 Primeiros ${first100.length} contatos com e-mail selecionados!`, 'info');
+    onToast(`🎯 Primeiros ${first100.length} contatos selecionados!`, 'info');
+  };
+
+  const handleSelectVirgins = () => {
+    const virgins = contactsWithEmail.filter((c) => !c.lastEmailSentAt).map((c) => c.id);
+    if (virgins.length === 0) {
+      onToast('Todos os contatos listados já receberam e-mail.', 'info');
+      return;
+    }
+    setSelectedIds(virgins);
+    onToast(`🆕 ${virgins.length} alunos que NUNCA receberam e-mail foram selecionados!`, 'success');
+  };
+
+  const handleDeselectAlreadyContacted = () => {
+    const uncontacted = contactsWithEmail.filter((c) => !c.lastEmailSentAt).map((c) => c.id);
+    setSelectedIds(uncontacted);
+    onToast(`🧹 Contatos já contatados por e-mail foram desmarcados (${uncontacted.length} restantes).`, 'info');
   };
 
   const handleSelectAll = (select: boolean) => {
@@ -543,10 +641,14 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             accumulatedLogs.push(...chunkResults);
 
             // Mark contacted in CRM
-            if (Array.isArray(chunkResults) && onMarkContacted) {
+            if (Array.isArray(chunkResults)) {
               chunkResults.forEach((r: any) => {
                 if (r.status === 'sent' && r.id) {
-                  onMarkContacted(r.id);
+                  if (onMarkEmailContacted) {
+                    onMarkEmailContacted(r.id, subject);
+                  } else if (onMarkContacted) {
+                    onMarkContacted(r.id);
+                  }
                 }
               });
             }
@@ -770,9 +872,9 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Settings, Filter & Message Builder (7 Cols) */}
         <div className="lg:col-span-7 space-y-5">
-          {/* 1. Contact Selection & Filters */}
+          {/* 1. Contact Selection & Filters with Anti-Duplication & Email Contact Status */}
           <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#C9A227]" />
                 <h4 className="font-bold text-[#EDE6D6] text-sm">
@@ -780,14 +882,31 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 </h4>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Quick Selection Actions */}
+              <div className="flex flex-wrap items-center gap-1.5">
                 <button
                   type="button"
                   onClick={handleSelectFirst100}
                   className="bg-[#101B2D] hover:bg-[#1F3057] text-[#C9A227] font-semibold text-xs px-2.5 py-1 rounded border border-[#2B3D63] transition-colors cursor-pointer"
                   title="Seleciona os primeiros 100 contatos com e-mail válido"
                 >
-                  ⚡ Selecionar 100 Primeiros
+                  ⚡ 100 Primeiros
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSelectVirgins}
+                  className="bg-[#101B2D] hover:bg-[#1F3057] text-emerald-400 font-semibold text-xs px-2.5 py-1 rounded border border-[#2B3D63] transition-colors cursor-pointer"
+                  title="Seleciona apenas alunos que nunca receberam nenhum e-mail"
+                >
+                  🆕 Apenas Virgens
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeselectAlreadyContacted}
+                  className="bg-[#101B2D] hover:bg-[#1F3057] text-blue-300 font-semibold text-xs px-2.5 py-1 rounded border border-[#2B3D63] transition-colors cursor-pointer"
+                  title="Remove da seleção quem já recebeu e-mail anteriormente"
+                >
+                  🧹 Desmarcar Contatados
                 </button>
                 <button
                   type="button"
@@ -801,7 +920,123 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               </div>
             </div>
 
-            {/* Filter Bar */}
+            {/* Anti-Duplication Feature Banner */}
+            <div className={`p-3 rounded-lg border transition-all ${
+              avoidDuplicates
+                ? 'bg-emerald-950/30 border-emerald-600/40 text-emerald-200'
+                : 'bg-amber-950/30 border-amber-600/40 text-amber-200'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-start sm:items-center gap-2">
+                  {avoidDuplicates ? (
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5 sm:mt-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+                  )}
+                  <div>
+                    <div className="text-xs font-bold flex items-center gap-2">
+                      <span>Filtro Anti-Duplicação de E-mails</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                        avoidDuplicates
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      }`}>
+                        {avoidDuplicates ? '✓ ATIVADO (1 envio por e-mail)' : 'DESATIVADO'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#8C98B4] mt-0.5">
+                      {avoidDuplicates
+                        ? 'Garante que o mesmo endereço de e-mail não receba mensagens repetidas no mesmo disparo.'
+                        : 'Permite múltiplos envios se o mesmo e-mail estiver cadastrado em contatos diferentes.'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleToggleDeduplication}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors cursor-pointer shrink-0 ${
+                    avoidDuplicates
+                      ? 'bg-emerald-900/60 hover:bg-emerald-800/80 text-emerald-200 border-emerald-500/50'
+                      : 'bg-amber-900/60 hover:bg-amber-800/80 text-amber-200 border-amber-500/50'
+                  }`}
+                >
+                  {avoidDuplicates ? 'Desativar Anti-Duplicação' : 'Ativar Anti-Duplicação'}
+                </button>
+              </div>
+
+              {/* Duplicates Notification Badge if detected */}
+              {duplicateStats.duplicateEntriesCount > 0 && (
+                <div className="mt-2 pt-2 border-t border-[#2B3D63]/50 flex items-center justify-between text-[11px]">
+                  <span className="text-[#8C98B4]">
+                    Identificados <strong>{duplicateStats.duplicateEntriesCount}</strong> e-mails duplicados na base selecionada.
+                  </span>
+                  <span className={`font-semibold ${avoidDuplicates ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {avoidDuplicates
+                      ? `🛡️ ${duplicateStats.duplicateEntriesCount} duplicatas filtradas com sucesso!`
+                      : `⚠️ ${duplicateStats.duplicateEntriesCount} duplicatas serão enviadas.`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Email Status Filter Tabs */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4]">
+                Filtrar por Histórico de Contato via E-mail:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setEmailStatusFilter('all')}
+                  className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
+                    emailStatusFilter === 'all'
+                      ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold shadow-sm'
+                      : 'bg-[#101B2D] text-[#EDE6D6] border-[#2B3D63] hover:border-[#C9A227]/60'
+                  }`}
+                >
+                  Todos ({duplicateStats.totalRaw})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEmailStatusFilter('uncontacted')}
+                  className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
+                    emailStatusFilter === 'uncontacted'
+                      ? 'bg-emerald-600 text-white border-emerald-500 font-bold shadow-sm'
+                      : 'bg-[#101B2D] text-emerald-300 border-[#2B3D63] hover:border-emerald-500/60'
+                  }`}
+                >
+                  🆕 Nunca Contatados ({duplicateStats.uncontactedCount})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEmailStatusFilter('contacted')}
+                  className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
+                    emailStatusFilter === 'contacted'
+                      ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-sm'
+                      : 'bg-[#101B2D] text-blue-300 border-[#2B3D63] hover:border-blue-500/60'
+                  }`}
+                >
+                  ✉️ Já Contatados ({duplicateStats.contactedCount})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEmailStatusFilter('uncontacted_today')}
+                  className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
+                    emailStatusFilter === 'uncontacted_today'
+                      ? 'bg-purple-600 text-white border-purple-500 font-bold shadow-sm'
+                      : 'bg-[#101B2D] text-purple-300 border-[#2B3D63] hover:border-purple-500/60'
+                  }`}
+                >
+                  ⏳ Não Hoje
+                </button>
+              </div>
+            </div>
+
+            {/* General Filters Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
               <select
                 value={courseFilter}
@@ -838,19 +1073,114 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               />
             </div>
 
-            {/* Contact count summary */}
-            <div className="flex items-center justify-between text-xs bg-[#101B2D] px-3 py-2 rounded-lg border border-[#2B3D63]/70">
-              <div className="flex items-center gap-2 text-[#8C98B4]">
-                <span>Total com e-mail válido:</span>
+            {/* Contact count summary & Drawer Trigger */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs bg-[#101B2D] px-3.5 py-2.5 rounded-lg border border-[#2B3D63]/70">
+              <div className="flex items-center gap-2 text-[#8C98B4] flex-wrap">
+                <span>Total pós-filtro:</span>
                 <strong className="text-[#EDE6D6]">{contactsWithEmail.length} alunos</strong>
+                {avoidDuplicates && duplicateStats.duplicateEntriesCount > 0 && (
+                  <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/40">
+                    ({duplicateStats.duplicateEntriesCount} duplicatas excluídas)
+                  </span>
+                )}
               </div>
+
               <div className="flex items-center gap-2">
-                <span className="text-[#8C98B4]">Alvo atual do disparo:</span>
-                <span className="font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-700/50 px-2 py-0.5 rounded text-[11px]">
-                  {targetContacts.length} selecionados
+                <button
+                  type="button"
+                  onClick={() => setShowRecipientDrawer((prev) => !prev)}
+                  className="text-xs bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] px-2.5 py-1 rounded border border-[#2B3D63] flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5 text-[#C9A227]" />
+                  <span>{showRecipientDrawer ? 'Ocultar Detalhes' : 'Inspecionar Lista'}</span>
+                  {showRecipientDrawer ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+
+                <span className="font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-700/50 px-2 py-1 rounded text-[11px]">
+                  {targetContacts.length} prontos para disparo
                 </span>
               </div>
             </div>
+
+            {/* Collapsible Recipient Inspector Drawer */}
+            {showRecipientDrawer && (
+              <div className="bg-[#101B2D] border border-[#2B3D63] rounded-lg p-3 space-y-2 animate-fadeIn max-h-72 overflow-y-auto">
+                <div className="flex items-center justify-between pb-2 border-b border-[#2B3D63] text-xs">
+                  <span className="font-semibold text-[#EDE6D6] flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#C9A227]" />
+                    Lista Individual de Destinatários ({contactsWithEmail.length})
+                  </span>
+                  <span className="text-[11px] text-[#8C98B4]">
+                    Clique na caixa para incluir/remover do envio
+                  </span>
+                </div>
+
+                <div className="divide-y divide-[#2B3D63]/50 text-xs">
+                  {contactsWithEmail.map((c) => {
+                    const isSelected = selectedIds.length === 0 || selectedIds.includes(c.id);
+                    const emailOccurrences = duplicateStats.emailCounts.get((c.email || '').trim().toLowerCase()) || 1;
+                    const hasBeenEmailed = !!c.lastEmailSentAt;
+
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => handleToggleContact(c.id)}
+                        className={`py-2 px-2 rounded-md flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                          isSelected ? 'hover:bg-[#172644]' : 'opacity-40 hover:opacity-75 bg-[#0B141A]/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}} // Handled by div click
+                            className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-0 cursor-pointer"
+                          />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-[#EDE6D6] truncate">
+                                {c.nome || 'Sem Nome'}
+                              </span>
+                              {c.curso && (
+                                <span className="text-[10px] text-[#C9A227] truncate max-w-[140px]">
+                                  {c.curso}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-[#8C98B4] font-mono truncate flex items-center gap-1.5 mt-0.5">
+                              <span>{c.email}</span>
+                              {emailOccurrences > 1 && (
+                                <span className="text-[9px] bg-amber-950 text-amber-400 px-1 rounded border border-amber-800/40">
+                                  {emailOccurrences}x cadastrado
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Badge */}
+                        <div className="shrink-0 text-right">
+                          {hasBeenEmailed ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 border border-blue-800/50 shadow-sm"
+                              title={`Último e-mail enviado em: ${new Date(c.lastEmailSentAt!).toLocaleString('pt-BR')}${c.emailSentCount ? ` (${c.emailSentCount}x)` : ''}`}
+                            >
+                              <Mail className="w-3 h-3 text-blue-400" />
+                              <span>Contatado ({new Date(c.lastEmailSentAt!).toLocaleDateString('pt-BR')})</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 shadow-sm">
+                              <Sparkles className="w-3 h-3 text-emerald-400" />
+                              <span>Nunca contatado</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 2. Email Subject & Body Builder */}

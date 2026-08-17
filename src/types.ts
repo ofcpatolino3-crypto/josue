@@ -50,9 +50,12 @@ export interface Contact {
   isSeenByAttendant?: boolean;
   lastMessageAt?: number; // Timestamp da última mensagem enviada pelo vendedor
   lastMessageText?: string; // Resumo ou texto da última mensagem enviada
-  lastMessageType?: 'whatsapp' | 'template' | 'assistente' | 'manual';
+  lastMessageType?: 'whatsapp' | 'template' | 'assistente' | 'manual' | 'email';
   messagesSentCount?: number; // Contador de mensagens enviadas
   lastInteractedBy?: string; // Nome/Email do atendente que interagiu por último
+  lastEmailSentAt?: number; // Timestamp do último envio de e-mail SendGrid
+  lastEmailSubject?: string; // Assunto do último e-mail enviado
+  emailSentCount?: number; // Contador de e-mails já enviados
 }
 
 export interface Objection {

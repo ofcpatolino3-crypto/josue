@@ -53,6 +53,7 @@ interface FastBroadcastViewProps {
   templates: MessageTemplate[];
   onAddContact?: (contact: Contact) => void;
   onMarkContacted?: (id: string) => void;
+  onMarkEmailContacted?: (id: string, emailSubject?: string) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
@@ -61,6 +62,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   templates,
   onAddContact,
   onMarkContacted,
+  onMarkEmailContacted,
   onToast,
 }) => {
   // Mode: single quick broadcast, batch queue broadcast, automated mass broadcast (zero tabs), email mass (SendGrid), history
@@ -2059,6 +2061,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
           contacts={contacts}
           templates={templates}
           onMarkContacted={onMarkContacted}
+          onMarkEmailContacted={onMarkEmailContacted}
           onToast={onToast}
         />
       )}

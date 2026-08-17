@@ -477,8 +477,9 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
       let failedCount = 0;
       let skippedCount = 0;
 
-      // Filter valid emails
+      // Filter valid emails & deduplicate
       const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const seenEmails = new Set<string>();
 
       for (const contact of contacts) {
         const rawEmail = (contact.email || '').trim().toLowerCase();
@@ -494,6 +495,20 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
           });
           continue;
         }
+
+        // Prevent duplicate dispatch to the exact same email address in the same batch
+        if (seenEmails.has(rawEmail)) {
+          skippedCount++;
+          results.push({
+            id: contact.id || '',
+            email: rawEmail,
+            nome: contact.nome || 'Aluno',
+            status: 'skipped',
+            error: 'E-mail duplicado no mesmo lote (omitido com segurança)',
+          });
+          continue;
+        }
+        seenEmails.add(rawEmail);
 
         // Variable Replacements
         const firstName = (contact.nome || 'Aluno').trim().split(' ')[0];

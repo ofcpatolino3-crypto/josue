@@ -129,6 +129,17 @@ export const ContactCard: React.FC<CardProps> = ({
               );
             })()}
 
+            {/* Email Contacted Badge */}
+            {contact.lastEmailSentAt && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/40 shadow-sm"
+                title={`E-mail enviado em ${new Date(contact.lastEmailSentAt).toLocaleDateString('pt-BR')} às ${new Date(contact.lastEmailSentAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}${contact.emailSentCount && contact.emailSentCount > 1 ? ` (${contact.emailSentCount} disparos)` : ''}${contact.lastEmailSubject ? `\nAssunto: ${contact.lastEmailSubject}` : ''}`}
+              >
+                <Mail className="w-3 h-3 text-blue-400" />
+                <span>E-mail Enviado ({new Date(contact.lastEmailSentAt).toLocaleDateString('pt-BR')})</span>
+              </span>
+            )}
+
             {/* Inactivity Status Badge */}
             {contact.temperatura !== 'Pagou' && (
               <span
@@ -185,6 +196,14 @@ export const ContactCard: React.FC<CardProps> = ({
                 >
                   {contact.email}
                 </a>
+                {contact.lastEmailSentAt && (
+                  <span
+                    className="text-[10px] text-blue-400 font-semibold bg-blue-950/60 px-1.5 py-0.2 rounded border border-blue-800/40 shrink-0"
+                    title={`Contatado por e-mail em ${new Date(contact.lastEmailSentAt).toLocaleDateString('pt-BR')}`}
+                  >
+                    ✓ E-mail enviado
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={handleCopyEmail}

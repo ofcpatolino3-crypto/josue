@@ -1375,6 +1375,44 @@ export default function App() {
     addToast('Contato marcado como contatado hoje!', 'success');
   };
 
+  const handleMarkEmailContacted = (id: string, emailSubject?: string) => {
+    const target = contacts.find((c) => c.id === id);
+    const now = Date.now();
+    const today = todayStr();
+    if (target) {
+      const updated: Contact = {
+        ...target,
+        ultimoContato: today,
+        dataContato: target.dataContato || today,
+        lastEmailSentAt: now,
+        lastEmailSubject: emailSubject || target.lastEmailSubject,
+        emailSentCount: (target.emailSentCount || 0) + 1,
+        lastMessageType: 'email',
+        lastMessageAt: now,
+        lastMessageText: emailSubject ? `E-mail: ${emailSubject.slice(0, 50)}` : 'E-mail enviado via SendGrid',
+        status: target.status && !target.status.includes('E-mail') ? `${target.status} (E-mail)` : (target.status || 'Contatado via E-mail'),
+      };
+      saveContactToCloud(updated);
+    }
+    setContacts((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c;
+        return {
+          ...c,
+          ultimoContato: today,
+          dataContato: c.dataContato || today,
+          lastEmailSentAt: now,
+          lastEmailSubject: emailSubject || c.lastEmailSubject,
+          emailSentCount: (c.emailSentCount || 0) + 1,
+          lastMessageType: 'email',
+          lastMessageAt: now,
+          lastMessageText: emailSubject ? `E-mail: ${emailSubject.slice(0, 50)}` : 'E-mail enviado via SendGrid',
+          status: c.status && !c.status.includes('E-mail') ? `${c.status} (E-mail)` : (c.status || 'Contatado via E-mail'),
+        };
+      })
+    );
+  };
+
   // Bulk mark multiple/all filtered contacts as contacted (useful for external WhatsApp/SMS blast campaigns)
   const handleBulkMarkAsContacted = async (targetContacts: Contact[], labelDescription = 'todos os contatos visíveis') => {
     if (!targetContacts || targetContacts.length === 0) {
@@ -1945,6 +1983,7 @@ export default function App() {
             templates={templates}
             onAddContact={handleAddManualContact}
             onMarkContacted={handleMarkToday}
+            onMarkEmailContacted={handleMarkEmailContacted}
             onToast={addToast}
           />
         )}
