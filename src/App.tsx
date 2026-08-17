@@ -126,7 +126,6 @@ export default function App() {
   const [loginModalTab, setLoginModalTab] = useState<'login' | 'register'>('login');
   const [authLoading, setAuthLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const initialCloudLoadDone = useRef(false);
 
   // --- ADMIN STATE (All users and all global contacts) ---
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -293,7 +292,7 @@ export default function App() {
         }
       );
 
-      // Listen to global contacts database
+      // Listen to global contacts database in real-time
       const globalContactsRef = collection(db, 'global_contacts');
       const unsubGlobal = onSnapshot(
         globalContactsRef,
@@ -301,14 +300,27 @@ export default function App() {
           const list: Contact[] = [];
           snapshot.forEach((d) => {
             const data = d.data() as Contact;
-            if (data && !data.id?.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
+            if (data && data.id && !data.id.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
               list.push(data);
             } else if (data?.id?.startsWith('c_demo_')) {
               // Automatically cleanup demo document from cloud
               deleteDoc(doc(db, 'global_contacts', data.id)).catch(() => {});
             }
           });
+          list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
           setGlobalContacts(list);
+
+          // If current user is Admin, Supervisor, Master or not assigned to attendant role:
+          // Synchronize main contacts view in real-time with global database
+          const isAttendantRole = currentProfile?.role === 'attendant';
+          if (!isAttendantRole) {
+            setContacts(list);
+            try {
+              localStorage.setItem(STORAGE_CONTACTS, JSON.stringify(list));
+            } catch (err) {
+              console.warn(err);
+            }
+          }
         },
         (err) => console.warn('Firestore global contacts info:', err)
       );
@@ -347,16 +359,17 @@ export default function App() {
     if (!currentProfile) return;
 
     try {
-      // Listen to user's assigned contacts in cloud
-      const contactsRef = collection(db, 'users', currentProfile.uid, 'contacts');
-      const unsubContacts = onSnapshot(
-        contactsRef,
-        (snapshot) => {
-          if (!snapshot.empty) {
+      // If attendant, listen to attendant's assigned contacts subcollection
+      let unsubContacts = () => {};
+      if (currentProfile.role === 'attendant') {
+        const contactsRef = collection(db, 'users', currentProfile.uid, 'contacts');
+        unsubContacts = onSnapshot(
+          contactsRef,
+          (snapshot) => {
             const cloudContacts: Contact[] = [];
             snapshot.forEach((d) => {
               const data = d.data() as Contact;
-              if (data && !data.id?.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
+              if (data && data.id && !data.id.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
                 cloudContacts.push(data);
               } else if (data?.id?.startsWith('c_demo_')) {
                 deleteDoc(doc(db, 'users', currentProfile.uid, 'contacts', data.id)).catch(() => {});
@@ -364,18 +377,17 @@ export default function App() {
             });
             cloudContacts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             setContacts(cloudContacts);
-          } else if (!initialCloudLoadDone.current && contacts.length > 0 && currentProfile?.status === 'approved') {
-            const realContacts = contacts.filter((c) => !c.id?.startsWith('c_demo_'));
-            if (realContacts.length > 0) {
-              syncInitialDataToCloud(currentProfile.uid, realContacts);
+            try {
+              localStorage.setItem(STORAGE_CONTACTS, JSON.stringify(cloudContacts));
+            } catch (err) {
+              console.warn(err);
             }
+          },
+          (error) => {
+            console.warn('Firestore sync error:', error);
           }
-          initialCloudLoadDone.current = true;
-        },
-        (error) => {
-          console.warn('Firestore sync error:', error);
-        }
-      );
+        );
+      }
 
       // Listen to templates
       const templatesRef = collection(db, 'users', currentProfile.uid, 'templates');
@@ -402,25 +414,7 @@ export default function App() {
     } catch (e) {
       console.warn('Firebase user sync init:', e);
     }
-  }, [currentProfile]);
-
-  // Initial cloud sync helper
-  const syncInitialDataToCloud = async (userId: string, currentContacts: Contact[]) => {
-    try {
-      setSyncing(true);
-      const batch = writeBatch(db);
-      currentContacts.forEach((c) => {
-        const ref = doc(db, 'users', userId, 'contacts', c.id);
-        batch.set(ref, c);
-      });
-      await batch.commit();
-      addToast('Contatos sincronizados com sua carteira!', 'success');
-    } catch (e) {
-      console.error('Error syncing initial data:', e);
-    } finally {
-      setSyncing(false);
-    }
-  };
+  }, [currentProfile?.uid, currentProfile?.role]);
 
   // --- LOCAL PERSISTENCE BACKUP ---
   useEffect(() => {
@@ -457,15 +451,20 @@ export default function App() {
 
   // Helper to save single contact to cloud
   const saveContactToCloud = async (contact: Contact) => {
-    if (!currentProfile) return;
     try {
       setSyncing(true);
-      const ref = doc(db, 'users', currentProfile.uid, 'contacts', contact.id);
-      await setDoc(ref, contact, { merge: true });
-
-      // Also update in global_contacts if present
+      // 1. Always update in global_contacts
       const globalRef = doc(db, 'global_contacts', contact.id);
       await setDoc(globalRef, contact, { merge: true });
+
+      // 2. If assigned to a specific attendant, update in their collection
+      if (contact.assignedTo) {
+        const targetRef = doc(db, 'users', contact.assignedTo, 'contacts', contact.id);
+        await setDoc(targetRef, contact, { merge: true });
+      } else if (currentProfile?.uid) {
+        const myRef = doc(db, 'users', currentProfile.uid, 'contacts', contact.id);
+        await setDoc(myRef, contact, { merge: true });
+      }
     } catch (e) {
       console.error('Error saving contact to Firestore:', e);
     } finally {
@@ -475,30 +474,36 @@ export default function App() {
 
   // Helper to batch save contacts to cloud
   const saveBatchContactsToCloud = async (newContacts: Contact[], batchName?: string) => {
-    if (!currentProfile || newContacts.length === 0) return;
+    if (newContacts.length === 0) return;
     try {
       setSyncing(true);
       const batch = writeBatch(db);
 
-      // Save to user's assigned contacts
       newContacts.forEach((c) => {
-        const ref = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
-        batch.set(ref, c, { merge: true });
-
-        // Save to global pool so Admin can redistribute if needed
+        // Save in global pool
         const globalRef = doc(db, 'global_contacts', c.id);
         batch.set(globalRef, { ...c, batchName: batchName || 'Planilha Manual' }, { merge: true });
+
+        // If user profile is logged in, also save to user's assigned contacts
+        if (c.assignedTo) {
+          const userRef = doc(db, 'users', c.assignedTo, 'contacts', c.id);
+          batch.set(userRef, c, { merge: true });
+        } else if (currentProfile?.uid) {
+          const ref = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
+          batch.set(ref, c, { merge: true });
+        }
       });
 
       if (batchName) {
-        const batchDocRef = doc(db, 'lead_batches', 'b_' + Date.now());
+        const batchDocId = 'b_' + Date.now();
+        const batchDocRef = doc(db, 'lead_batches', batchDocId);
         batch.set(batchDocRef, {
-          id: 'b_' + Date.now(),
+          id: batchDocId,
           name: batchName,
           totalLeads: newContacts.length,
-          distributedLeads: newContacts.length,
+          distributedLeads: newContacts.filter((c) => c.assignedTo).length,
           createdAt: Date.now(),
-          createdBy: currentProfile.email || 'admin',
+          createdBy: currentProfile?.email || 'admin',
         });
       }
 
@@ -511,14 +516,20 @@ export default function App() {
   };
 
   // Helper to delete contact from cloud
-  const deleteContactFromCloud = async (contactId: string) => {
-    if (!currentProfile) return;
+  const deleteContactFromCloud = async (contactId: string, assignedTo?: string) => {
     try {
       setSyncing(true);
-      const ref = doc(db, 'users', currentProfile.uid, 'contacts', contactId);
-      await deleteDoc(ref);
       const globalRef = doc(db, 'global_contacts', contactId);
       await deleteDoc(globalRef);
+
+      if (assignedTo) {
+        const userRef = doc(db, 'users', assignedTo, 'contacts', contactId);
+        await deleteDoc(userRef);
+      }
+      if (currentProfile?.uid) {
+        const myRef = doc(db, 'users', currentProfile.uid, 'contacts', contactId);
+        await deleteDoc(myRef);
+      }
     } catch (e) {
       console.error('Error deleting contact from Firestore:', e);
     } finally {
@@ -528,15 +539,25 @@ export default function App() {
 
   // Helper to clear all contacts from cloud
   const clearAllContactsFromCloud = async (allContacts: Contact[]) => {
-    if (!currentProfile || allContacts.length === 0) return;
+    if (allContacts.length === 0) return;
     try {
       setSyncing(true);
       const batch = writeBatch(db);
       allContacts.forEach((c) => {
-        const ref = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
-        batch.delete(ref);
+        const globalRef = doc(db, 'global_contacts', c.id);
+        batch.delete(globalRef);
+
+        if (c.assignedTo) {
+          const userRef = doc(db, 'users', c.assignedTo, 'contacts', c.id);
+          batch.delete(userRef);
+        }
+        if (currentProfile?.uid) {
+          const myRef = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
+          batch.delete(myRef);
+        }
       });
       await batch.commit();
+      localStorage.removeItem(STORAGE_CONTACTS);
     } catch (e) {
       console.error('Error clearing contacts in Firestore:', e);
     } finally {
