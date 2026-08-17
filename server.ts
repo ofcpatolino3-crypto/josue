@@ -519,11 +519,16 @@ Regra de saída: Retorne rigorosamente um objeto JSON estruturado contendo a lis
           .map((p: string) => `<p style="margin: 0 0 16px 0; line-height: 1.6;">${p.replace(/\n/g, '<br/>')}</p>`)
           .join('');
 
+        // Personalized CTA Link (supports wa.me or standard URL with variables)
+        const personalizedCtaLink = ctaLink ? replaceVars(ctaLink) : '';
+
+        const isWhatsAppBtn = personalizedCtaLink.includes('wa.me') || personalizedCtaLink.includes('whatsapp.com');
+
         const ctaHtml =
-          ctaLink && ctaText
+          personalizedCtaLink && ctaText
             ? `<div style="text-align: center; margin: 32px 0 24px 0;">
-                <a href="${ctaLink}" target="_blank" style="background-color: #059669; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                  ${ctaText}
+                <a href="${personalizedCtaLink}" target="_blank" style="background-color: ${isWhatsAppBtn ? '#25D366' : '#059669'}; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); letter-spacing: 0.2px;">
+                  ${isWhatsAppBtn ? '💬 ' : ''}${ctaText}
                 </a>
               </div>`
             : '';

@@ -22,6 +22,10 @@ import {
   CheckSquare,
   Square,
   Key,
+  MessageSquare,
+  MessageCircle,
+  Phone,
+  Link2,
 } from 'lucide-react';
 import { Contact, MessageTemplate } from '../types';
 import { todayStr } from '../utils/excel';
@@ -69,18 +73,25 @@ export const SendGridEmailBroadcast: React.FC<SendGridEmailBroadcastProps> = ({
 
 Identificamos o seu interesse no curso preparatório para {curso}.
 
-Temos uma excelente notícia: você pode aproveitar uma condição exclusiva e abater o valor investido para garantir acesso completo à Assinatura Anual do Portal Concursos.
+Temos uma excelente notícia: liberamos uma condição especial com desconto exclusivo na Assinatura Anual do Portal Concursos para você continuar seus estudos com foco total.
 
 Com a assinatura, você tem acesso a mais de 180.000 questões comentadas, cronogramas atualizados e simulados para todas as carreiras.
 
-Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de suporte pedagógico.`
+Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e garantir sua condição!`
   );
 
   const [fromName, setFromName] = useState<string>('Portal Concursos');
   const [fromEmail, setFromEmail] = useState<string>('');
-  const [ctaText, setCtaText] = useState<string>('Garantir Minha Vaga com Desconto');
-  const [ctaLink, setCtaLink] = useState<string>('https://portalconcurso.com.br');
+  
+  // CTA & WhatsApp Button Configuration
   const [includeCta, setIncludeCta] = useState<boolean>(true);
+  const [ctaMode, setCtaMode] = useState<'whatsapp' | 'custom_link'>('whatsapp');
+  const [waPhoneNumber, setWaPhoneNumber] = useState<string>('55');
+  const [waMessage, setWaMessage] = useState<string>(
+    'Olá! Vi o e-mail do Portal Concursos sobre {curso} e gostaria de saber mais sobre a oferta.'
+  );
+  const [ctaText, setCtaText] = useState<string>('🟢 Falar no WhatsApp com o Consultor');
+  const [ctaLink, setCtaLink] = useState<string>('https://portalconcurso.com.br');
 
   // Dispatch Queue Execution State
   const [isSending, setIsSending] = useState<boolean>(false);
@@ -214,6 +225,18 @@ Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de supor
     onToast(`Tag {${variableName}} inserida!`, 'info');
   };
 
+  // Build computed CTA link based on mode
+  const effectiveCtaLink = useMemo(() => {
+    if (!includeCta) return '';
+    if (ctaMode === 'whatsapp') {
+      const cleanNumber = waPhoneNumber.replace(/\D/g, '');
+      const validPhone = cleanNumber.startsWith('55') ? cleanNumber : cleanNumber ? `55${cleanNumber}` : '55';
+      const encodedMsg = encodeURIComponent(waMessage);
+      return `https://wa.me/${validPhone}?text=${encodedMsg}`;
+    }
+    return ctaLink.trim();
+  }, [includeCta, ctaMode, waPhoneNumber, waMessage, ctaLink]);
+
   // Preview data using the first selected contact
   const previewContact = targetContacts[0] || {
     id: 'preview',
@@ -244,6 +267,12 @@ Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de supor
     .replace(/{whatsapp}/gi, previewContact.whatsapp || '')
     .replace(/{email}/gi, previewContact.email || '');
 
+  const processedPreviewCtaLink = effectiveCtaLink
+    .replace(/{nome}/gi, previewContact.nome || 'Aluno')
+    .replace(/{primeiro_nome}/gi, previewFirstName)
+    .replace(/{primeironome}/gi, previewFirstName)
+    .replace(/{curso}/gi, previewContact.curso || 'Concursos');
+
   // 1-Click Mass Dispatch via SendGrid API
   const handleExecuteBatchSend = async () => {
     if (targetContacts.length === 0) {
@@ -254,6 +283,14 @@ Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de supor
     if (!subject.trim() || !body.trim()) {
       onToast('Por favor, defina o assunto e a mensagem do e-mail.', 'error');
       return;
+    }
+
+    if (includeCta && ctaMode === 'whatsapp') {
+      const cleanPhone = waPhoneNumber.replace(/\D/g, '');
+      if (cleanPhone.length < 10) {
+        onToast('Por favor, digite o número do seu WhatsApp com DDD para o botão.', 'error');
+        return;
+      }
     }
 
     const confirmMsg = `Confirma o disparo de e-mails para ${targetContacts.length} contato(s) via SendGrid?`;
@@ -270,7 +307,7 @@ Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de supor
         bodyTemplate: body,
         fromEmailCustom: fromEmail || sendGridStatus.fromEmail || undefined,
         fromNameCustom: fromName,
-        ctaLink: includeCta && ctaLink.trim() ? ctaLink.trim() : undefined,
+        ctaLink: includeCta && effectiveCtaLink ? effectiveCtaLink : undefined,
         ctaText: includeCta && ctaText.trim() ? ctaText.trim() : undefined,
       };
 
@@ -625,42 +662,135 @@ Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de supor
               />
             </div>
 
-            {/* Call to Action Button Options */}
-            <div className="bg-[#101B2D] p-3.5 rounded-lg border border-[#2B3D63]/70 space-y-3">
+            {/* Call to Action & WhatsApp Button Options */}
+            <div className="bg-[#101B2D] p-4 rounded-lg border border-[#2B3D63]/70 space-y-4">
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#EDE6D6]">
                   <input
                     type="checkbox"
                     checked={includeCta}
                     onChange={(e) => setIncludeCta(e.target.checked)}
-                    className="rounded border-[#2B3D63] text-[#10B981] focus:ring-0"
+                    className="rounded border-[#2B3D63] text-[#10B981] focus:ring-0 w-4 h-4 cursor-pointer"
                   />
-                  <span>Incluir Botão de Ação (CTA) em Destaque no E-mail</span>
+                  <span className="text-sm font-bold text-[#EDE6D6]">
+                    Incluir Botão de Ação / WhatsApp no E-mail
+                  </span>
                 </label>
               </div>
 
               {includeCta && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-                  <div>
-                    <label className="block text-[#8C98B4] mb-1">Texto do Botão</label>
-                    <input
-                      type="text"
-                      value={ctaText}
-                      onChange={(e) => setCtaText(e.target.value)}
-                      placeholder="Garantir Minha Vaga com Desconto"
-                      className="w-full bg-[#172644] border border-[#2B3D63] rounded px-2.5 py-1.5 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
-                    />
+                <div className="space-y-3.5 pt-1">
+                  {/* Mode Selector */}
+                  <div className="grid grid-cols-2 gap-2 bg-[#172644] p-1 rounded-lg border border-[#2B3D63]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCtaMode('whatsapp');
+                        setCtaText('🟢 Falar no WhatsApp com o Consultor');
+                      }}
+                      className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        ctaMode === 'whatsapp'
+                          ? 'bg-[#25D366] text-slate-900 shadow'
+                          : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                      }`}
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>Botão do WhatsApp</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCtaMode('custom_link');
+                        setCtaText('Garantir Minha Vaga com Desconto');
+                      }}
+                      className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        ctaMode === 'custom_link'
+                          ? 'bg-blue-600 text-white shadow'
+                          : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                      }`}
+                    >
+                      <Link2 className="w-3.5 h-3.5" />
+                      <span>Link do Site / Checkout</span>
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-[#8C98B4] mb-1">Link de Destino</label>
-                    <input
-                      type="url"
-                      value={ctaLink}
-                      onChange={(e) => setCtaLink(e.target.value)}
-                      placeholder="https://portalconcurso.com.br"
-                      className="w-full bg-[#172644] border border-[#2B3D63] rounded px-2.5 py-1.5 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
-                    />
-                  </div>
+
+                  {ctaMode === 'whatsapp' ? (
+                    /* WhatsApp Specific Inputs */
+                    <div className="space-y-3 bg-[#172644]/80 p-3.5 rounded-lg border border-[#25D366]/30">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <label className="block text-[#EDE6D6] mb-1 font-semibold flex items-center gap-1">
+                            <Phone className="w-3.5 h-3.5 text-[#25D366]" />
+                            Seu Número de WhatsApp (com DDD)
+                          </label>
+                          <input
+                            type="text"
+                            value={waPhoneNumber}
+                            onChange={(e) => setWaPhoneNumber(e.target.value)}
+                            placeholder="Ex: 5511999998888 ou 11987654321"
+                            className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] font-mono focus:outline-none focus:border-[#25D366]"
+                          />
+                          <span className="text-[10px] text-[#8C98B4] mt-0.5 block">
+                            Pode digitar com DDD (ex: 11 98765-4321). O sistema ajusta o link automaticamente.
+                          </span>
+                        </div>
+
+                        <div>
+                          <label className="block text-[#EDE6D6] mb-1 font-semibold">
+                            Texto que vai escrito no Botão
+                          </label>
+                          <input
+                            type="text"
+                            value={ctaText}
+                            onChange={(e) => setCtaText(e.target.value)}
+                            placeholder="🟢 Falar no WhatsApp com o Consultor"
+                            className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#25D366]"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-[#EDE6D6] mb-1 font-semibold">
+                          Mensagem Pré-pronta que o aluno vai enviar quando clicar:
+                        </label>
+                        <input
+                          type="text"
+                          value={waMessage}
+                          onChange={(e) => setWaMessage(e.target.value)}
+                          placeholder="Olá! Vi o e-mail do Portal Concursos sobre {curso} e quero tirar dúvidas."
+                          className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-xs text-[#EDE6D6] focus:outline-none focus:border-[#25D366]"
+                        />
+                        <span className="text-[10px] text-[#8C98B4] mt-1 block">
+                          Quando o aluno apertar o botão no e-mail, essa mensagem já vai digitada no WhatsApp dele!
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Standard URL Input */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <label className="block text-[#8C98B4] mb-1 font-semibold">Texto do Botão</label>
+                        <input
+                          type="text"
+                          value={ctaText}
+                          onChange={(e) => setCtaText(e.target.value)}
+                          placeholder="Garantir Minha Vaga com Desconto"
+                          className="w-full bg-[#172644] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[#8C98B4] mb-1 font-semibold">Link de Destino</label>
+                        <input
+                          type="url"
+                          value={ctaLink}
+                          onChange={(e) => setCtaLink(e.target.value)}
+                          placeholder="https://portalconcurso.com.br"
+                          className="w-full bg-[#172644] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -829,16 +959,26 @@ Ficou com alguma dúvida? Responda este e-mail ou fale com nossa equipe de supor
                 <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-3 text-slate-700 leading-relaxed text-xs sm:text-sm whitespace-pre-wrap">
                   {processedPreviewBody}
 
-                  {includeCta && ctaLink && ctaText && (
+                  {includeCta && processedPreviewCtaLink && ctaText && (
                     <div className="pt-4 pb-2 text-center">
                       <a
-                        href={ctaLink}
+                        href={processedPreviewCtaLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-block bg-[#059669] hover:bg-[#047857] text-white font-bold px-6 py-2.5 rounded-lg text-xs sm:text-sm shadow-md pointer-events-none"
+                        className={`inline-block text-white font-bold px-7 py-3 rounded-full text-xs sm:text-sm shadow-md transition-all hover:scale-105 ${
+                          ctaMode === 'whatsapp'
+                            ? 'bg-[#25D366] hover:bg-[#1EBE5D] text-white shadow-emerald-600/30'
+                            : 'bg-[#059669] hover:bg-[#047857]'
+                        }`}
                       >
+                        {ctaMode === 'whatsapp' ? '💬 ' : ''}
                         {ctaText}
                       </a>
+                      <p className="text-[10px] text-slate-400 mt-1.5 italic">
+                        {ctaMode === 'whatsapp'
+                          ? '👆 Clique acima para testar o redirecionamento para o seu WhatsApp'
+                          : '👆 Botão de ação oficial no corpo do e-mail'}
+                      </p>
                     </div>
                   )}
                 </div>
