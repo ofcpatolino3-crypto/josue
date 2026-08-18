@@ -19,7 +19,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Contact, Objection, Plan } from '../types';
-import { waLinkWithMessage, openWhatsAppDirect } from '../utils/excel';
+import { waLinkWithMessage, openWhatsAppDirect, formatPhoneDisplay } from '../utils/excel';
 
 interface ChatMessage {
   id: string;
@@ -293,7 +293,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
           <option value="">Geral (Sem aluno específico)</option>
           {contacts.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.nome} ({c.temperatura}) — {c.curso || 'Sem curso'}
+              {c.nome} {c.whatsapp ? `• ${formatPhoneDisplay(c.whatsapp)}` : ''} ({c.temperatura}) — {c.curso || 'Sem curso'}
             </option>
           ))}
         </select>
@@ -304,6 +304,11 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
         <div className="bg-[#101B2D]/80 px-4 py-2 border-b border-[#2B3D63]/70 flex items-center justify-between text-[11px] text-[#8C98B4]">
           <div className="flex items-center gap-1.5 truncate">
             <span className="font-semibold text-[#EDE6D6]">{currentContact.nome}</span>
+            {currentContact.whatsapp && (
+              <span className="text-[#25D366] font-mono text-[10px] bg-[#25D366]/10 px-1.5 py-0.5 rounded border border-[#25D366]/30">
+                {formatPhoneDisplay(currentContact.whatsapp)}
+              </span>
+            )}
             <span>•</span>
             <span className="truncate">{currentContact.curso || 'Sem curso'}</span>
           </div>

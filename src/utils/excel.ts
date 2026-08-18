@@ -3,6 +3,18 @@ import ExcelJS from 'exceljs';
 import { Contact, Temperature } from '../types';
 import { extractContactsFromRawText } from './clientOcr';
 
+export const VALID_BRAZIL_DDDS = new Set([
+  '11', '12', '13', '14', '15', '16', '17', '18', '19',
+  '21', '22', '24', '27', '28',
+  '31', '32', '33', '34', '35', '37', '38',
+  '41', '42', '43', '44', '45', '46', '47', '48', '49',
+  '51', '53', '54', '55',
+  '61', '62', '63', '64', '65', '66', '67', '68', '69',
+  '71', '73', '74', '75', '77', '79',
+  '81', '82', '83', '84', '85', '86', '87', '88', '89',
+  '91', '92', '93', '94', '95', '96', '97', '98', '99'
+]);
+
 export function normHeader(h: unknown): string {
   return (h ?? '')
     .toString()
@@ -55,26 +67,35 @@ export function excelDateToStr(v: unknown): string {
 export function normalizeRawPhoneValue(val: unknown): string {
   if (val === null || val === undefined) return '';
 
-  // Handle Excel numbers (e.g. 5591981234567 or scientific notation 5.59198E+12)
+  // Handle Excel numbers (e.g. 5591981234567 or 5.59198E+12)
   if (typeof val === 'number') {
     if (isNaN(val)) return '';
-    return val.toLocaleString('fullwide', { useGrouping: false, maximumFractionDigits: 0 });
+    try {
+      if (Number.isSafeInteger(val)) {
+        return BigInt(val).toString();
+      }
+      return BigInt(Math.floor(val)).toString();
+    } catch {
+      return String(Math.floor(val));
+    }
   }
 
   let s = String(val).trim();
+  if (!s) return '';
+
   // Handle scientific notation formatted as string "5.59198E+12"
   if (/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)$/.test(s)) {
     try {
       const num = Number(s);
       if (!isNaN(num)) {
-        return num.toLocaleString('fullwide', { useGrouping: false, maximumFractionDigits: 0 });
+        return BigInt(Math.floor(num)).toString();
       }
     } catch {
       // fallback
     }
   }
 
-  // Remove trailing .0 if Excel exported integer as float string
+  // Remove trailing .0 or .00 if Excel exported integer as float string
   if (/\.0+$/.test(s)) {
     s = s.replace(/\.0+$/, '');
   }
@@ -82,53 +103,140 @@ export function normalizeRawPhoneValue(val: unknown): string {
   return s;
 }
 
-export function cleanPhone(tel: unknown): string {
-  const rawStr = normalizeRawPhoneValue(tel);
+/**
+ * Robust cleaner for a single phone string
+ */
+function cleanSinglePhoneString(rawStr: string, separateDDD?: string): string {
   if (!rawStr) return '';
 
-  // Remove all non-digits
+  // Handle scientific notation string if present
+  if (/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)$/.test(rawStr)) {
+    try {
+      const num = Number(rawStr);
+      if (!isNaN(num)) {
+        rawStr = BigInt(Math.floor(num)).toString();
+      }
+    } catch {}
+  }
+  rawStr = rawStr.replace(/\.0+$/, '').trim();
+
   let digits = rawStr.replace(/\D/g, '');
   if (!digits) return '';
 
-  // Handle leading zeroes (e.g. 091981234567 -> 91981234567 or 05591981234567 -> 5591981234567)
-  while (digits.startsWith('0') && digits.length > 10) {
-    digits = digits.slice(1);
+  // Remove leading 00 (international 0055...)
+  if (digits.startsWith('00')) {
+    digits = digits.replace(/^00+/, '');
   }
 
-  // Handle 550 prefix (14 digits)
-  if (digits.startsWith('550') && digits.length === 14) {
-    return digits.slice(3);
-  }
-
-  // Handle 55 DDI prefix (Brazil international code)
-  if (digits.startsWith('55')) {
-    // 55 + DDD (2) + 8 or 9 digits (12 or 13 digits)
-    if (digits.length === 12 || digits.length === 13) {
-      return digits.slice(2);
+  // 14 digits with carrier code and leading zero (e.g. 0 + 15 + 85 + 987654321 or 0 + 21 + 91 + 981234567)
+  if (digits.length === 14 && digits.startsWith('0')) {
+    const ddd = digits.slice(3, 5);
+    if (VALID_BRAZIL_DDDS.has(ddd)) {
+      digits = digits.slice(3); // strips '0' and carrier code (2 digits)
     }
-    // If 11 digits starting with 55 (e.g. 55839811193 -> 55 + DDD 83 + 7 digits)
-    const validDdds = [
-      '11','12','13','14','15','16','17','18','19',
-      '21','22','24','27','28',
-      '31','32','33','34','35','37','38',
-      '41','42','43','44','45','46','47','48','49',
-      '51','53','54','55',
-      '61','62','63','64','65','66','67','68','69',
-      '71','73','74','75','77','79',
-      '81','82','83','84','85','86','87','88','89',
-      '91','92','93','94','95','96','97','98','99'
-    ];
-    if (digits.length === 11 && validDdds.includes(digits.slice(2, 4))) {
-      return digits.slice(2);
+  }
+
+  // 14 digits with 550 prefix (e.g. 55085987654321)
+  if (digits.length === 14 && digits.startsWith('550')) {
+    digits = digits.slice(3);
+  }
+
+  // 13 digits with carrier code without leading zero (e.g. 15 + 85 + 987654321)
+  if (digits.length === 13 && !digits.startsWith('55')) {
+    const ddd = digits.slice(2, 4);
+    if (VALID_BRAZIL_DDDS.has(ddd)) {
+      digits = digits.slice(2);
+    }
+  }
+
+  // 13 digits starting with 55 (55 + DDD (2) + 9 digits, e.g. 5585987654321)
+  if (digits.length === 13 && digits.startsWith('55')) {
+    const ddd = digits.slice(2, 4);
+    if (VALID_BRAZIL_DDDS.has(ddd)) {
+      digits = digits.slice(2);
+    }
+  }
+
+  // 12 digits with leading 0 before DDD (e.g. 085987654321 -> 85987654321)
+  if (digits.length === 12 && digits.startsWith('0')) {
+    const ddd = digits.slice(1, 3);
+    if (VALID_BRAZIL_DDDS.has(ddd)) {
+      digits = digits.slice(1);
+    }
+  }
+
+  // 12 digits starting with 55 (55 + DDD (2) + 8 digits, e.g. 558587654321)
+  if (digits.length === 12 && digits.startsWith('55')) {
+    const ddd = digits.slice(2, 4);
+    if (VALID_BRAZIL_DDDS.has(ddd)) {
+      digits = digits.slice(2);
+    }
+  }
+
+  // 10 digits (DDD (2) + 8 digits, e.g. 8587654321) -> normalize to 11 digits by inserting '9' if mobile
+  if (digits.length === 10) {
+    const ddd = digits.slice(0, 2);
+    const firstNum = digits.charAt(2);
+    if (VALID_BRAZIL_DDDS.has(ddd) && ['6', '7', '8', '9'].includes(firstNum)) {
+      digits = ddd + '9' + digits.slice(2);
+    }
+  }
+
+  // If 8 or 9 digits and separateDDD was passed
+  if (separateDDD && (digits.length === 8 || digits.length === 9)) {
+    const cleanD = separateDDD.replace(/\D/g, '');
+    if (VALID_BRAZIL_DDDS.has(cleanD)) {
+      if (digits.length === 8 && ['6', '7', '8', '9'].includes(digits.charAt(0))) {
+        digits = cleanD + '9' + digits;
+      } else {
+        digits = cleanD + digits;
+      }
     }
   }
 
   return digits;
 }
 
+/**
+ * Universal Phone Cleaner.
+ * Handles Brazilian DDDs, DDI 55, carrier codes, scientific numbers, and multi-number cells.
+ */
+export function cleanPhone(tel: unknown, separateDDD?: string): string {
+  const rawStr = normalizeRawPhoneValue(tel);
+  if (!rawStr) return '';
+
+  // Check if multiple phone numbers exist in cell separated by slash, comma, semicolon, pipe or words
+  const parts = rawStr.split(/[\/,;|]|\bou\b|\be\b/i).map((p) => p.trim()).filter(Boolean);
+  if (parts.length > 1) {
+    for (const part of parts) {
+      const cleaned = cleanSinglePhoneString(part, separateDDD);
+      if (cleaned && (cleaned.length === 11 || cleaned.length === 10)) {
+        return cleaned;
+      }
+    }
+  }
+
+  return cleanSinglePhoneString(rawStr, separateDDD);
+}
+
 export function isLikelyPhone(val: unknown): boolean {
   const digits = cleanPhone(val);
-  return digits.length >= 8 && digits.length <= 13;
+  if (!digits) return false;
+  // If 11 or 10 digits, must start with a valid Brazilian DDD
+  if (digits.length === 11 || digits.length === 10) {
+    const ddd = digits.slice(0, 2);
+    return VALID_BRAZIL_DDDS.has(ddd);
+  }
+  // If 8 or 9 digits (local number without DDD)
+  if (digits.length === 8 || digits.length === 9) {
+    return true;
+  }
+  // Full international number with 55 (12 or 13 digits)
+  if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) {
+    const ddd = digits.slice(2, 4);
+    return VALID_BRAZIL_DDDS.has(ddd);
+  }
+  return false;
 }
 
 export function formatPhoneDisplay(tel: unknown): string {
@@ -145,6 +253,9 @@ export function formatPhoneDisplay(tel: unknown): string {
   }
   if (digits.length === 8) {
     return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  }
+  if (digits.length === 13 && digits.startsWith('55')) {
+    return `+55 (${digits.slice(2, 4)}) ${digits.slice(4, 9)}-${digits.slice(9)}`;
   }
   return digits;
 }
@@ -181,6 +292,17 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
   let courseCandidate = '';
   let nameCandidate = '';
   let noteCandidate = '';
+  let sobrenomeCandidate = '';
+
+  // Words that NEVER represent a phone column
+  const PHONE_EXCLUSION_KEYWORDS = [
+    'parcela', 'parcelas', 'parcelamento',
+    'cancelado', 'cancelamento', 'cancelar',
+    'acerto', 'acertos', 'erro', 'erros', 'questao', 'questoes', 'simulado',
+    'matricula', 'inscricao', 'pedido', 'protocolo', 'cpf', 'rg', 'cep',
+    'endereco', 'documento', 'transacao', 'id', 'valor', 'preco', 'r$', 'plano',
+    'nota', 'escore', 'posicao', 'ranking', 'tentativa', 'tentativas'
+  ];
 
   for (const [k, raw] of Object.entries(row)) {
     const n = normHeader(k);
@@ -190,9 +312,19 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
     if (!v && !vStr) continue;
 
     // 1. Check separate DDD column
-    if (n === 'ddd' || n === 'codigodearea' || n === 'prefixo' || n === 'areacode' || n === 'dddcelular' || n === 'dddtelefone') {
+    if (
+      n === 'ddd' ||
+      n === 'codigodearea' ||
+      n === 'codarea' ||
+      n === 'prefixo' ||
+      n === 'areacode' ||
+      n === 'dddcelular' ||
+      n === 'dddtelefone' ||
+      n === 'ddd1' ||
+      n === 'ddd2'
+    ) {
       const dddDigits = v.replace(/\D/g, '');
-      if (dddDigits.length === 2) {
+      if (VALID_BRAZIL_DDDS.has(dddDigits)) {
         separateDDD = dddDigits;
       }
       continue;
@@ -295,103 +427,111 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
       n.includes('e-mail') ||
       n.includes('electronicmail')
     ) {
-      out.email = v.toLowerCase();
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+        out.email = v.toLowerCase();
+      }
     }
-    // 9. Phone / WhatsApp / Mobile (Regardless of column order or synonym)
+    // 9. Phone / WhatsApp / Mobile (High Precision Matching)
     else if (
-      n.includes('whatsapp') ||
-      n.includes('whats') ||
-      n.includes('wpp') ||
-      n.includes('zap') ||
-      n.includes('celular') ||
-      n.includes('cel') ||
-      n.includes('telefone') ||
-      n.includes('tel') ||
-      n.includes('fone') ||
-      n.includes('mobile') ||
-      n.includes('phone') ||
-      n.includes('numero') ||
-      n.includes('num') ||
-      n.includes('tel1') ||
-      n.includes('tel2') ||
-      n.includes('cel1') ||
-      n.includes('cel2') ||
-      n.includes('fone1') ||
-      n.includes('fone2')
+      (n.includes('whatsapp') ||
+        n.includes('whats') ||
+        n.includes('wpp') ||
+        n.includes('zap') ||
+        n.includes('celular') ||
+        n.includes('mobile') ||
+        n.includes('cel') ||
+        n.includes('telefone') ||
+        n.includes('fone') ||
+        n.includes('phone') ||
+        n.includes('tel')) &&
+      !PHONE_EXCLUSION_KEYWORDS.some((kw) => n.includes(kw))
     ) {
-      const cleaned = cleanPhone(vStr);
+      const cleaned = cleanPhone(vStr, separateDDD);
       if (cleaned) {
         if (!out.whatsapp || cleaned.length >= out.whatsapp.length) {
           out.whatsapp = cleaned;
         }
-      } else if (v && !out.whatsapp) {
+      } else if (v && !out.whatsapp && isLikelyPhone(vStr)) {
         out.whatsapp = v;
       }
     }
-    // 10. Course / Exam / Position / Area / Interest
+    // 10. Generic "Numero" or "Contato" column (Only if it contains a valid phone number)
     else if (
-      n.includes('curso') ||
-      n.includes('concurso') ||
-      n.includes('cargo') ||
-      n.includes('carreira') ||
-      n.includes('orgao') ||
-      n.includes('edital') ||
-      n.includes('turma') ||
-      n.includes('materia') ||
-      n.includes('disciplina') ||
-      n.includes('produto') ||
-      n.includes('area') ||
-      n.includes('interesse') ||
-      n.includes('plano') ||
-      n.includes('modalidade') ||
-      n.includes('pacote') ||
-      n.includes('modulo') ||
-      n.includes('mentoria') ||
-      n.includes('inscricao') ||
-      n.includes('course') ||
-      n.includes('product')
+      (n === 'numero' || n === 'num' || n === 'numerodecontato' || n === 'numerodocontato' || n === 'contato') &&
+      !PHONE_EXCLUSION_KEYWORDS.some((kw) => n.includes(kw))
+    ) {
+      if (isLikelyPhone(vStr)) {
+        const cleaned = cleanPhone(vStr, separateDDD);
+        if (cleaned && !out.whatsapp) {
+          out.whatsapp = cleaned;
+        }
+      } else if (n === 'contato' && !out.nome && v.length > 2 && !/^\d+$/.test(v)) {
+        out.nome = v;
+      }
+    }
+    // 11. Course / Exam / Position / Area / Interest
+    else if (
+      (n.includes('curso') ||
+        n.includes('concurso') ||
+        n.includes('cargo') ||
+        n.includes('carreira') ||
+        n.includes('orgao') ||
+        n.includes('edital') ||
+        n.includes('turma') ||
+        n.includes('materia') ||
+        n.includes('disciplina') ||
+        n.includes('produto') ||
+        n.includes('area') ||
+        n.includes('interesse') ||
+        n.includes('plano') ||
+        n.includes('modalidade') ||
+        n.includes('pacote') ||
+        n.includes('modulo') ||
+        n.includes('mentoria') ||
+        n.includes('course') ||
+        n.includes('product')) &&
+      !n.includes('matricula') &&
+      !n.includes('numinscricao') &&
+      !n.includes('datainscricao')
     ) {
       out.curso = v;
     }
-    // 11. Student Name / Lead Name / Full Name
+    // 12. Student Name / Lead Name / Full Name
     else if (
-      n.includes('nome') ||
-      n.includes('name') ||
-      n.includes('aluno') ||
-      n.includes('aluna') ||
-      n.includes('cliente') ||
-      n.includes('lead') ||
-      n.includes('candidato') ||
-      n.includes('candidata') ||
-      n.includes('estudante') ||
-      n.includes('participante') ||
-      n.includes('pessoa') ||
-      n.includes('destinatario') ||
-      n.includes('titular') ||
-      n.includes('assinante') ||
-      n.includes('usuario') ||
-      n.includes('student') ||
-      n.includes('customer')
+      (n.includes('nome') ||
+        n.includes('name') ||
+        n.includes('aluno') ||
+        n.includes('aluna') ||
+        n.includes('cliente') ||
+        n.includes('lead') ||
+        n.includes('candidato') ||
+        n.includes('candidata') ||
+        n.includes('estudante') ||
+        n.includes('participante') ||
+        n.includes('pessoa') ||
+        n.includes('destinatario') ||
+        n.includes('titular') ||
+        n.includes('assinante') ||
+        n.includes('usuario') ||
+        n.includes('student') ||
+        n.includes('customer')) &&
+      !n.includes('sobrenome')
     ) {
-      // Don't overwrite if it's "nomedocurso"
-      if (n.includes('curso') || n.includes('concurso')) {
+      // Don't overwrite if it's "nomedocurso" or "nomedoconcurso"
+      if (n.includes('curso') || n.includes('concurso') || n.includes('produto') || n.includes('plano')) {
         if (!out.curso) out.curso = v;
       } else {
         out.nome = v;
       }
     }
-    // 12. Generic "Contato" Column
-    else if (n.includes('contato')) {
-      if (isLikelyPhone(vStr)) {
-        if (!out.whatsapp) out.whatsapp = cleanPhone(vStr);
-      } else if (!out.nome && v.length > 2) {
-        out.nome = v;
-      }
+    // 13. Surname / Sobrenome
+    else if (n.includes('sobrenome') || n.includes('lastname') || n.includes('surname')) {
+      sobrenomeCandidate = v;
     }
-    // 13. Fallback Heuristic Candidates for Unlabeled / Mystery Columns
+    // 14. Fallback Heuristic Candidates for Unlabeled / Mystery Columns
     else {
-      if (!phoneCandidate && isLikelyPhone(vStr)) {
-        phoneCandidate = cleanPhone(vStr);
+      if (!phoneCandidate && isLikelyPhone(vStr) && !PHONE_EXCLUSION_KEYWORDS.some((kw) => n.includes(kw))) {
+        phoneCandidate = cleanPhone(vStr, separateDDD);
       } else if (
         !courseCandidate &&
         (v.toLowerCase().includes('polic') ||
@@ -405,15 +545,28 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
         courseCandidate = v;
       } else if (!nameCandidate && v.length > 3 && /^[A-Za-zÀ-ÿ\s]+$/.test(v) && v.includes(' ')) {
         nameCandidate = v;
-      } else if (!noteCandidate && v.length > 5) {
+      } else if (!noteCandidate && v.length > 5 && !PHONE_EXCLUSION_KEYWORDS.some((kw) => n.includes(kw))) {
         noteCandidate = v;
       }
     }
   }
 
-  // Prepend separate DDD if phone number has only 8 or 9 digits
+  // Combine First Name + Surname if available
+  if (sobrenomeCandidate) {
+    if (out.nome && !out.nome.toLowerCase().includes(sobrenomeCandidate.toLowerCase())) {
+      out.nome = `${out.nome} ${sobrenomeCandidate}`.trim();
+    } else if (!out.nome) {
+      out.nome = sobrenomeCandidate;
+    }
+  }
+
+  // Apply separate DDD if phone number has only 8 or 9 digits
   if (separateDDD && out.whatsapp && (out.whatsapp.length === 8 || out.whatsapp.length === 9)) {
-    out.whatsapp = `${separateDDD}${out.whatsapp}`;
+    if (out.whatsapp.length === 8 && ['6', '7', '8', '9'].includes(out.whatsapp.charAt(0))) {
+      out.whatsapp = `${separateDDD}9${out.whatsapp}`;
+    } else {
+      out.whatsapp = `${separateDDD}${out.whatsapp}`;
+    }
   }
 
   // FALLBACK SCANNER 1: Phone number detection from unmapped cells
@@ -421,10 +574,12 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
     if (phoneCandidate) {
       out.whatsapp = phoneCandidate;
     } else {
-      for (const raw of Object.values(row)) {
+      for (const [k, raw] of Object.entries(row)) {
+        const n = normHeader(k);
+        if (PHONE_EXCLUSION_KEYWORDS.some((kw) => n.includes(kw))) continue;
         const v = normalizeRawPhoneValue(raw);
         if (isLikelyPhone(v)) {
-          const cp = cleanPhone(v);
+          const cp = cleanPhone(v, separateDDD);
           if (cp.length >= 8) {
             out.whatsapp = cp;
             break;
@@ -436,7 +591,28 @@ export function mapRowToContact(row: Record<string, unknown>, rowIndex?: number)
 
   // Re-apply separate DDD to fallback phone if applicable
   if (separateDDD && out.whatsapp && (out.whatsapp.length === 8 || out.whatsapp.length === 9)) {
-    out.whatsapp = `${separateDDD}${out.whatsapp}`;
+    if (out.whatsapp.length === 8 && ['6', '7', '8', '9'].includes(out.whatsapp.charAt(0))) {
+      out.whatsapp = `${separateDDD}9${out.whatsapp}`;
+    } else {
+      out.whatsapp = `${separateDDD}${out.whatsapp}`;
+    }
+  }
+
+  // Normalize any 10-digit mobile number to 11 digits
+  if (out.whatsapp && out.whatsapp.length === 10) {
+    const ddd = out.whatsapp.slice(0, 2);
+    const firstNum = out.whatsapp.charAt(2);
+    if (VALID_BRAZIL_DDDS.has(ddd) && ['6', '7', '8', '9'].includes(firstNum)) {
+      out.whatsapp = `${ddd}9${out.whatsapp.slice(2)}`;
+    }
+  }
+
+  // Strip DDI 55 if length is 13 so out.whatsapp is stored as clean 11 digits (DDD + 9 digits)
+  if (out.whatsapp && out.whatsapp.length === 13 && out.whatsapp.startsWith('55')) {
+    const ddd = out.whatsapp.slice(2, 4);
+    if (VALID_BRAZIL_DDDS.has(ddd)) {
+      out.whatsapp = out.whatsapp.slice(2);
+    }
   }
 
   // FALLBACK SCANNER 2: Email detection
