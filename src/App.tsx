@@ -17,6 +17,7 @@ import {
   Sparkles,
   Shield,
   Layers,
+  Clipboard,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -60,6 +61,7 @@ import {
   exportContactsToExcel,
   isOverdue,
   isWithoutContactFor3Days,
+  cleanPhone,
 } from './utils/excel';
 
 import { Header } from './components/Header';
@@ -71,6 +73,7 @@ import { TemperatureChart } from './components/TemperatureChart';
 import { Dropzone } from './components/Dropzone';
 import { ContactCard } from './components/ContactCard';
 import { AddContactForm } from './components/AddContactModal';
+import { QuickPasteModal } from './components/QuickPasteModal';
 import { DailyExportModal } from './components/DailyExportModal';
 import { MessagesView } from './components/MessagesView';
 import { MessageModal } from './components/MessageModal';
@@ -215,12 +218,31 @@ export default function App() {
   const [filterTemp, setFilterTemp] = useState('');
   const [sortBy, setSortBy] = useState<'curso' | 'nome' | 'temperatura' | 'recentes'>('curso');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showQuickPasteModal, setShowQuickPasteModal] = useState(false);
   const [showDailyExport, setShowDailyExport] = useState(false);
   const [messageModalContact, setMessageModalContact] = useState<Contact | null>(null);
   const [salesAssistantContact, setSalesAssistantContact] = useState<Contact | null>(null);
   const [showAIChatAssistant, setShowAIChatAssistant] = useState(false);
   const [showAppSmartImport, setShowAppSmartImport] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Global Ctrl+V / Cmd+V shortcut to open Quick Paste when not typing in an input
+  useEffect(() => {
+    const handleGlobalPaste = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+        const target = e.target as HTMLElement;
+        const isInput =
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable;
+        if (!isInput && activeView === 'contatos') {
+          setShowQuickPasteModal(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalPaste);
+    return () => window.removeEventListener('keydown', handleGlobalPaste);
+  }, [activeView]);
 
   // Auto redirect if not admin trying to access admin tab
   useEffect(() => {
@@ -1351,18 +1373,19 @@ export default function App() {
   };
 
   const handleAddManualContact = (partial: Partial<Contact>) => {
+    const rawZap = partial.whatsapp ? cleanPhone(partial.whatsapp) : '';
     const newContact: Contact = {
       id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9),
-      nome: partial.nome || 'Novo Aluno',
-      whatsapp: partial.whatsapp || '',
-      email: partial.email || '',
-      curso: partial.curso || '',
+      nome: partial.nome?.trim() || 'Novo Aluno',
+      whatsapp: rawZap || (partial.whatsapp?.trim() || ''),
+      email: partial.email?.trim().toLowerCase() || '',
+      curso: partial.curso?.trim() || '',
       temperatura: partial.temperatura || 'Frio',
       dataContato: partial.dataContato || todayStr(),
       ultimoContato: partial.ultimoContato || '',
       proximoContato: partial.proximoContato || '',
       status: partial.status || 'Novo Lead',
-      observacao: partial.observacao || '',
+      observacao: partial.observacao?.trim() || '',
       createdAt: Date.now(),
       assignedTo: currentProfile?.uid,
       assignedToEmail: currentProfile?.email || undefined,
@@ -1611,6 +1634,7 @@ export default function App() {
           onSelectView={setActiveView}
           onOpenDailyExport={() => setShowDailyExport(true)}
           onOpenAIAssistant={() => setShowAIChatAssistant(true)}
+          onOpenQuickPaste={() => setShowQuickPasteModal(true)}
           contactsCount={contacts.length}
           currentProfile={currentProfile}
           pendingApprovalsCount={pendingApprovalsCount}
@@ -1678,6 +1702,8 @@ export default function App() {
               hasContacts={contacts.length > 0}
               isAdmin={currentProfile?.role === 'admin'}
               onOpenSmartImport={() => setShowAppSmartImport(true)}
+              onOpenAddManual={() => setShowAddForm(true)}
+              onOpenQuickPaste={() => setShowQuickPasteModal(true)}
             />
 
             {/* Quick Action & Search Controls */}
@@ -1795,8 +1821,19 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Action Buttons: Marcar Todos Disparados + Novo Contato */}
-                <div className="flex items-center gap-2">
+                {/* Action Buttons: Colar Rápido, Marcar Todos Disparados, Novo Contato */}
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <button
+                    type="button"
+                    id="quick-paste-action-btn"
+                    onClick={() => setShowQuickPasteModal(true)}
+                    className="flex items-center justify-center gap-1.5 bg-[#22C55E]/15 hover:bg-[#22C55E]/30 text-[#4ADE80] border border-[#22C55E]/40 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
+                    title="Colar contatos do WhatsApp, Excel ou texto diretamente (Ctrl+V)"
+                  >
+                    <Clipboard className="w-4 h-4 text-[#4ADE80]" />
+                    <span>📋 Colar Contatos (Ctrl+V)</span>
+                  </button>
+
                   {filteredContacts.length > 0 && (
                     <button
                       type="button"
@@ -1815,7 +1852,7 @@ export default function App() {
                       className="flex items-center justify-center gap-1.5 bg-[#6E8F5C]/20 hover:bg-[#6E8F5C]/35 text-[#4ADE80] border border-[#6E8F5C]/40 font-semibold text-xs sm:text-sm px-3 py-2 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
                     >
                       <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
-                      <span>Marcar Todos como Contatados ({filteredContacts.length})</span>
+                      <span>Marcar Todos ({filteredContacts.length})</span>
                     </button>
                   )}
 
@@ -1826,7 +1863,7 @@ export default function App() {
                     className="flex items-center justify-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0"
                   >
                     <UserPlus className="w-4 h-4 text-[#C9A227]" />
-                    <span>Novo Contato</span>
+                    <span>+ Novo Manual</span>
                   </button>
                 </div>
               </div>
@@ -1898,8 +1935,22 @@ export default function App() {
             {/* Modal: Add Contact Form */}
             {showAddForm && (
               <AddContactForm
+                isOpen={showAddForm}
                 onAddContact={handleAddManualContact}
+                onAddMultipleContacts={(newContacts) => handleImportRows(newContacts, 'Cadastro Manual em Lote')}
                 onClose={() => setShowAddForm(false)}
+                availableCourses={uniqueCourses}
+              />
+            )}
+
+            {/* Modal: Quick Paste Contacts (Instant batch paste & save) */}
+            {showQuickPasteModal && (
+              <QuickPasteModal
+                isOpen={showQuickPasteModal}
+                onClose={() => setShowQuickPasteModal(false)}
+                onImportContacts={(newContacts, batch) =>
+                  handleImportRows(newContacts, batch || 'Colar Rápido')
+                }
                 availableCourses={uniqueCourses}
               />
             )}

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, FileSpreadsheet, Sparkles, Trash2, Layers, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, Sparkles, Trash2, Layers, CheckCircle2, UserPlus, Clipboard } from 'lucide-react';
 import { parseSpreadsheetBuffer } from '../utils/excel';
 import { Contact } from '../types';
 
@@ -9,6 +9,8 @@ interface DropzoneProps {
   hasContacts: boolean;
   isAdmin?: boolean;
   onOpenSmartImport?: () => void;
+  onOpenAddManual?: () => void;
+  onOpenQuickPaste?: () => void;
 }
 
 export const Dropzone: React.FC<DropzoneProps> = ({
@@ -17,6 +19,8 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   hasContacts,
   isAdmin = false,
   onOpenSmartImport,
+  onOpenAddManual,
+  onOpenQuickPaste,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!hasContacts);
@@ -105,6 +109,30 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               <UploadCloud className="w-3.5 h-3.5 text-[#C9A227]" />
               {isAdmin ? 'Importar Planilha Direta' : 'Importar (.xlsx, .csv)'}
             </button>
+
+            {onOpenQuickPaste && (
+              <button
+                type="button"
+                onClick={onOpenQuickPaste}
+                className="flex items-center gap-1.5 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#4ADE80] px-2.5 py-1 rounded-md font-semibold border border-[#22C55E]/40 transition-colors cursor-pointer"
+                title="Colar contatos direto (Ctrl+V)"
+              >
+                <Clipboard className="w-3.5 h-3.5 text-[#4ADE80]" />
+                <span>📋 Colar Contatos</span>
+              </button>
+            )}
+
+            {onOpenAddManual && (
+              <button
+                type="button"
+                onClick={onOpenAddManual}
+                className="flex items-center gap-1.5 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] px-2.5 py-1 rounded-md font-semibold border border-[#2B3D63] transition-colors cursor-pointer"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-[#C9A227]" />
+                <span>+ Novo Manual</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setIsExpanded(true)}
@@ -187,6 +215,35 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               >
                 Escolher Planilha
               </button>
+
+              {onOpenQuickPaste && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenQuickPaste();
+                  }}
+                  className="flex items-center gap-1.5 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#4ADE80] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-[#22C55E]/40 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                  title="Colar contatos do WhatsApp, Excel ou texto (Ctrl+V)"
+                >
+                  <Clipboard className="w-4 h-4 text-[#4ADE80]" />
+                  <span>📋 Colar Contatos (Ctrl+V)</span>
+                </button>
+              )}
+
+              {onOpenAddManual && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenAddManual();
+                  }}
+                  className="flex items-center gap-1.5 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-[#2B3D63] transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  <UserPlus className="w-4 h-4 text-[#C9A227]" />
+                  <span>+ Novo Manual</span>
+                </button>
+              )}
             </div>
           </div>
 

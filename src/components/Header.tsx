@@ -14,6 +14,7 @@ import {
   Monitor,
   Globe,
   ExternalLink,
+  Clipboard,
 } from 'lucide-react';
 import { ViewTab, UserProfile } from '../types';
 import { getWhatsAppTargetMode, setWhatsAppTargetMode, WhatsAppTargetMode } from '../utils/excel';
@@ -24,6 +25,7 @@ interface HeaderProps {
   onSelectView: (view: ViewTab) => void;
   onOpenDailyExport: () => void;
   onOpenAIAssistant: () => void;
+  onOpenQuickPaste?: () => void;
   contactsCount: number;
   currentProfile: UserProfile | null;
   pendingApprovalsCount?: number;
@@ -35,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectView,
   onOpenDailyExport,
   onOpenAIAssistant,
+  onOpenQuickPaste,
   contactsCount,
   currentProfile,
   pendingApprovalsCount = 0,
@@ -121,6 +124,18 @@ export const Header: React.FC<HeaderProps> = ({
               <ExternalLink className="w-3 h-3" />
             </button>
           </div>
+
+          {onOpenQuickPaste && (
+            <button
+              id="quick-paste-header-btn"
+              onClick={onOpenQuickPaste}
+              className="flex items-center gap-2 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#4ADE80] border border-[#22C55E]/40 font-bold rounded-lg px-3 py-2 text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+              title="Colar contatos diretamente do WhatsApp, Excel ou Bloco de Notas (Ctrl+V)"
+            >
+              <Clipboard className="w-4 h-4 text-[#4ADE80]" />
+              <span>Colar Contatos</span>
+            </button>
+          )}
 
           <button
             id="ai-assistant-btn"
