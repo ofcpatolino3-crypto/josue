@@ -908,18 +908,19 @@ export function parseRawTextToContacts(rawText: string): Partial<Contact>[] {
   return results;
 }
 
-export type WhatsAppTargetMode = 'same_tab' | 'desktop_app' | 'new_tab';
+export type WhatsAppTargetMode = 'desktop_app' | 'same_tab' | 'new_tab';
 
 export function getWhatsAppTargetMode(): WhatsAppTargetMode {
   try {
     const saved = localStorage.getItem('portal_whatsapp_target_mode');
-    if (saved === 'same_tab' || saved === 'desktop_app' || saved === 'new_tab') {
+    if (saved === 'desktop_app' || saved === 'same_tab' || saved === 'new_tab') {
       return saved as WhatsAppTargetMode;
     }
   } catch (e) {
     console.error(e);
   }
-  return 'same_tab'; // Padrão: Reaproveita a mesma aba para não criar dezenas de abas!
+  // Padrão: Abre direto no Aplicativo WhatsApp (Desktop / Celular) sem abrir abas no navegador!
+  return 'desktop_app';
 }
 
 export function setWhatsAppTargetMode(mode: WhatsAppTargetMode) {
@@ -934,6 +935,10 @@ export function waLink(tel: string): string | null {
   const digits = cleanPhone(tel);
   if (!digits) return null;
   const full = digits.length <= 11 ? '55' + digits : digits;
+  const mode = getWhatsAppTargetMode();
+  if (mode === 'desktop_app') {
+    return `whatsapp://send?phone=${full}`;
+  }
   return `https://web.whatsapp.com/send?phone=${full}`;
 }
 
@@ -941,11 +946,12 @@ export function waLinkWithMessage(tel: string, message?: string): string | null 
   const digits = cleanPhone(tel);
   if (!digits) return null;
   const full = digits.length <= 11 ? '55' + digits : digits;
-  const base = `https://web.whatsapp.com/send?phone=${full}`;
-  if (message && message.trim()) {
-    return `${base}&text=${encodeURIComponent(message.trim())}`;
+  const msgParam = message && message.trim() ? `&text=${encodeURIComponent(message.trim())}` : '';
+  const mode = getWhatsAppTargetMode();
+  if (mode === 'desktop_app') {
+    return `whatsapp://send?phone=${full}${msgParam}`;
   }
-  return base;
+  return `https://web.whatsapp.com/send?phone=${full}${msgParam}`;
 }
 
 /**

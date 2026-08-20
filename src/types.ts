@@ -96,6 +96,7 @@ export type MessageTemplateCategory =
   | 'recuperacao_sumidos' 
   | 'renovacao' 
   | 'boas_vindas' 
+  | 'roteiro_audio'
   | 'geral';
 
 export interface MessageTemplate {
@@ -108,6 +109,10 @@ export interface MessageTemplate {
   emocao?: string;
   logica?: string;
   tags?: string[];
+  tipo?: 'texto' | 'audio';
+  duracaoEstimada?: string; // ex: '25 a 35 seg'
+  tomDeVoz?: string; // ex: 'Acolhedor, seguro e dinâmico'
+  dicasGravacao?: string[]; // ex: ['Fale o primeiro nome no primeiro segundo', 'Faça pequenas pausas para naturalidade']
 }
 
 export interface ToastMessage {

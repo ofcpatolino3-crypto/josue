@@ -13,6 +13,10 @@ import {
   ArrowRightLeft,
   RefreshCw,
   Search,
+  Mic,
+  Volume2,
+  Timer,
+  Headphones,
 } from 'lucide-react';
 import { MessageTemplate } from '../types';
 import { DEFAULT_TEMPLATES } from '../data/defaults';
@@ -45,15 +49,19 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
   const [editLogica, setEditLogica] = useState<string>('');
   const [editDesc, setEditDesc] = useState<string>('');
   const [editText, setEditText] = useState<string>('');
+  const [editDuracao, setEditDuracao] = useState<string>('');
+  const [editTomDeVoz, setEditTomDeVoz] = useState<string>('');
 
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [newTitle, setNewTitle] = useState<string>('');
-  const [newCategory, setNewCategory] = useState<MessageTemplate['categoria']>('pos_prova');
+  const [newCategory, setNewCategory] = useState<MessageTemplate['categoria']>('roteiro_audio');
   const [newGatilho, setNewGatilho] = useState<string>('');
   const [newEmocao, setNewEmocao] = useState<string>('');
   const [newLogica, setNewLogica] = useState<string>('');
   const [newDesc, setNewDesc] = useState<string>('');
   const [newText, setNewText] = useState<string>('');
+  const [newDuracao, setNewDuracao] = useState<string>('25 a 30 segundos');
+  const [newTomDeVoz, setNewTomDeVoz] = useState<string>('Acolhedor, seguro e dinâmico');
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -73,6 +81,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
     setEditLogica(tmpl.logica || '');
     setEditDesc(tmpl.descricao || '');
     setEditText(tmpl.texto);
+    setEditDuracao(tmpl.duracaoEstimada || '');
+    setEditTomDeVoz(tmpl.tomDeVoz || '');
   };
 
   const handleSaveEdit = (id: string) => {
@@ -92,11 +102,15 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       logica: editLogica.trim() || undefined,
       descricao: editDesc.trim() || undefined,
       texto: editText.trim(),
+      tipo: editCategory === 'roteiro_audio' ? 'audio' : currentTmpl?.tipo || 'texto',
+      duracaoEstimada: editDuracao.trim() || undefined,
+      tomDeVoz: editTomDeVoz.trim() || undefined,
+      dicasGravacao: currentTmpl?.dicasGravacao,
       tags: currentTmpl?.tags,
     });
 
     setEditingId(null);
-    onToast('Modelo de mensagem atualizado com sucesso!', 'success');
+    onToast('Modelo atualizado com sucesso!', 'success');
   };
 
   const handleCreateNew = (e: React.FormEvent) => {
@@ -117,23 +131,29 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       logica: newLogica.trim() || undefined,
       descricao: newDesc.trim() || undefined,
       texto: newText.trim(),
+      tipo: newCategory === 'roteiro_audio' ? 'audio' : 'texto',
+      duracaoEstimada: newCategory === 'roteiro_audio' ? newDuracao.trim() : undefined,
+      tomDeVoz: newCategory === 'roteiro_audio' ? newTomDeVoz.trim() : undefined,
     });
 
     setNewTitle('');
+    setNewCategory('roteiro_audio');
     setNewGatilho('');
     setNewEmocao('');
     setNewLogica('');
     setNewDesc('');
     setNewText('');
+    setNewDuracao('25 a 30 segundos');
+    setNewTomDeVoz('Acolhedor, seguro e dinâmico');
     setShowAddForm(false);
-    onToast('Novo modelo de mensagem criado com sucesso!', 'success');
+    onToast('Novo modelo criado com sucesso!', 'success');
   };
 
   const handleCopyPreview = (tmpl: MessageTemplate) => {
     const filled = fillTemplate(tmpl.texto, previewContact);
     navigator.clipboard.writeText(filled);
     setCopiedId(tmpl.id);
-    onToast(`Mensagem "${tmpl.titulo}" copiada (com dados de exemplo)!`, 'success');
+    onToast(`Roteiro "${tmpl.titulo}" copiado (com dados de exemplo)!`, 'success');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -149,6 +169,13 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
   const getCategoryBadge = (cat: string) => {
     switch (cat) {
+      case 'roteiro_audio':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#38BDF8] border border-[#38BDF8]/50 text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-sm">
+            <Mic className="w-3 h-3 text-[#38BDF8]" />
+            🎙️ Roteiro de Áudio (20-35s)
+          </span>
+        );
       case 'pos_prova':
         return (
           <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#C9A227] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
@@ -217,10 +244,10 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
             Comunicação & Abordagens
           </div>
           <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
-            Mensagens Prontas & Scripts
+            Mensagens Prontas & Roteiros de Áudio
           </h2>
           <p className="text-xs sm:text-sm text-[#8C98B4] mt-0.5">
-            Abordagens humanizadas focadas em escuta ativa, rotina de estudos e oportunidade de migrar do Curso Isolado para a Assinatura 1.0 (com abatimento total do valor já pago).
+            Scripts de alta conversão para gravação de áudios de 20-35 segundos e mensagens de texto focadas em migração do Curso Isolado para a Assinatura 1.0.
           </p>
         </div>
 
@@ -230,7 +257,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
             onClick={() => {
               if (
                 window.confirm(
-                  'Deseja restaurar as mensagens para os modelos padrão de fábrica?'
+                  'Deseja restaurar as mensagens e roteiros de áudio para os modelos padrão de fábrica?'
                 )
               ) {
                 onResetTemplates();
@@ -249,16 +276,45 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
             className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
-            Novo Script
+            Novo Script / Roteiro
           </button>
         </div>
       </div>
 
+      {/* Audio Scripts Highlight Promo Banner */}
+      <div className="bg-gradient-to-r from-[#172644] via-[#1A2E56] to-[#172644] border border-[#38BDF8]/40 rounded-xl p-3.5 sm:p-4 text-xs text-[#EDE6D6] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#38BDF8]/20 border border-[#38BDF8]/40 flex items-center justify-center shrink-0">
+            <Mic className="w-5 h-5 text-[#38BDF8] animate-pulse" />
+          </div>
+          <div>
+            <div className="font-bold text-sm text-[#EDE6D6] flex items-center gap-1.5">
+              <span>🎙️ Roteiros de Áudio para Gravar no WhatsApp (20 a 35s)</span>
+              <span className="bg-[#38BDF8] text-[#101B2D] text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase">
+                3x Mais Conversão
+              </span>
+            </div>
+            <p className="text-xs text-[#8C98B4] mt-0.5">
+              Áudios gravados com fala natural e conexão amiga quebram objeções e fecham matrículas muito mais rápido que textos longos.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setActiveCategory('roteiro_audio')}
+          className="bg-[#38BDF8] hover:bg-[#2fb0ea] text-[#101B2D] text-xs font-bold px-3.5 py-1.5 rounded-lg shrink-0 transition-colors cursor-pointer flex items-center gap-1.5"
+        >
+          <Headphones className="w-3.5 h-3.5" />
+          Ver Só Roteiros de Áudio
+        </button>
+      </div>
+
       {/* Dynamic Tags Legend Box */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-3.5 text-xs text-[#8C98B4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-3 text-xs text-[#8C98B4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-2 text-[#EDE6D6] font-semibold">
           <Sparkles className="w-4 h-4 text-[#C9A227]" />
-          <span>Variáveis automáticas aceitas nos textos:</span>
+          <span>Variáveis automáticas aceitas nos roteiros:</span>
         </div>
         <div className="flex flex-wrap gap-2">
           <code className="bg-[#101B2D] border border-[#2B3D63] text-[#C9A227] px-2 py-0.5 rounded text-[11px] font-mono">
@@ -280,83 +336,126 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       {showAddForm && (
         <form
           onSubmit={handleCreateNew}
-          className="bg-[#172644] border border-[#C9A227]/40 rounded-xl p-4 sm:p-5 shadow-lg space-y-3"
+          className="bg-[#172644] border border-[#C9A227] rounded-xl p-4 sm:p-5 space-y-4 shadow-md"
         >
-          <div className="text-sm font-semibold text-[#EDE6D6] flex items-center gap-2">
-            <Plus className="w-4 h-4 text-[#C9A227]" />
-            Cadastrar Novo Modelo de Mensagem
+          <div className="flex items-center justify-between border-b border-[#2B3D63] pb-2">
+            <h3 className="font-bold text-sm text-[#C9A227] flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Criar Novo Roteiro ou Modelo de Mensagem
+            </h3>
+            <button
+              type="button"
+              onClick={() => setShowAddForm(false)}
+              className="text-xs text-[#8C98B4] hover:text-[#EDE6D6] cursor-pointer"
+            >
+              Fechar
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
-                Título do Modelo *
+                Título do Script *
               </label>
               <input
                 type="text"
                 required
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Ex: Pós-Prova: Feedback e sondagem de migração"
+                placeholder="Ex: 🎙️ Áudio: Fechamento com Condição Autorizada"
                 className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
               />
             </div>
 
             <div>
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
-                Categoria / Objetivo
+                Categoria *
               </label>
               <select
                 value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value as MessageTemplate['categoria'])}
+                onChange={(e) =>
+                  setNewCategory(e.target.value as MessageTemplate['categoria'])
+                }
                 className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227] cursor-pointer"
               >
-                <option value="pos_prova">Pós-Prova (Como foi no concurso)</option>
-                <option value="migracao">Migração de Edital (Abatimento Integral)</option>
-                <option value="pre_prova">Pré-Prova (Rotina de estudos & Reta Final)</option>
-                <option value="fechamento_pix">Fechamento Rápido & PIX / Cartão</option>
-                <option value="recuperacao_sumidos">Resgate / Alunos Sumidos com Afeto</option>
-                <option value="renovacao">Renovação de Assinatura</option>
-                <option value="boas_vindas">Boas-Vindas & Diagnóstico Amigo</option>
+                <option value="roteiro_audio">🎙️ Roteiro para Áudio (Voice Script)</option>
+                <option value="pos_prova">Pós-Prova</option>
+                <option value="migracao">Migração de Edital (Assinatura 1.0)</option>
+                <option value="fechamento_pix">Fechamento & PIX</option>
+                <option value="pre_prova">Pré-Prova / Rotina</option>
+                <option value="recuperacao_sumidos">Resgate / Sumidos</option>
+                <option value="boas_vindas">Boas-Vindas</option>
+                <option value="renovacao">Renovação</option>
                 <option value="geral">Geral</option>
               </select>
             </div>
           </div>
 
+          {newCategory === 'roteiro_audio' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#101B2D] p-3 rounded-lg border border-[#38BDF8]/30">
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#38BDF8] mb-1 flex items-center gap-1">
+                  <Timer className="w-3 h-3" />
+                  Duração Estimada do Áudio
+                </label>
+                <input
+                  type="text"
+                  value={newDuracao}
+                  onChange={(e) => setNewDuracao(e.target.value)}
+                  placeholder="Ex: 25 a 30 segundos"
+                  className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8]"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#38BDF8] mb-1 flex items-center gap-1">
+                  <Volume2 className="w-3 h-3" />
+                  Tom de Voz Sugerido
+                </label>
+                <input
+                  type="text"
+                  value={newTomDeVoz}
+                  onChange={(e) => setNewTomDeVoz(e.target.value)}
+                  placeholder="Ex: Acolhedor, seguro e com energia positiva"
+                  className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8]"
+                />
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#C9A227] mb-1">
-                ⚡ Gatilho Mental & Estratégia
+                ⚡ Gatilho Mental
               </label>
               <input
                 type="text"
                 value={newGatilho}
                 onChange={(e) => setNewGatilho(e.target.value)}
-                placeholder="Ex: ❤️ Empatia + 🧠 Matemática dos 80%"
+                placeholder="Ex: 💡 Abatimento 100% + Reciprocidade"
                 className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
               />
             </div>
             <div>
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#B14432] mb-1">
-                ❤️ Conexão Emocional (Dor / Alívio / Sonho)
+                ❤️ Conexão Emocional
               </label>
               <input
                 type="text"
                 value={newEmocao}
                 onChange={(e) => setNewEmocao(e.target.value)}
-                placeholder="Ex: Tira a culpa do cansaço e valida a jornada"
+                placeholder="Ex: Tira o peso da reprovação"
                 className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
               />
             </div>
             <div>
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#5C7A9E] mb-1">
-                🧠 Fundamento Lógico (Cálculo / Razão)
+                🧠 Fundamento Lógico
               </label>
               <input
                 type="text"
                 value={newLogica}
                 onChange={(e) => setNewLogica(e.target.value)}
-                placeholder="Ex: Estudo de 45 min/dia gera 70% mais retenção"
+                placeholder="Ex: Abatimento de 100% na assinatura"
                 className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
               />
             </div>
@@ -370,22 +469,22 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               type="text"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
-              placeholder="Ex: Usar quando o aluno fez a prova no domingo..."
+              placeholder="Ex: Usar quando o aluno disser que achou caro..."
               className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
             />
           </div>
 
           <div>
             <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
-              Texto da Mensagem *
+              Roteiro de Fala / Texto da Mensagem *
             </label>
             <textarea
               required
               rows={5}
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
-              placeholder="Olá {nome}! Tudo bem? Passando para saber como foi sua prova de {curso}..."
-              className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227] resize-y"
+              placeholder="Oi, {nome}! Tudo bem? Gravando esse áudio rapidinho só pra te avisar sobre o abatimento de {curso}..."
+              className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227] resize-y font-sans"
             />
           </div>
 
@@ -412,6 +511,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
         <div className="flex flex-wrap gap-1.5">
           {[
             { id: 'todos', label: 'Todos os Scripts' },
+            { id: 'roteiro_audio', label: '🎙️ Roteiros de Áudio (Voice)' },
             { id: 'pos_prova', label: 'Pós-Prova' },
             { id: 'migracao', label: 'Migração p/ Assinatura 1.0' },
             { id: 'fechamento_pix', label: 'Fechamento & PIX' },
@@ -426,7 +526,9 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               onClick={() => setActiveCategory(cat.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeCategory === cat.id
-                  ? 'bg-[#C9A227] text-[#101B2D] font-bold shadow-sm'
+                  ? cat.id === 'roteiro_audio'
+                    ? 'bg-[#38BDF8] text-[#101B2D] font-bold shadow-sm'
+                    : 'bg-[#C9A227] text-[#101B2D] font-bold shadow-sm'
                   : 'bg-[#172644] text-[#8C98B4] hover:text-[#EDE6D6] border border-[#2B3D63]'
               }`}
             >
@@ -457,11 +559,14 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
           filtered.map((tmpl) => {
             const isEditing = editingId === tmpl.id;
             const isCopied = copiedId === tmpl.id;
+            const isAudio = tmpl.categoria === 'roteiro_audio' || tmpl.tipo === 'audio';
 
             return (
               <div
                 key={tmpl.id}
-                className="bg-[#172644] border border-[#2B3D63] rounded-xl p-4 sm:p-5 transition-all shadow-sm flex flex-col gap-3"
+                className={`bg-[#172644] border rounded-xl p-4 sm:p-5 transition-all shadow-sm flex flex-col gap-3 ${
+                  isAudio ? 'border-[#38BDF8]/40 bg-gradient-to-br from-[#172644] to-[#121F38]' : 'border-[#2B3D63]'
+                }`}
               >
                 {isEditing ? (
                   /* Edit Form Mode */
@@ -502,6 +607,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                           }
                           className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227] cursor-pointer"
                         >
+                          <option value="roteiro_audio">🎙️ Roteiro para Áudio (Voice Script)</option>
                           <option value="pos_prova">Pós-Prova</option>
                           <option value="migracao">Migração de Edital</option>
                           <option value="pre_prova">Pré-Prova / Rotina</option>
@@ -513,6 +619,35 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                         </select>
                       </div>
                     </div>
+
+                    {editCategory === 'roteiro_audio' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#101B2D] p-2.5 rounded-lg border border-[#38BDF8]/30">
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#38BDF8] mb-1">
+                            ⏱️ Duração Estimada do Áudio
+                          </label>
+                          <input
+                            type="text"
+                            value={editDuracao}
+                            onChange={(e) => setEditDuracao(e.target.value)}
+                            placeholder="Ex: 25 a 30 segundos"
+                            className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-[#38BDF8]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#38BDF8] mb-1">
+                            🗣️ Tom de Voz
+                          </label>
+                          <input
+                            type="text"
+                            value={editTomDeVoz}
+                            onChange={(e) => setEditTomDeVoz(e.target.value)}
+                            placeholder="Ex: Acolhedor, seguro e com energia"
+                            className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-[#38BDF8]"
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
@@ -567,13 +702,13 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
                     <div>
                       <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
-                        Texto da Mensagem
+                        Texto / Roteiro da Mensagem
                       </label>
                       <textarea
                         rows={6}
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
-                        className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg p-3 text-sm focus:outline-none focus:border-[#C9A227] resize-y"
+                        className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg p-3 text-sm focus:outline-none focus:border-[#C9A227] resize-y font-sans"
                       />
                     </div>
 
@@ -607,9 +742,15 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                               ⚡ {tmpl.gatilho}
                             </span>
                           )}
+                          {isAudio && (tmpl.duracaoEstimada || tmpl.tomDeVoz) && (
+                            <span className="inline-flex items-center gap-1.5 bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30 text-[10px] font-semibold px-2 py-0.5 rounded">
+                              <Timer className="w-3 h-3" />
+                              {tmpl.duracaoEstimada || '25 a 30s'}
+                            </span>
+                          )}
                         </div>
-                        <h3 className="font-serif font-bold text-base sm:text-lg text-[#EDE6D6] mt-1">
-                          {tmpl.titulo}
+                        <h3 className="font-serif font-bold text-base sm:text-lg text-[#EDE6D6] mt-1 flex items-center gap-2">
+                          <span>{tmpl.titulo}</span>
                         </h3>
                         {tmpl.descricao && (
                           <p className="text-xs text-[#8C98B4] mt-0.5">{tmpl.descricao}</p>
@@ -642,6 +783,44 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                       </div>
                     </div>
 
+                    {/* Audio Specific Guidelines Box if Audio */}
+                    {isAudio && (
+                      <div className="bg-[#101B2D] border border-[#38BDF8]/30 rounded-xl p-3 text-xs space-y-2">
+                        <div className="flex flex-wrap items-center gap-3 text-[11px]">
+                          {tmpl.tomDeVoz && (
+                            <div className="flex items-center gap-1 text-[#EDE6D6]">
+                              <Volume2 className="w-3.5 h-3.5 text-[#38BDF8]" />
+                              <span className="text-[#8C98B4]">Tom de Voz:</span>
+                              <span className="font-semibold">{tmpl.tomDeVoz}</span>
+                            </div>
+                          )}
+                          {tmpl.duracaoEstimada && (
+                            <div className="flex items-center gap-1 text-[#EDE6D6]">
+                              <Timer className="w-3.5 h-3.5 text-[#38BDF8]" />
+                              <span className="text-[#8C98B4]">Duração Ideal:</span>
+                              <span className="font-semibold">{tmpl.duracaoEstimada}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {tmpl.dicasGravacao && tmpl.dicasGravacao.length > 0 && (
+                          <div className="pt-2 border-t border-[#2B3D63] space-y-1">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-[#38BDF8] flex items-center gap-1">
+                              <span>💡 Dicas de Gravação para Alta Conversão:</span>
+                            </div>
+                            <ul className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[11px] text-[#EDE6D6]/90">
+                              {tmpl.dicasGravacao.map((dica, idx) => (
+                                <li key={idx} className="flex items-start gap-1.5 bg-[#172644]/70 p-1.5 rounded">
+                                  <span className="text-[#38BDF8] font-bold">•</span>
+                                  <span>{dica}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Emotion & Logic Cards Breakdown */}
                     {(tmpl.emocao || tmpl.logica) && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
@@ -664,8 +843,20 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                       </div>
                     )}
 
-                    {/* Formatted Message Preview */}
-                    <div className="bg-[#101B2D]/90 border border-[#2B3D63] rounded-lg p-3.5 text-xs sm:text-[13.5px] text-[#EDE6D6] leading-relaxed whitespace-pre-wrap font-sans">
+                    {/* Formatted Message / Teleprompter Box */}
+                    <div
+                      className={`rounded-lg p-4 text-xs sm:text-[14px] leading-relaxed whitespace-pre-wrap font-sans ${
+                        isAudio
+                          ? 'bg-[#0E1726] border-2 border-[#38BDF8]/40 text-[#EDE6D6] shadow-inner font-medium tracking-wide'
+                          : 'bg-[#101B2D]/90 border border-[#2B3D63] text-[#EDE6D6]'
+                      }`}
+                    >
+                      {isAudio && (
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-[#38BDF8] mb-1.5 flex items-center gap-1">
+                          <Mic className="w-3 h-3" />
+                          Teleprompter de Leitura para o Microfone:
+                        </div>
+                      )}
                       {tmpl.texto}
                     </div>
 
@@ -681,6 +872,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                         className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           isCopied
                             ? 'bg-[#6E8F5C] text-[#EDE6D6]'
+                            : isAudio
+                            ? 'bg-[#38BDF8] hover:bg-[#2fb0ea] text-[#101B2D]'
                             : 'bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D]'
                         }`}
                         title="Copiar texto substituindo variáveis pelo exemplo"
@@ -693,7 +886,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                         ) : (
                           <>
                             <Copy className="w-3.5 h-3.5" />
-                            Copiar Script
+                            {isAudio ? 'Copiar Roteiro de Áudio' : 'Copiar Script'}
                           </>
                         )}
                       </button>

@@ -85,30 +85,30 @@ export const Header: React.FC<HeaderProps> = ({
             
             <button
               type="button"
-              onClick={() => handleSwitchWaMode('same_tab')}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
-                waMode === 'same_tab'
-                  ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
-              }`}
-              title="Abre e atualiza sempre na MESMA aba do WhatsApp Web (Sem abrir novas abas)"
-            >
-              <Globe className="w-3 h-3" />
-              <span>Web (1 Aba)</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => handleSwitchWaMode('desktop_app')}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
                 waMode === 'desktop_app'
                   ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
                   : 'text-[#8C98B4] hover:text-[#EDE6D6]'
               }`}
               title="Abre direto no Aplicativo WhatsApp do Computador / Celular (ZERO abas no navegador!)"
             >
-              <Monitor className="w-3 h-3" />
-              <span>App Desktop (0 Abas)</span>
+              <Monitor className="w-3.5 h-3.5" />
+              <span>App WhatsApp (0 Abas)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchWaMode('same_tab')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
+                waMode === 'same_tab'
+                  ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
+                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+              title="Abre e atualiza na MESMA aba do WhatsApp Web"
+            >
+              <Globe className="w-3 h-3" />
+              <span>Web (1 Aba)</span>
             </button>
 
             <button

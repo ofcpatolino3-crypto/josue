@@ -288,6 +288,122 @@ Separei aqui um material exclusivo de apoio pedagógico para quem está focado e
 Quero te enviar gratuitamente para te ajudar a organizar seu cronograma dessa semana!
 
 Você prefere que eu te envie o link direto por aqui em PDF ou tem algum e-mail de preferência? Me dá um alô!`
+  },
+
+  // 8. ROTEIROS DE ÁUDIO / VOICE SCRIPTS (Para gravar áudios de alta conversão de 20-35s)
+  {
+    id: 't_audio_pos_prova',
+    titulo: '🎙️ Áudio: Acolhimento Humano Pós-Prova',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '25 a 30 segundos',
+    tomDeVoz: 'Acolhedor, sincero, voz calma e amiga (sem tom vendedor)',
+    dicasGravacao: [
+      'Chame pelo primeiro nome logo no 1º segundo de gravação.',
+      'Fale pausadamente, como uma conversa entre dois amigos.',
+      'Faça uma pequena pausa de 1 segundo antes da pergunta final.'
+    ],
+    gatilho: '🎙️ Conexão de Voz Genuína + Validação da Dedicação',
+    emocao: 'Ouvir a voz humana transmite consideração real e quebra qualquer frieza do texto comercial.',
+    logica: 'Áudios pós-prova aumentam a taxa de resposta do aluno em até 70% quando não há oferta imediata.',
+    descricao: 'Roteiro de áudio para gravar no WhatsApp 1 a 3 dias após a prova do curso isolado.',
+    tags: ['Roteiro de Áudio', 'Pós-Prova', 'Voz', 'Acolhimento'],
+    texto: `Fala, {nome}, tudo bem contigo? Aqui é da equipe pedagógica do Portal Concursos. Tô passando aqui rapidinho só pra te parabenizar por ter encarado essa prova de *{curso}*! Sei o quanto você se dedicou nesses últimos meses. Conseguiu descansar um pouquinho a cabeça? Me manda um áudio ou uma mensagem aqui dizendo como você sentiu o nível da prova. Tô na torcida por você!`
+  },
+  {
+    id: 't_audio_quebra_preco',
+    titulo: '🎙️ Áudio: Quebra de Objeção "Tá Caro" / Abatimento 100%',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '28 a 35 segundos',
+    tomDeVoz: 'Empático, firme e seguro na proposta de valor',
+    dicasGravacao: [
+      'Valide que cuidar do dinheiro é prioridade, sem desmerecer a objeção.',
+      'Destaque com ênfase a frase "100% de abatimento do que já pagou".',
+      'Use a comparação de menos de R$ 3 por dia.'
+    ],
+    gatilho: '💡 Alívio de Custo + 🧠 Economia Diária vs Salário Público',
+    emocao: 'Segurança financeira e sentimento de estar fazendo um negócio vantajoso.',
+    logica: 'A voz firme e didática esclarece o cálculo do abatimento melhor que textos longos.',
+    descricao: 'Para enviar quando o aluno disser que está apertado financeiramente ou achar caro.',
+    tags: ['Roteiro de Áudio', 'Objeção Preço', 'Migração', 'Voz'],
+    texto: `Oi, {nome}! Tudo bem? Te entendo perfeitamente, a gente tem que cuidar muito bem do nosso dinheiro mesmo. Mas olha só a boa notícia: você não perde um centavo do que já pagou no curso de *{curso}*. Nós abatemos 100% desse valor pra você migrar pra Assinatura 1.0! Na prática, a diferença fica parcelada em menos de três reais por dia pra destravar o portal inteiro com 180 mil questões. Posso te mandar o link pra você dar uma olhada sem compromisso?`
+  },
+  {
+    id: 't_audio_resgate_sumido',
+    titulo: '🎙️ Áudio: Resgate de Aluno Sumido / Desanimado',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '20 a 25 segundos',
+    tomDeVoz: 'Leve, incentivador, sem qualquer tom de cobrança',
+    dicasGravacao: [
+      'Comece com entusiasmo caloroso.',
+      'Não pergunte "por que você sumiu?", foque na rotina real.',
+      'Sugira o recomeço fácil com apenas 20 a 30 minutos diários.'
+    ],
+    gatilho: '🕊️ Reativação Emocional do Sonho da Posse',
+    emocao: 'Tira a culpa do aluno por ter pausado os estudos e devolve a esperança.',
+    logica: 'Ouvir um áudio caloroso e sem cobrança gera resposta rápida.',
+    descricao: 'Para contatos que pararam de responder há 3 dias ou mais.',
+    tags: ['Roteiro de Áudio', 'Resgate', 'Reconexão', 'Voz'],
+    texto: `Oi, {nome}, tudo em paz? Lembrei de você hoje acompanhando aqui a turma de *{curso}*! Sei que a rotina aperta e às vezes a gente dá uma desanimada ou fica sem tempo, isso é super normal. Só queria te lembrar que você tem muito potencial pra buscar essa posse. Se quiser, a gente monta um planinho leve de 30 minutinhos por dia pra você retomar no seu ritmo. Me dá um oi aqui quando puder!`
+  },
+  {
+    id: 't_audio_fechamento_quente',
+    titulo: '🎙️ Áudio: Fechamento com Condição Autorizada',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '25 a 30 segundos',
+    tomDeVoz: 'Entusiasmado, com autoridade e energia de oportunidade única',
+    dicasGravacao: [
+      'Grave com energia alta e tom resolutivo.',
+      'Diga que acabou de sair da coordenação com a aprovação especial.',
+      'Finalize avisando que o link já está sendo enviado no chat.'
+    ],
+    gatilho: '🔥 Escassez Real + Autorização Especial de Desconto',
+    emocao: 'Sensação de exclusividade e urgência positiva de fechar agora.',
+    logica: 'O áudio personalizado gera compromisso moral muito maior que mensagem automática.',
+    descricao: 'Para contatos quentes que estão prestes a fechar a Assinatura.',
+    tags: ['Roteiro de Áudio', 'Fechamento', 'Quente', 'Voz'],
+    texto: `Fala, {nome}, tudo certo? Passei agora pela coordenação e consegui a liberação daquela condição exclusiva que a gente conversou sobre *{curso}*. O abatimento do seu curso isolado já tá cadastrado no sistema e se você confirmar hoje eu consigo segurar o seu acesso com todas as 180 mil questões comentadas liberadas. Vou te mandar o link facilitado aqui abaixo, tá bom? Confirma se recebeu!`
+  },
+  {
+    id: 't_audio_quebra_tempo',
+    titulo: '🎙️ Áudio: "Não Tenho Tempo" / Estudo de 40 Minutos',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '22 a 28 segundos',
+    tomDeVoz: 'Prático, compreensivo e didático',
+    dicasGravacao: [
+      'Grave em ritmo natural, transmitindo praticidade.',
+      'Mostre que o concurseiro comum estuda no intervalo e no celular.',
+      'Enfatize as questões comentadas em vídeo.'
+    ],
+    gatilho: '⏱️ Desmistificação do Tempo + Método Direto no Celular',
+    emocao: 'Alívio da sobrecarga de achar que precisa de 6 horas por dia.',
+    logica: 'Estudo ativo por questões em blocos de 15 minutos rende mais que maratonas passivas.',
+    descricao: 'Para alunos que alegam falta de tempo, trabalho puxado ou filhos.',
+    tags: ['Roteiro de Áudio', 'Objeção Tempo', 'Método', 'Voz'],
+    texto: `Oi, {nome}! Deixa eu te falar uma coisa rápida: a maioria dos nossos alunos aprovados também não tinha o dia livre, trabalhava fora e cuidava de casa. A Assinatura foi pensada exatamente pra quem tem pouco tempo: você faz 10 a 15 questões comentadas no celular na hora do almoço ou no ônibus e fixa mais matéria do que vendo três horas de aula. Quer que eu te mostre como organizar 40 minutinhos por dia?`
+  },
+  {
+    id: 't_audio_boas_vindas',
+    titulo: '🎙️ Áudio: Boas-Vindas ao Aluno Matriculado (Encantamento)',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '20 a 25 segundos',
+    tomDeVoz: 'Festivo, acolhedor, vibrante e profissional',
+    dicasGravacao: [
+      'Transmita genuína alegria pela matrícula do aluno.',
+      'Reforce que agora você é o orientador direto dele no WhatsApp.',
+      'Dê uma instrução inicial simples sobre a plataforma.'
+    ],
+    gatilho: '🎉 Validação da Vitória + Redução do Remorso Pós-Compra',
+    emocao: 'Orgulho, pertencimento e segurança de ter feito a escolha certa.',
+    logica: 'Áudio pós-venda reduz cancelamentos a zero e aumenta indicações futuras.',
+    descricao: 'Para enviar imediatamente após o aluno pagar a assinatura.',
+    tags: ['Roteiro de Áudio', 'Boas-Vindas', 'Pós-Venda', 'Voz'],
+    texto: `Parabéns, {nome}! Seja muito bem-vindo(a) oficialmente à família do Portal Concursos! Você deu o passo mais importante rumo à sua posse em *{curso}*. Tô salvando seu contato como meu aluno VIP aqui no WhatsApp. Qualquer dúvida com as aulas, simulados ou cronograma, pode me mandar mensagem direta aqui. Bons estudos e vamos juntos até a nomeação!`
   }
 ];
 

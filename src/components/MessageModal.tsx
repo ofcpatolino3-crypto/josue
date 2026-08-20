@@ -16,9 +16,13 @@ import {
   Phone,
   BookOpen,
   FastForward,
+  Mic,
+  Volume2,
+  Timer,
+  Headphones,
 } from 'lucide-react';
 import { Contact, MessageTemplate } from '../types';
-import { fillTemplate, waLinkWithMessage, openWhatsAppDirect } from '../utils/excel';
+import { fillTemplate, openWhatsAppDirect } from '../utils/excel';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -42,6 +46,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   onToast,
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [templateFilter, setTemplateFilter] = useState<'all' | 'audio' | 'text'>('all');
   const [customText, setCustomText] = useState<string>('');
   const [autoMarkContacted, setAutoMarkContacted] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
@@ -51,40 +56,50 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const hasPrevious = currentIndex > 0;
   const hasNext = currentIndex >= 0 && currentIndex < contactsQueue.length - 1;
 
-  // Calculate stats for current course in queue
-  const currentCourse = contact?.curso?.trim() || 'Sem Curso';
+  // Contacts from same course in queue
+  const currentCourse = contact?.curso || 'Sem Concurso Definido';
   const sameCourseContacts = contactsQueue.filter(
-    (c) => (c.curso?.trim() || 'Sem Curso') === currentCourse
+    (c) => (c.curso || 'Sem Concurso Definido') === currentCourse
   );
   const indexInCourse = sameCourseContacts.findIndex((c) => c.id === contact?.id);
 
-  // When modal opens or contact changes, update template text
+  // Initialize template selection when modal opens or contact changes
   useEffect(() => {
-    if (isOpen && contact && templates.length > 0) {
-      const activeTmpl =
-        templates.find((t) => t.id === selectedTemplateId) || templates[0];
-      if (activeTmpl) {
-        setSelectedTemplateId(activeTmpl.id);
-        setCustomText(fillTemplate(activeTmpl.texto, contact));
+    if (templates.length > 0 && !selectedTemplateId) {
+      // Default to first template or a pos_prova / audio template
+      const defaultTmpl =
+        templates.find((t) => t.categoria === 'pos_prova') ||
+        templates.find((t) => t.categoria === 'roteiro_audio') ||
+        templates[0];
+      setSelectedTemplateId(defaultTmpl.id);
+    }
+  }, [templates, selectedTemplateId]);
+
+  // Update text when template or contact changes
+  useEffect(() => {
+    if (contact && selectedTemplateId) {
+      const tmpl = templates.find((t) => t.id === selectedTemplateId);
+      if (tmpl) {
+        setCustomText(fillTemplate(tmpl.texto, contact));
       }
     }
-  }, [isOpen, contact]);
+  }, [contact, selectedTemplateId, templates]);
 
   if (!isOpen || !contact) return null;
 
-  const handleSelectTemplate = (templateId: string) => {
-    setSelectedTemplateId(templateId);
-    const tmpl = templates.find((t) => t.id === templateId);
-    if (tmpl) {
+  const handleSelectTemplate = (tmplId: string) => {
+    setSelectedTemplateId(tmplId);
+    const tmpl = templates.find((t) => t.id === tmplId);
+    if (tmpl && contact) {
       setCustomText(fillTemplate(tmpl.texto, contact));
     }
   };
 
   const handleResetToTemplate = () => {
     const tmpl = templates.find((t) => t.id === selectedTemplateId);
-    if (tmpl) {
+    if (tmpl && contact) {
       setCustomText(fillTemplate(tmpl.texto, contact));
-      onToast('Texto redefinido para o padrão do modelo.', 'info');
+      onToast('Texto resetado para o modelo padrão.', 'info');
     }
   };
 
@@ -95,18 +110,19 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleNavigate = (targetIndex: number) => {
-    if (targetIndex >= 0 && targetIndex < contactsQueue.length && onSelectContact) {
-      onSelectContact(contactsQueue[targetIndex]);
+  const handleNavigate = (newIndex: number) => {
+    if (newIndex >= 0 && newIndex < contactsQueue.length && onSelectContact) {
+      onSelectContact(contactsQueue[newIndex]);
     }
   };
 
   const handleSendWhatsAppAndNext = () => {
     if (!contact.whatsapp) {
-      onToast('Este contato não possui número de WhatsApp cadastrado.', 'error');
+      onToast('Contato não possui telefone WhatsApp cadastrado.', 'error');
       return;
     }
 
+    // Direct desktop/mobile app trigger
     openWhatsAppDirect(contact.whatsapp, customText);
 
     if (autoMarkContacted && onMarkContacted) {
@@ -115,18 +131,17 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
     onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
 
+    // Auto advance to next contact in queue
     if (hasNext && onSelectContact) {
-      const nextContact = contactsQueue[currentIndex + 1];
-      onSelectContact(nextContact);
+      onSelectContact(contactsQueue[currentIndex + 1]);
     } else {
-      onToast('Você concluiu toda a fila de envio de contatos!', 'success');
       onClose();
     }
   };
 
   const handleSendWhatsAppOnly = () => {
     if (!contact.whatsapp) {
-      onToast('Este contato não possui número de WhatsApp cadastrado.', 'error');
+      onToast('Contato não possui telefone WhatsApp cadastrado.', 'error');
       return;
     }
 
@@ -142,6 +157,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
   const getCategoryBadge = (cat: string) => {
     switch (cat) {
+      case 'roteiro_audio':
+        return (
+          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#38BDF8] border border-[#38BDF8]/50 text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-sm">
+            <Mic className="w-3 h-3 text-[#38BDF8]" />
+            🎙️ Roteiro de Áudio
+          </span>
+        );
       case 'pos_prova':
         return (
           <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#C9A227] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
@@ -201,6 +223,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   };
 
   const currentTemplate = templates.find((t) => t.id === selectedTemplateId);
+  const isAudio = currentTemplate?.categoria === 'roteiro_audio' || currentTemplate?.tipo === 'audio';
+
+  const visibleTemplates = templates.filter((t) => {
+    if (templateFilter === 'audio') return t.categoria === 'roteiro_audio' || t.tipo === 'audio';
+    if (templateFilter === 'text') return t.categoria !== 'roteiro_audio' && t.tipo !== 'audio';
+    return true;
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
@@ -305,15 +334,56 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
         {/* Content Body */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
-          {/* Template Selector */}
+          {/* Template Selector with Audio / Text Filter */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center justify-between">
-              <span>Escolha o Script da Mensagem:</span>
-              {currentTemplate && getCategoryBadge(currentTemplate.categoria)}
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {templates.map((tmpl) => {
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4] flex items-center gap-1.5">
+                <span>Escolha o Script da Mensagem:</span>
+              </label>
+
+              <div className="flex items-center gap-1 bg-[#101B2D] p-0.5 rounded-lg border border-[#2B3D63]">
+                <button
+                  type="button"
+                  onClick={() => setTemplateFilter('all')}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
+                    templateFilter === 'all'
+                      ? 'bg-[#1F3057] text-[#EDE6D6]'
+                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  }`}
+                >
+                  Todos ({templates.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemplateFilter('audio')}
+                  className={`px-2 py-0.5 text-[11px] font-bold rounded cursor-pointer transition-all flex items-center gap-1 ${
+                    templateFilter === 'audio'
+                      ? 'bg-[#38BDF8] text-[#101B2D]'
+                      : 'text-[#38BDF8] hover:text-[#EDE6D6]'
+                  }`}
+                >
+                  <Mic className="w-3 h-3" />
+                  Roteiros de Áudio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemplateFilter('text')}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
+                    templateFilter === 'text'
+                      ? 'bg-[#1F3057] text-[#EDE6D6]'
+                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  }`}
+                >
+                  Textos
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+              {visibleTemplates.map((tmpl) => {
                 const isSelected = tmpl.id === selectedTemplateId;
+                const isTmplAudio = tmpl.categoria === 'roteiro_audio' || tmpl.tipo === 'audio';
+
                 return (
                   <button
                     key={tmpl.id}
@@ -321,15 +391,26 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     onClick={() => handleSelectTemplate(tmpl.id)}
                     className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
-                        ? 'bg-[#1F3057] border-[#C9A227] text-[#EDE6D6] shadow-sm'
+                        ? isTmplAudio
+                          ? 'bg-[#142944] border-[#38BDF8] text-[#EDE6D6] shadow-sm ring-1 ring-[#38BDF8]/50'
+                          : 'bg-[#1F3057] border-[#C9A227] text-[#EDE6D6] shadow-sm ring-1 ring-[#C9A227]/50'
+                        : isTmplAudio
+                        ? 'bg-[#101B2D]/90 border-[#38BDF8]/30 text-[#8C98B4] hover:text-[#EDE6D6] hover:border-[#38BDF8]'
                         : 'bg-[#101B2D]/70 border-[#2B3D63] text-[#8C98B4] hover:text-[#EDE6D6] hover:border-[#8C98B4]/50'
                     }`}
                   >
-                    <div className="font-semibold text-xs leading-snug text-[#EDE6D6]">
-                      {tmpl.titulo}
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <div className="font-semibold text-xs leading-snug text-[#EDE6D6] line-clamp-1">
+                        {tmpl.titulo}
+                      </div>
+                      {isTmplAudio && (
+                        <span className="text-[10px] text-[#38BDF8] bg-[#38BDF8]/10 px-1.5 py-0.2 rounded font-bold shrink-0">
+                          🎙️ Áudio
+                        </span>
+                      )}
                     </div>
                     {tmpl.gatilho && (
-                      <div className="text-[10px] text-[#C9A227] mt-1 line-clamp-1 font-medium">
+                      <div className="text-[10px] text-[#C9A227] line-clamp-1 font-medium">
                         ⚡ {tmpl.gatilho}
                       </div>
                     )}
@@ -339,8 +420,45 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             </div>
           </div>
 
-          {/* Emotion & Logic Strategic Context */}
-          {currentTemplate && (currentTemplate.emocao || currentTemplate.logica || currentTemplate.gatilho) && (
+          {/* Audio Teleprompter & Voice Tone Guidance Box */}
+          {isAudio && (
+            <div className="bg-gradient-to-br from-[#101B2D] to-[#12233C] border border-[#38BDF8]/50 rounded-xl p-3.5 space-y-2.5 text-xs shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#2B3D63] pb-2 flex-wrap gap-2">
+                <div className="flex items-center gap-2 font-bold text-[#38BDF8] text-xs uppercase tracking-wide">
+                  <Mic className="w-4 h-4 text-[#38BDF8] animate-pulse" />
+                  <span>Teleprompter de Gravação no WhatsApp</span>
+                </div>
+                <div className="flex items-center gap-3 text-[11px] text-[#EDE6D6]">
+                  {currentTemplate?.duracaoEstimada && (
+                    <span className="flex items-center gap-1 bg-[#38BDF8]/20 border border-[#38BDF8]/40 px-2 py-0.5 rounded text-[#38BDF8] font-semibold">
+                      <Timer className="w-3 h-3" />
+                      {currentTemplate.duracaoEstimada}
+                    </span>
+                  )}
+                  {currentTemplate?.tomDeVoz && (
+                    <span className="flex items-center gap-1 text-[#8C98B4]">
+                      <Volume2 className="w-3 h-3 text-[#38BDF8]" />
+                      {currentTemplate.tomDeVoz}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {currentTemplate?.dicasGravacao && currentTemplate.dicasGravacao.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#EDE6D6]/90">
+                  {currentTemplate.dicasGravacao.map((dica, idx) => (
+                    <div key={idx} className="flex items-start gap-1.5 bg-[#172644]/70 p-1.5 rounded">
+                      <span className="text-[#38BDF8] font-bold">•</span>
+                      <span>{dica}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Emotion & Logic Strategic Context for Text Scripts */}
+          {!isAudio && currentTemplate && (currentTemplate.emocao || currentTemplate.logica || currentTemplate.gatilho) && (
             <div className="bg-[#101B2D] border border-[#C9A227]/30 rounded-xl p-3 space-y-2 text-xs">
               {currentTemplate.gatilho && (
                 <div className="text-[11px] font-bold text-[#C9A227] flex items-center gap-1.5 border-b border-[#2B3D63] pb-1.5">
@@ -373,12 +491,12 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             </div>
           )}
 
-          {/* Editable Text Area */}
+          {/* Editable Text / Teleprompter Area */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4] flex items-center gap-1.5">
                 <Edit3 className="w-3.5 h-3.5 text-[#C9A227]" />
-                Mensagem Personalizada para {contact.nome}:
+                {isAudio ? 'Roteiro de Fala Personalizado:' : `Mensagem Personalizada para ${contact.nome}:`}
               </label>
               <button
                 type="button"
@@ -392,16 +510,20 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             </div>
 
             <textarea
-              rows={7}
+              rows={isAudio ? 6 : 7}
               value={customText}
               onChange={(e) => setCustomText(e.target.value)}
               placeholder="Digite ou ajuste a mensagem..."
-              className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] rounded-xl p-3 text-xs sm:text-[13.5px] leading-relaxed resize-y font-sans shadow-inner"
+              className={`w-full rounded-xl p-3 sm:p-3.5 text-xs sm:text-[14px] leading-relaxed resize-y font-sans shadow-inner ${
+                isAudio
+                  ? 'bg-[#0E1726] border-2 border-[#38BDF8]/40 focus:border-[#38BDF8] text-[#EDE6D6] font-medium tracking-wide'
+                  : 'bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6]'
+              }`}
             />
             <div className="text-[11px] text-[#8C98B4] mt-1 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-[#C9A227] shrink-0" />
               <span>
-                As tags como <b>{'{nome}'}</b> e <b>{'{curso}'}</b> foram substituídas por <b>{contact.nome}</b> e <b>{contact.curso || 'Portal Concurso'}</b>.
+                Tags <b>{'{nome}'}</b> e <b>{'{curso}'}</b> foram substituídas por <b>{contact.nome}</b> e <b>{contact.curso || 'Portal Concurso'}</b>.
               </span>
             </div>
           </div>
@@ -424,7 +546,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             <button
               type="button"
               onClick={handleCopy}
-              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 copied
                   ? 'bg-[#6E8F5C]/20 border-[#6E8F5C] text-[#6E8F5C]'
                   : 'border-[#2B3D63] hover:border-[#EDE6D6] text-[#EDE6D6] hover:bg-[#1F3057]'
@@ -438,7 +560,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               ) : (
                 <>
                   <Copy className="w-3.5 h-3.5" />
-                  Copiar Texto
+                  {isAudio ? 'Copiar Roteiro' : 'Copiar Texto'}
                 </>
               )}
             </button>
@@ -460,17 +582,27 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 className="w-full sm:w-auto px-3 py-2 text-xs font-semibold text-[#EDE6D6] border border-[#2B3D63] hover:bg-[#1F3057] rounded-lg transition-colors cursor-pointer"
                 title="Apenas abre o WhatsApp sem avançar na fila"
               >
-                Enviar Apenas Este
+                {isAudio ? 'Gravar Só Este' : 'Enviar Só Este'}
               </button>
             )}
 
             <button
               type="button"
               onClick={handleSendWhatsAppAndNext}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] active:scale-[0.98] text-[#101B2D] font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-md transition-all cursor-pointer whitespace-nowrap"
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-md transition-all cursor-pointer whitespace-nowrap ${
+                isAudio
+                  ? 'bg-[#38BDF8] hover:bg-[#2bb2ee] text-[#101B2D]'
+                  : 'bg-[#25D366] hover:bg-[#20ba5a] text-[#101B2D]'
+              }`}
             >
-              <Send className="w-4 h-4 fill-current" />
-              {hasNext ? 'Enviar no WhatsApp & Próximo Aluno' : 'Enviar no WhatsApp'}
+              {isAudio ? <Mic className="w-4 h-4" /> : <Send className="w-4 h-4 fill-current" />}
+              {isAudio
+                ? hasNext
+                  ? 'Abrir WhatsApp p/ Gravar & Próximo'
+                  : 'Abrir WhatsApp para Gravar'
+                : hasNext
+                ? 'Enviar no WhatsApp & Próximo Aluno'
+                : 'Enviar no WhatsApp'}
               {hasNext && <FastForward className="w-4 h-4 ml-0.5" />}
             </button>
           </div>

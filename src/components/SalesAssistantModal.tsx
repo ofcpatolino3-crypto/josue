@@ -24,9 +24,13 @@ import {
   CheckCircle2,
   FastForward,
   Loader2,
+  Mic,
+  Volume2,
+  Timer,
+  Headphones,
 } from 'lucide-react';
 import { Contact, Objection, Plan, Temperature } from '../types';
-import { fillTemplate, waLinkWithMessage, openWhatsAppDirect } from '../utils/excel';
+import { fillTemplate, openWhatsAppDirect } from '../utils/excel';
 
 interface SalesAssistantModalProps {
   isOpen: boolean;
@@ -63,8 +67,9 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [selectedObjectionId, setSelectedObjectionId] = useState<string>('');
   const [customPitch, setCustomPitch] = useState<string>('');
+  const [customAudioScript, setCustomAudioScript] = useState<string>('');
   const [isGeneratingAI, setIsGeneratingAI] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'pitch' | 'objecoes' | 'planos'>('pitch');
+  const [activeTab, setActiveTab] = useState<'pitch' | 'audio' | 'objecoes' | 'planos'>('pitch');
   const [quickNote, setQuickNote] = useState<string>('');
 
   // Queue navigation index
@@ -304,6 +309,24 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
     }
 
     setCustomPitch(pitch);
+
+    // Audio speech scripts calculation (20 to 35 seconds spoken scripts)
+    const firstName = nome.split(' ')[0] || nome;
+    let audioScript = '';
+    if (analysis.temp === 'Pagou') {
+      audioScript = `Fala, ${firstName}! Tudo bem por aí? Passando rapidinho em áudio só pra te dar as boas-vindas oficiais aqui no Portal Concursos! O seu acesso já tá 100% liberado e eu tô à sua disposição aqui no WhatsApp pra te apoiar no cronograma e tirar dúvidas. Tamo junto até a sua aprovação, viu? Um abraço!`;
+    } else if (analysis.temp === 'Quente') {
+      audioScript = `Oi, ${firstName}! Tudo bem? Gravando esse áudio rapidinho porque lembrei de você. Consegui a autorização aqui pra abater cem por cento do valor do seu curso isolado de ${curso} pra você migrar pra Assinatura 1.0! Ficou uma condição muito diferenciada e você já leva mais de cento e oitenta mil questões comentadas. Posso te mandar o link com o desconto aplicado agora?`;
+    } else if (analysis.temp === 'Potencial') {
+      audioScript = `Oi, ${firstName}, tudo em paz? Gravei esse áudio rápido porque vi seu interesse em ${curso} e queria te dar uma dica de ouro. A gente consegue abater todo o valor do seu curso isolado se você migrar pra Assinatura Completa. Assim você não gasta duas vezes quando abrir outro edital. Se fizer sentido pro seu momento, me avisa que te mostro como fica!`;
+    } else if (analysis.temp === 'Morno') {
+      audioScript = `Fala, ${firstName}! Tudo bem contigo? Lembrei de você hoje acompanhando a turma de ${curso}. Sei que a rotina pesa e o tempo fica apertado, mas queria te dizer que com trinta a quarenta minutos de questões comentadas por dia no celular você já mantém o ritmo sem cansaço excessivo. Me conta: como tá seu ritmo essa semana?`;
+    } else {
+      // Frio
+      audioScript = `Oi, ${firstName}! Tudo bem por aí? Passei pra te deixar um abraço amigo e te lembrar que o seu sonho do concurso em ${curso} continua totalmente possível. Se a rotina apertou, relaxa que acontece. Só queria te avisar que o valor do seu curso isolado continua garantido pra quando você quiser reativar. Me dá um oi quando puder!`;
+    }
+
+    setCustomAudioScript(audioScript);
   }, [contact, analysis, selectedPlanId, selectedObjectionId, plans]);
 
   if (!isOpen || !contact || !analysis) return null;
@@ -547,44 +570,57 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
           </div>
 
           {/* Sub Navigation Tabs */}
-          <div className="flex items-center gap-2 border-b border-[#2B3D63]">
+          <div className="flex items-center gap-2 border-b border-[#2B3D63] overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('pitch')}
-              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'pitch'
                   ? 'border-[#C9A227] text-[#C9A227]'
                   : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
               }`}
             >
               <Sparkles className="w-4 h-4" />
-              <span>Pitch de Vendas Personalizado (1-Clique)</span>
+              <span>Pitch de Vendas (Texto)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('audio')}
+              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'audio'
+                  ? 'border-[#38BDF8] text-[#38BDF8]'
+                  : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+              }`}
+            >
+              <Mic className="w-4 h-4" />
+              <span>🎙️ Roteiro de Áudio (25-30s)</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('objecoes')}
-              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'objecoes'
                   ? 'border-[#C9A227] text-[#C9A227]'
                   : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
               }`}
             >
               <ShieldAlert className="w-4 h-4" />
-              <span>Objeções Detectadas & Scripts ({analysis.objectionMatches.length})</span>
+              <span>Objeções & Scripts ({analysis.objectionMatches.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('planos')}
-              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'planos'
                   ? 'border-[#C9A227] text-[#C9A227]'
                   : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
               }`}
             >
               <BookOpen className="w-4 h-4" />
-              <span>Planos & Proposta Sugerida</span>
+              <span>Planos & Proposta</span>
             </button>
           </div>
 
@@ -706,6 +742,114 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                 >
                   + Fechou Matrícula (💰 Pagou)
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: ROTEIRO DE ÁUDIO (25-30s) */}
+          {activeTab === 'audio' && (
+            <div className="space-y-4 animate-fadeIn">
+              {/* Teleprompter Banner & Voice Tips */}
+              <div className="bg-gradient-to-r from-[#101B2D] via-[#142640] to-[#101B2D] border border-[#38BDF8]/40 rounded-xl p-4 space-y-3 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#2B3D63] pb-2.5">
+                  <div className="flex items-center gap-2 text-sm font-bold text-[#38BDF8]">
+                    <Mic className="w-4 h-4 text-[#38BDF8] animate-pulse" />
+                    <span>Teleprompter de Fala para WhatsApp ({contact.nome})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 bg-[#38BDF8]/20 border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-bold px-2.5 py-0.5 rounded">
+                      <Timer className="w-3.5 h-3.5" />
+                      ⏱️ Duração: 25 a 30s
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] text-xs px-2.5 py-0.5 rounded">
+                      <Volume2 className="w-3.5 h-3.5 text-[#38BDF8]" />
+                      Tom Seguro & Amigável
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="bg-[#172644]/70 p-2 rounded-lg border border-[#2B3D63] flex items-start gap-1.5">
+                    <span className="text-[#38BDF8] font-bold">1.</span>
+                    <span className="text-[#EDE6D6]">Fale o 1º nome nos 3 primeiros segundos para gerar atenção imediata.</span>
+                  </div>
+                  <div className="bg-[#172644]/70 p-2 rounded-lg border border-[#2B3D63] flex items-start gap-1.5">
+                    <span className="text-[#38BDF8] font-bold">2.</span>
+                    <span className="text-[#EDE6D6]">Destaque a garantia de abater 100% do curso isolado sem rodeios.</span>
+                  </div>
+                  <div className="bg-[#172644]/70 p-2 rounded-lg border border-[#2B3D63] flex items-start gap-1.5">
+                    <span className="text-[#38BDF8] font-bold">3.</span>
+                    <span className="text-[#EDE6D6]">Finalize com uma pergunta simples que exija apenas um "sim".</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spoken Teleprompter Box */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#38BDF8] flex items-center gap-1.5">
+                    <Mic className="w-3.5 h-3.5" />
+                    <span>Texto do Roteiro (Leitura Fluida):</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const firstName = (contact.nome || '').split(' ')[0] || contact.nome;
+                      const curso = contact.curso ? contact.curso.trim() : 'Concursos';
+                      let script = `Oi, ${firstName}! Tudo bem? Gravando esse áudio rapidinho porque consegui autorização da coordenação pra abater cem por cento do valor do seu curso isolado de ${curso} na Assinatura 1.0! Você já leva mais de cento e oitenta mil questões comentadas e simulados. Posso te mandar o link com o desconto aplicado agora?`;
+                      setCustomAudioScript(script);
+                      onToast('Roteiro de áudio recarregado!', 'info');
+                    }}
+                    className="text-[11px] text-[#38BDF8] hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    Resetar Roteiro
+                  </button>
+                </div>
+
+                <textarea
+                  rows={5}
+                  value={customAudioScript}
+                  onChange={(e) => setCustomAudioScript(e.target.value)}
+                  className="w-full bg-[#0E1726] border-2 border-[#38BDF8]/50 focus:border-[#38BDF8] text-[#EDE6D6] rounded-xl p-4 text-sm sm:text-base leading-relaxed resize-y font-sans font-medium tracking-wide shadow-inner"
+                  placeholder="Roteiro de fala..."
+                />
+              </div>
+
+              {/* Action buttons specifically for Audio */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-[#2B3D63]">
+                <div className="text-xs text-[#8C98B4]">
+                  💡 <i>Dica: Clique no botão abaixo para abrir o WhatsApp do aluno e segure o microfone para gravar enquanto lê a tela acima!</i>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyText(customAudioScript, 'audio_script', 'Roteiro de Áudio')}
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    {copiedKey === 'audio_script' ? <Check className="w-3.5 h-3.5 text-[#4ADE80]" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedKey === 'audio_script' ? 'Copiado!' : 'Copiar Roteiro'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!contact.whatsapp) {
+                        onToast('Contato não possui WhatsApp cadastrado.', 'error');
+                        return;
+                      }
+                      openWhatsAppDirect(contact.whatsapp, '');
+                      if (onMarkContacted) {
+                        onMarkContacted(contact.id);
+                      }
+                      onToast(`WhatsApp aberto para gravação com ${contact.nome}!`, 'success');
+                    }}
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#38BDF8] hover:bg-[#2cb2ed] text-[#101B2D] font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors shadow-sm"
+                  >
+                    <Mic className="w-4 h-4" />
+                    <span>Abrir WhatsApp para Gravar</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
