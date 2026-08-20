@@ -20,8 +20,12 @@ import {
   Volume2,
   Timer,
   Headphones,
+  Plus,
+  BookmarkPlus,
+  Save,
+  Tag,
 } from 'lucide-react';
-import { Contact, MessageTemplate } from '../types';
+import { Contact, MessageTemplate, MessageTemplateCategory } from '../types';
 import { fillTemplate, openWhatsAppDirect } from '../utils/excel';
 
 interface MessageModalProps {
@@ -32,6 +36,7 @@ interface MessageModalProps {
   onClose: () => void;
   onSelectContact?: (contact: Contact) => void;
   onMarkContacted?: (id: string) => void;
+  onAddTemplate?: (newTmpl: MessageTemplate) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
@@ -43,6 +48,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   onClose,
   onSelectContact,
   onMarkContacted,
+  onAddTemplate,
   onToast,
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
@@ -50,6 +56,20 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const [customText, setCustomText] = useState<string>('');
   const [autoMarkContacted, setAutoMarkContacted] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
+
+  // Quick Script Creator inline state
+  const [showInlineNewScript, setShowInlineNewScript] = useState<boolean>(false);
+  const [newScriptTitle, setNewScriptTitle] = useState<string>('');
+  const [newScriptCategory, setNewScriptCategory] = useState<MessageTemplateCategory>('roteiro_audio');
+  const [newScriptGatilho, setNewScriptGatilho] = useState<string>('');
+  const [newScriptText, setNewScriptText] = useState<string>('');
+  const [newScriptType, setNewScriptType] = useState<'texto' | 'audio'>('audio');
+
+  // Quick Save Current Text as Script
+  const [showSaveCurrentAsScript, setShowSaveCurrentAsScript] = useState<boolean>(false);
+  const [saveCurrentTitle, setSaveCurrentTitle] = useState<string>('');
+  const [saveCurrentCategory, setSaveCurrentCategory] = useState<MessageTemplateCategory>('roteiro_audio');
+  const [saveCurrentGatilho, setSaveCurrentGatilho] = useState<string>('');
 
   // Find queue index
   const currentIndex = contactsQueue.findIndex((c) => c.id === contact?.id);
@@ -101,6 +121,97 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       setCustomText(fillTemplate(tmpl.texto, contact));
       onToast('Texto resetado para o modelo padrão.', 'info');
     }
+  };
+
+  const handleCreateInlineScript = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newScriptTitle.trim() || !newScriptText.trim()) {
+      onToast('Título e texto do script são obrigatórios.', 'error');
+      return;
+    }
+
+    const newId = 't_custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    const newTmpl: MessageTemplate = {
+      id: newId,
+      titulo: newScriptTitle.trim(),
+      categoria: newScriptCategory,
+      texto: newScriptText.trim(),
+      gatilho: newScriptGatilho.trim() || undefined,
+      tipo: newScriptType,
+      duracaoEstimada: newScriptType === 'audio' ? '25 a 35 segundos' : undefined,
+      tomDeVoz: newScriptType === 'audio' ? 'Acolhedor e seguro' : undefined,
+    };
+
+    if (onAddTemplate) {
+      onAddTemplate(newTmpl);
+    }
+
+    setSelectedTemplateId(newId);
+    if (contact) {
+      setCustomText(fillTemplate(newTmpl.texto, contact));
+    }
+
+    setShowInlineNewScript(false);
+    setNewScriptTitle('');
+    setNewScriptGatilho('');
+    setNewScriptText('');
+    onToast(`Script "${newTmpl.titulo}" salvo e aplicado!`, 'success');
+  };
+
+  const handleSaveCurrentAsScript = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!saveCurrentTitle.trim()) {
+      onToast('Digite um título para o script.', 'error');
+      return;
+    }
+    if (!customText.trim()) {
+      onToast('O texto do script não pode estar vazio.', 'error');
+      return;
+    }
+
+    let templateTextToSave = customText;
+    if (contact) {
+      if (contact.nome) {
+        templateTextToSave = templateTextToSave.replaceAll(contact.nome, '{nome}');
+        const firstName = contact.nome.split(' ')[0];
+        if (firstName && firstName !== contact.nome) {
+          templateTextToSave = templateTextToSave.replaceAll(firstName, '{nome}');
+        }
+      }
+      if (contact.curso) {
+        templateTextToSave = templateTextToSave.replaceAll(contact.curso, '{curso}');
+      }
+    }
+
+    const newId = 't_saved_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    const newTmpl: MessageTemplate = {
+      id: newId,
+      titulo: saveCurrentTitle.trim(),
+      categoria: saveCurrentCategory,
+      texto: templateTextToSave.trim(),
+      gatilho: saveCurrentGatilho.trim() || undefined,
+      tipo: isAudio ? 'audio' : 'texto',
+      duracaoEstimada: isAudio ? '25 a 30 segundos' : undefined,
+      tomDeVoz: isAudio ? 'Seguro e confiante' : undefined,
+    };
+
+    if (onAddTemplate) {
+      onAddTemplate(newTmpl);
+    }
+
+    setSelectedTemplateId(newId);
+    setShowSaveCurrentAsScript(false);
+    setSaveCurrentTitle('');
+    setSaveCurrentGatilho('');
+    onToast(`Script "${newTmpl.titulo}" salvo na biblioteca!`, 'success');
+  };
+
+  const insertSnippet = (snippet: string) => {
+    setCustomText((prev) => {
+      if (!prev) return snippet;
+      return prev + (prev.endsWith(' ') || prev.endsWith('\n') ? '' : ' ') + snippet;
+    });
+    onToast(`Inserido no script: "${snippet.slice(0, 25)}..."`, 'info');
   };
 
   const handleCopy = () => {
@@ -334,50 +445,210 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
         {/* Content Body */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
-          {/* Template Selector with Audio / Text Filter */}
+          {/* Template Selector with Audio / Text Filter and '+ Colocar Script' button */}
           <div>
             <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4] flex items-center gap-1.5">
                 <span>Escolha o Script da Mensagem:</span>
               </label>
 
-              <div className="flex items-center gap-1 bg-[#101B2D] p-0.5 rounded-lg border border-[#2B3D63]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1 bg-[#101B2D] p-0.5 rounded-lg border border-[#2B3D63]">
+                  <button
+                    type="button"
+                    onClick={() => setTemplateFilter('all')}
+                    className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
+                      templateFilter === 'all'
+                        ? 'bg-[#1F3057] text-[#EDE6D6]'
+                        : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                    }`}
+                  >
+                    Todos ({templates.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTemplateFilter('audio')}
+                    className={`px-2 py-0.5 text-[11px] font-bold rounded cursor-pointer transition-all flex items-center gap-1 ${
+                      templateFilter === 'audio'
+                        ? 'bg-[#38BDF8] text-[#101B2D]'
+                        : 'text-[#38BDF8] hover:text-[#EDE6D6]'
+                    }`}
+                  >
+                    <Mic className="w-3 h-3" />
+                    Roteiros de Áudio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTemplateFilter('text')}
+                    className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
+                      templateFilter === 'text'
+                        ? 'bg-[#1F3057] text-[#EDE6D6]'
+                        : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                    }`}
+                  >
+                    Textos
+                  </button>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => setTemplateFilter('all')}
-                  className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
-                    templateFilter === 'all'
-                      ? 'bg-[#1F3057] text-[#EDE6D6]'
-                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
-                  }`}
+                  onClick={() => setShowInlineNewScript(!showInlineNewScript)}
+                  className="flex items-center gap-1 bg-[#C9A227]/20 hover:bg-[#C9A227]/30 text-[#C9A227] border border-[#C9A227]/40 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
                 >
-                  Todos ({templates.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTemplateFilter('audio')}
-                  className={`px-2 py-0.5 text-[11px] font-bold rounded cursor-pointer transition-all flex items-center gap-1 ${
-                    templateFilter === 'audio'
-                      ? 'bg-[#38BDF8] text-[#101B2D]'
-                      : 'text-[#38BDF8] hover:text-[#EDE6D6]'
-                  }`}
-                >
-                  <Mic className="w-3 h-3" />
-                  Roteiros de Áudio
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTemplateFilter('text')}
-                  className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
-                    templateFilter === 'text'
-                      ? 'bg-[#1F3057] text-[#EDE6D6]'
-                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
-                  }`}
-                >
-                  Textos
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Colocar Novo Script</span>
                 </button>
               </div>
             </div>
+
+            {/* INLINE SCRIPT CREATOR FORM */}
+            {showInlineNewScript && (
+              <form
+                onSubmit={handleCreateInlineScript}
+                className="bg-[#101B2D] border-2 border-[#C9A227]/60 rounded-xl p-3.5 mb-3 space-y-3 animate-fadeIn shadow-lg"
+              >
+                <div className="flex items-center justify-between border-b border-[#2B3D63] pb-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#C9A227]">
+                    <BookmarkPlus className="w-4 h-4" />
+                    <span>Cadastrar Novo Script no Sistema</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowInlineNewScript(false)}
+                    className="text-[#8C98B4] hover:text-[#EDE6D6] text-xs cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] font-semibold text-[#8C98B4] block mb-1">
+                      Título do Script:
+                    </label>
+                    <input
+                      type="text"
+                      value={newScriptTitle}
+                      onChange={(e) => setNewScriptTitle(e.target.value)}
+                      placeholder="Ex: Oferta Relâmpago PF com Abatimento"
+                      className="w-full bg-[#172644] border border-[#2B3D63] focus:border-[#C9A227] text-xs text-[#EDE6D6] rounded-lg p-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-semibold text-[#8C98B4] block mb-1">
+                      Tipo do Script:
+                    </label>
+                    <div className="grid grid-cols-2 gap-1 bg-[#172644] p-1 rounded-lg border border-[#2B3D63]">
+                      <button
+                        type="button"
+                        onClick={() => setNewScriptType('texto')}
+                        className={`py-1 text-[11px] font-semibold rounded cursor-pointer ${
+                          newScriptType === 'texto' ? 'bg-[#1F3057] text-[#EDE6D6]' : 'text-[#8C98B4]'
+                        }`}
+                      >
+                        Texto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNewScriptType('audio')}
+                        className={`py-1 text-[11px] font-bold rounded cursor-pointer flex items-center justify-center gap-1 ${
+                          newScriptType === 'audio' ? 'bg-[#38BDF8] text-[#101B2D]' : 'text-[#38BDF8]'
+                        }`}
+                      >
+                        <Mic className="w-3 h-3" />
+                        Áudio
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-semibold text-[#8C98B4] block mb-1">
+                      Categoria:
+                    </label>
+                    <select
+                      value={newScriptCategory}
+                      onChange={(e) => setNewScriptCategory(e.target.value as MessageTemplateCategory)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-lg p-2"
+                    >
+                      <option value="roteiro_audio">🎙️ Roteiro de Áudio</option>
+                      <option value="pos_prova">Pós-Prova</option>
+                      <option value="pre_prova">Pré-Prova / Rotina</option>
+                      <option value="migracao">Migração Assinatura 1.0</option>
+                      <option value="fechamento_pix">Fechamento & PIX</option>
+                      <option value="recuperacao_sumidos">Resgate de Sumidos</option>
+                      <option value="boas_vindas">Boas-Vindas & Acesso</option>
+                      <option value="geral">Geral</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-semibold text-[#8C98B4] block mb-1">
+                      Gatilho / Destaque (Opcional):
+                    </label>
+                    <input
+                      type="text"
+                      value={newScriptGatilho}
+                      onChange={(e) => setNewScriptGatilho(e.target.value)}
+                      placeholder="Ex: Abatimento de 100% + Urgência"
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-lg p-2"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-semibold text-[#8C98B4]">
+                      Texto do Script: (Use <code className="text-[#C9A227]">{"{nome}"}</code> e <code className="text-[#C9A227]">{"{curso}"}</code>)
+                    </label>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setNewScriptText((prev) => prev + ' {nome}')}
+                        className="text-[10px] bg-[#172644] text-[#C9A227] px-1.5 py-0.5 rounded hover:bg-[#1F3057] cursor-pointer"
+                      >
+                        +{"{nome}"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNewScriptText((prev) => prev + ' {curso}')}
+                        className="text-[10px] bg-[#172644] text-[#C9A227] px-1.5 py-0.5 rounded hover:bg-[#1F3057] cursor-pointer"
+                      >
+                        +{"{curso}"}
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={newScriptText}
+                    onChange={(e) => setNewScriptText(e.target.value)}
+                    placeholder="Digite o script com as tags {nome} e {curso}..."
+                    className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-lg p-2 font-sans"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowInlineNewScript(false)}
+                    className="px-3 py-1.5 text-xs text-[#8C98B4] hover:text-[#EDE6D6]"
+                  >
+                    Fechar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#B89220] text-[#101B2D] font-bold text-xs px-4 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Salvar e Usar Este Script</span>
+                  </button>
+                </div>
+              </form>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
               {visibleTemplates.map((tmpl) => {
@@ -492,20 +763,150 @@ export const MessageModal: React.FC<MessageModalProps> = ({
           )}
 
           {/* Editable Text / Teleprompter Area */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-1">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4] flex items-center gap-1.5">
                 <Edit3 className="w-3.5 h-3.5 text-[#C9A227]" />
                 {isAudio ? 'Roteiro de Fala Personalizado:' : `Mensagem Personalizada para ${contact.nome}:`}
               </label>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSaveCurrentAsScript(!showSaveCurrentAsScript)}
+                  className="text-[11px] text-[#C9A227] hover:bg-[#C9A227]/10 px-2 py-0.5 rounded border border-[#C9A227]/30 cursor-pointer flex items-center gap-1 transition-colors"
+                  title="Salvar esta mensagem editada como um modelo permanente"
+                >
+                  <BookmarkPlus className="w-3 h-3" />
+                  <span>Salvar como Script</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetToTemplate}
+                  className="text-[11px] text-[#8C98B4] hover:text-[#EDE6D6] hover:underline cursor-pointer flex items-center gap-1"
+                  title="Recarregar texto original do modelo"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Resetar
+                </button>
+              </div>
+            </div>
+
+            {/* QUICK SAVE CURRENT TEXT AS SCRIPT POPOVER */}
+            {showSaveCurrentAsScript && (
+              <form
+                onSubmit={handleSaveCurrentAsScript}
+                className="bg-[#101B2D] border border-[#C9A227] rounded-xl p-3 space-y-2.5 animate-fadeIn shadow-md"
+              >
+                <div className="flex items-center justify-between border-b border-[#2B3D63] pb-1.5">
+                  <span className="text-xs font-bold text-[#C9A227] flex items-center gap-1">
+                    <Save className="w-3.5 h-3.5" />
+                    Salvar Mensagem Editada na Biblioteca de Scripts
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowSaveCurrentAsScript(false)}
+                    className="text-[#8C98B4] hover:text-[#EDE6D6] text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="sm:col-span-2">
+                    <input
+                      type="text"
+                      value={saveCurrentTitle}
+                      onChange={(e) => setSaveCurrentTitle(e.target.value)}
+                      placeholder="Nome do Novo Script (Ex: Oferta Fechamento Especial)"
+                      className="w-full bg-[#172644] border border-[#2B3D63] focus:border-[#C9A227] text-xs text-[#EDE6D6] rounded-lg p-2"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <select
+                      value={saveCurrentCategory}
+                      onChange={(e) => setSaveCurrentCategory(e.target.value as MessageTemplateCategory)}
+                      className="w-full bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-lg p-2"
+                    >
+                      <option value="fechamento_pix">Fechamento & PIX</option>
+                      <option value="migracao">Migração 1.0</option>
+                      <option value="roteiro_audio">Roteiro de Áudio</option>
+                      <option value="pos_prova">Pós-Prova</option>
+                      <option value="pre_prova">Pré-Prova</option>
+                      <option value="recuperacao_sumidos">Resgate Sumidos</option>
+                      <option value="boas_vindas">Boas-Vindas</option>
+                      <option value="geral">Geral</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <span className="text-[10px] text-[#8C98B4]">
+                    💡 As palavras com nome do aluno serão salvas como tags automáticas {'{nome}'} e {'{curso}'}.
+                  </span>
+                  <button
+                    type="submit"
+                    className="bg-[#C9A227] hover:bg-[#B89220] text-[#101B2D] font-bold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer transition-colors shrink-0 flex items-center gap-1"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Salvar Script</span>
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Quick Variable & Offer Snippets Bar */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] scrollbar-thin">
+              <span className="text-[10px] uppercase font-bold text-[#8C98B4] flex items-center gap-1 shrink-0">
+                <Tag className="w-3 h-3 text-[#C9A227]" />
+                Inserir no Script:
+              </span>
               <button
                 type="button"
-                onClick={handleResetToTemplate}
-                className="text-[11px] text-[#C9A227] hover:underline cursor-pointer flex items-center gap-1"
-                title="Recarregar texto original do modelo"
+                onClick={() => insertSnippet(contact.nome ? (contact.nome.split(' ')[0] || contact.nome) : '{nome}')}
+                className="bg-[#172644] hover:bg-[#1F3057] text-[#C9A227] border border-[#2B3D63] px-2 py-0.5 rounded cursor-pointer shrink-0 font-medium transition-colors"
+                title="Inserir primeiro nome do aluno"
               >
-                <RefreshCw className="w-3 h-3" />
-                Resetar para o padrão
+                + {contact.nome ? contact.nome.split(' ')[0] : 'Nome'}
+              </button>
+              <button
+                type="button"
+                onClick={() => insertSnippet(contact.curso ? contact.curso : '{curso}')}
+                className="bg-[#172644] hover:bg-[#1F3057] text-[#C9A227] border border-[#2B3D63] px-2 py-0.5 rounded cursor-pointer shrink-0 font-medium transition-colors"
+                title="Inserir concurso de interesse"
+              >
+                + {contact.curso ? contact.curso.slice(0, 16) : 'Curso'}
+              </button>
+              <button
+                type="button"
+                onClick={() => insertSnippet('A gente abate 100% do valor que você já investiu no seu curso isolado!')}
+                className="bg-[#172644] hover:bg-[#1F3057] text-[#38BDF8] border border-[#2B3D63] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+                title="Inserir benefício do abatimento integral"
+              >
+                + Abatimento 100%
+              </button>
+              <button
+                type="button"
+                onClick={() => insertSnippet('Você terá acesso a mais de 180.000 questões comentadas e simulados semanais.')}
+                className="bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+              >
+                + 180k Questões
+              </button>
+              <button
+                type="button"
+                onClick={() => insertSnippet('Chave PIX Oficial (CNPJ): 00.000.000/0001-00 (Portal Concursos)')}
+                className="bg-[#172644] hover:bg-[#1F3057] text-[#4ADE80] border border-[#2B3D63] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+              >
+                + Chave PIX
+              </button>
+              <button
+                type="button"
+                onClick={() => insertSnippet('https://portalconcursos.com.br/assinatura')}
+                className="bg-[#172644] hover:bg-[#1F3057] text-[#38BDF8] border border-[#2B3D63] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+              >
+                + Link Assinatura
               </button>
             </div>
 
@@ -520,10 +921,15 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                   : 'bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6]'
               }`}
             />
-            <div className="text-[11px] text-[#8C98B4] mt-1 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#C9A227] shrink-0" />
-              <span>
-                Tags <b>{'{nome}'}</b> e <b>{'{curso}'}</b> foram substituídas por <b>{contact.nome}</b> e <b>{contact.curso || 'Portal Concurso'}</b>.
+            <div className="text-[11px] text-[#8C98B4] mt-1 flex items-center justify-between gap-1 flex-wrap">
+              <div className="flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#C9A227] shrink-0" />
+                <span>
+                  Tags <b>{'{nome}'}</b> e <b>{'{curso}'}</b> são substituídas por <b>{contact.nome}</b> e <b>{contact.curso || 'Portal Concurso'}</b>.
+                </span>
+              </div>
+              <span className="text-[11px] text-[#8C98B4]">
+                {customText.length} caracteres • {customText.split(/\s+/).filter(Boolean).length} palavras
               </span>
             </div>
           </div>

@@ -2134,6 +2134,7 @@ export default function App() {
         onMarkContacted={(id) => {
           handleMarkToday(id);
         }}
+        onAddTemplate={handleAddTemplate}
         onToast={addToast}
       />
 
@@ -2148,6 +2149,7 @@ export default function App() {
         onSelectContact={(c) => setSalesAssistantContact(c)}
         onUpdateContactField={(id, field, val) => handleUpdateField(id, field, val)}
         onMarkContacted={(id) => handleMarkToday(id)}
+        onAddTemplate={handleAddTemplate}
         onToast={addToast}
       />
 

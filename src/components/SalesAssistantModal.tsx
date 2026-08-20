@@ -28,8 +28,10 @@ import {
   Volume2,
   Timer,
   Headphones,
+  BookmarkPlus,
+  Save,
 } from 'lucide-react';
-import { Contact, Objection, Plan, Temperature } from '../types';
+import { Contact, MessageTemplate, Objection, Plan, Temperature } from '../types';
 import { fillTemplate, openWhatsAppDirect } from '../utils/excel';
 
 interface SalesAssistantModalProps {
@@ -42,6 +44,7 @@ interface SalesAssistantModalProps {
   onSelectContact?: (contact: Contact) => void;
   onUpdateContactField?: (id: string, field: keyof Contact, value: any) => void;
   onMarkContacted?: (id: string) => void;
+  onAddTemplate?: (newTmpl: MessageTemplate) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
@@ -61,6 +64,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
   onSelectContact,
   onUpdateContactField,
   onMarkContacted,
+  onAddTemplate,
   onToast,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -695,6 +699,44 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                         </>
                       )}
                     </button>
+
+                    {onAddTemplate && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!customPitch.trim()) {
+                            onToast('O pitch não pode estar vazio.', 'error');
+                            return;
+                          }
+                          let savedText = customPitch;
+                          if (contact.nome) {
+                            savedText = savedText.replaceAll(contact.nome, '{nome}');
+                            const first = contact.nome.split(' ')[0];
+                            if (first && first !== contact.nome) {
+                              savedText = savedText.replaceAll(first, '{nome}');
+                            }
+                          }
+                          if (contact.curso) {
+                            savedText = savedText.replaceAll(contact.curso, '{curso}');
+                          }
+                          const newTmpl: MessageTemplate = {
+                            id: 't_ai_' + Date.now(),
+                            titulo: `Script Assistente IA (${contact.temperatura || 'Vendas'})`,
+                            categoria: 'fechamento_pix',
+                            texto: savedText,
+                            gatilho: 'Argumentação gerada por IA / Assistente',
+                            tipo: 'texto',
+                          };
+                          onAddTemplate(newTmpl);
+                          onToast('Pitch salvo como Novo Script no sistema!', 'success');
+                        }}
+                        className="flex items-center gap-1 text-[11px] bg-[#101B2D] hover:bg-[#1F3057] text-[#C9A227] border border-[#2B3D63] rounded-lg px-2.5 py-1 font-semibold cursor-pointer transition-colors"
+                        title="Salvar este pitch como um Script reutilizável"
+                      >
+                        <BookmarkPlus className="w-3 h-3" />
+                        <span>Salvar como Script</span>
+                      </button>
+                    )}
                     <span className="text-[11px] text-[#8C98B4] hidden sm:inline">Você pode editar livremente</span>
                   </div>
                 </div>
@@ -791,19 +833,59 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                     <Mic className="w-3.5 h-3.5" />
                     <span>Texto do Roteiro (Leitura Fluida):</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const firstName = (contact.nome || '').split(' ')[0] || contact.nome;
-                      const curso = contact.curso ? contact.curso.trim() : 'Concursos';
-                      let script = `Oi, ${firstName}! Tudo bem? Gravando esse áudio rapidinho porque consegui autorização da coordenação pra abater cem por cento do valor do seu curso isolado de ${curso} na Assinatura 1.0! Você já leva mais de cento e oitenta mil questões comentadas e simulados. Posso te mandar o link com o desconto aplicado agora?`;
-                      setCustomAudioScript(script);
-                      onToast('Roteiro de áudio recarregado!', 'info');
-                    }}
-                    className="text-[11px] text-[#38BDF8] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    Resetar Roteiro
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {onAddTemplate && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!customAudioScript.trim()) {
+                            onToast('O roteiro de áudio não pode estar vazio.', 'error');
+                            return;
+                          }
+                          let savedText = customAudioScript;
+                          if (contact.nome) {
+                            savedText = savedText.replaceAll(contact.nome, '{nome}');
+                            const first = contact.nome.split(' ')[0];
+                            if (first && first !== contact.nome) {
+                              savedText = savedText.replaceAll(first, '{nome}');
+                            }
+                          }
+                          if (contact.curso) {
+                            savedText = savedText.replaceAll(contact.curso, '{curso}');
+                          }
+                          const newTmpl: MessageTemplate = {
+                            id: 't_audio_' + Date.now(),
+                            titulo: `Roteiro Áudio: ${contact.temperatura || 'Vendas'} (${contact.curso || 'Geral'})`,
+                            categoria: 'roteiro_audio',
+                            texto: savedText,
+                            gatilho: 'Abatimento Integral + Simulado Semanal',
+                            tipo: 'audio',
+                            duracaoEstimada: '25 a 30 segundos',
+                            tomDeVoz: 'Seguro, amigável e direto',
+                          };
+                          onAddTemplate(newTmpl);
+                          onToast('Roteiro de áudio salvo como Novo Script!', 'success');
+                        }}
+                        className="text-[11px] text-[#38BDF8] hover:bg-[#38BDF8]/15 px-2 py-0.5 rounded border border-[#38BDF8]/30 cursor-pointer flex items-center gap-1 transition-colors"
+                      >
+                        <BookmarkPlus className="w-3 h-3" />
+                        <span>Salvar como Script</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const firstName = (contact.nome || '').split(' ')[0] || contact.nome;
+                        const curso = contact.curso ? contact.curso.trim() : 'Concursos';
+                        let script = `Oi, ${firstName}! Tudo bem? Gravando esse áudio rapidinho porque consegui autorização da coordenação pra abater cem por cento do valor do seu curso isolado de ${curso} na Assinatura 1.0! Você já leva mais de cento e oitenta mil questões comentadas e simulados. Posso te mandar o link com o desconto aplicado agora?`;
+                        setCustomAudioScript(script);
+                        onToast('Roteiro de áudio recarregado!', 'info');
+                      }}
+                      className="text-[11px] text-[#38BDF8] hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      Resetar Roteiro
+                    </button>
+                  </div>
                 </div>
 
                 <textarea
