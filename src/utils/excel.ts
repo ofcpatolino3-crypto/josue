@@ -919,7 +919,7 @@ export function getWhatsAppTargetMode(): WhatsAppTargetMode {
   } catch (e) {
     console.error(e);
   }
-  // Padrão: Abre direto no Aplicativo WhatsApp (Desktop / Celular) sem abrir abas no navegador!
+  // Padrão definitivo: Abre direto no Aplicativo WhatsApp (Desktop / Celular) sem abrir WhatsApp Web no navegador
   return 'desktop_app';
 }
 
@@ -931,23 +931,23 @@ export function setWhatsAppTargetMode(mode: WhatsAppTargetMode) {
   }
 }
 
-export function waLink(tel: string): string | null {
+export function waLink(tel: string, customMode?: WhatsAppTargetMode): string | null {
   const digits = cleanPhone(tel);
   if (!digits) return null;
   const full = digits.length <= 11 ? '55' + digits : digits;
-  const mode = getWhatsAppTargetMode();
+  const mode = customMode || getWhatsAppTargetMode();
   if (mode === 'desktop_app') {
     return `whatsapp://send?phone=${full}`;
   }
   return `https://web.whatsapp.com/send?phone=${full}`;
 }
 
-export function waLinkWithMessage(tel: string, message?: string): string | null {
+export function waLinkWithMessage(tel: string, message?: string, customMode?: WhatsAppTargetMode): string | null {
   const digits = cleanPhone(tel);
   if (!digits) return null;
   const full = digits.length <= 11 ? '55' + digits : digits;
   const msgParam = message && message.trim() ? `&text=${encodeURIComponent(message.trim())}` : '';
-  const mode = getWhatsAppTargetMode();
+  const mode = customMode || getWhatsAppTargetMode();
   if (mode === 'desktop_app') {
     return `whatsapp://send?phone=${full}${msgParam}`;
   }
@@ -955,8 +955,8 @@ export function waLinkWithMessage(tel: string, message?: string): string | null 
 }
 
 /**
- * Abre o WhatsApp sem criar abas infinitas quando no modo 'same_tab' (padrão),
- * ou diretamente no aplicativo Desktop quando no modo 'desktop_app'.
+ * Abre o WhatsApp diretamente no aplicativo Desktop (Windows/Mac/Celular) quando no modo 'desktop_app' (padrão),
+ * ou no WhatsApp Web quando configurado para 'same_tab' ou 'new_tab'.
  */
 let waHubWindow: Window | null = null;
 
@@ -972,23 +972,45 @@ export function openWhatsAppDirect(
   const msgParam = message && message.trim() ? `&text=${encodeURIComponent(message.trim())}` : '';
 
   if (mode === 'desktop_app') {
-    // Protocolo nativo do aplicativo WhatsApp Desktop ou Celular
-    // Não abre nenhuma aba no navegador!
+    // Protocolo nativo do aplicativo WhatsApp Desktop ou Celular (Windows/Mac/Android/iOS)
+    // Abre direto no programa instalado sem carregar páginas no navegador!
     const appUrl = `whatsapp://send?phone=${full}${msgParam}`;
+    
+    // Método 1: Cria elemento de link com target="_top" e executa clique
     const hiddenLink = document.createElement('a');
     hiddenLink.href = appUrl;
+    hiddenLink.target = '_top';
+    hiddenLink.rel = 'noopener noreferrer';
+    hiddenLink.style.position = 'fixed';
+    hiddenLink.style.left = '-9999px';
+    hiddenLink.style.top = '-9999px';
     hiddenLink.style.display = 'none';
     document.body.appendChild(hiddenLink);
-    hiddenLink.click();
+    
+    try {
+      hiddenLink.click();
+    } catch (e) {
+      console.warn('Click link app error:', e);
+    }
+
+    // Método 2: Aciona window.location para garantir que o sistema operacional receba o protocolo whatsapp://
+    try {
+      if (window.self === window.top) {
+        window.location.href = appUrl;
+      }
+    } catch (e) {
+      // Fallback
+    }
+
     setTimeout(() => {
       if (document.body.contains(hiddenLink)) {
         document.body.removeChild(hiddenLink);
       }
-    }, 400);
+    }, 500);
     return true;
   }
 
-  // URL do WhatsApp Web
+  // URL do WhatsApp Web (quando o usuário explicitamente escolher navegar via Web)
   const webUrl = `https://web.whatsapp.com/send?phone=${full}${msgParam}`;
 
   if (mode === 'same_tab') {

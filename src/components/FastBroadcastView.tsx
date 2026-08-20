@@ -74,9 +74,9 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   const [whatsapp, setWhatsapp] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [curso, setCurso] = useState<string>('');
-  const [assuntoEmail, setAssuntoEmail] = useState<string>('🎯 Informação Importante sobre seu Concurso {curso} - Portal Concursos');
+  const [assuntoEmail, setAssuntoEmail] = useState<string>('🚨 RETA FINAL DA PROMOÇÃO! Oportunidade Especial para {curso} - Portal Concursos');
   const [mensagem, setMensagem] = useState<string>(
-    'Olá {nome}! Tudo bem?\n\nPassando para compartilhar uma oportunidade exclusiva e material atualizado para o seu concurso {curso}.\n\nQualquer dúvida estou à sua disposição aqui no WhatsApp!'
+    '🚨 RETA FINAL DA PROMOÇÃO! 🚨\n\nSe você vai fazer {curso}, TRANSPETRO, SEDUC-CE ou qualquer outro concurso, essa oportunidade é para você! 🎯\n\nEstamos com uma super promoção na maior escola de aprovados em concursos do Brasil! 📚🔥\n\nQuer saber quais benefícios e condições especiais estão disponíveis para você?\n\n👉 Manda “QUERO” aqui que eu te explico tudo e te mostro como garantir!'
   );
   
   // Image attachment state

@@ -24,9 +24,17 @@ import {
   BookmarkPlus,
   Save,
   Tag,
+  Monitor,
+  Globe,
 } from 'lucide-react';
 import { Contact, MessageTemplate, MessageTemplateCategory } from '../types';
-import { fillTemplate, openWhatsAppDirect } from '../utils/excel';
+import {
+  fillTemplate,
+  openWhatsAppDirect,
+  getWhatsAppTargetMode,
+  setWhatsAppTargetMode,
+  WhatsAppTargetMode,
+} from '../utils/excel';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -56,6 +64,17 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const [customText, setCustomText] = useState<string>('');
   const [autoMarkContacted, setAutoMarkContacted] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
+  const [waTargetMode, setWaTargetModeState] = useState<WhatsAppTargetMode>(() => getWhatsAppTargetMode());
+
+  const handleUpdateWaMode = (mode: WhatsAppTargetMode) => {
+    setWaTargetModeState(mode);
+    setWhatsAppTargetMode(mode);
+    if (mode === 'desktop_app') {
+      onToast('📱 Configurado: Mensagens abrirão direto no Aplicativo WhatsApp (Desktop/Celular)!', 'success');
+    } else {
+      onToast('🌐 Configurado: Mensagens abrirão no WhatsApp Web do navegador.', 'info');
+    }
+  };
 
   // Quick Script Creator inline state
   const [showInlineNewScript, setShowInlineNewScript] = useState<boolean>(false);
@@ -233,14 +252,19 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       return;
     }
 
-    // Direct desktop/mobile app trigger
-    openWhatsAppDirect(contact.whatsapp, customText);
+    // Abre no destino configurado (App desktop ou Web)
+    openWhatsAppDirect(contact.whatsapp, customText, waTargetMode);
 
     if (autoMarkContacted && onMarkContacted) {
       onMarkContacted(contact.id);
     }
 
-    onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
+    onToast(
+      waTargetMode === 'desktop_app'
+        ? `📱 Abrindo no Aplicativo WhatsApp para ${contact.nome}...`
+        : `🌐 Abrindo WhatsApp Web para ${contact.nome}...`,
+      'success'
+    );
 
     // Auto advance to next contact in queue
     if (hasNext && onSelectContact) {
@@ -256,13 +280,18 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       return;
     }
 
-    openWhatsAppDirect(contact.whatsapp, customText);
+    openWhatsAppDirect(contact.whatsapp, customText, waTargetMode);
 
     if (autoMarkContacted && onMarkContacted) {
       onMarkContacted(contact.id);
     }
 
-    onToast(`WhatsApp aberto para ${contact.nome}!`, 'success');
+    onToast(
+      waTargetMode === 'desktop_app'
+        ? `📱 Abrindo no Aplicativo WhatsApp para ${contact.nome}...`
+        : `🌐 Abrindo WhatsApp Web para ${contact.nome}...`,
+      'success'
+    );
     onClose();
   };
 
@@ -934,6 +963,48 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             </div>
           </div>
 
+          {/* WhatsApp Destination Switcher */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 rounded-xl bg-[#101B2D] border border-[#2B3D63]">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-semibold text-[#EDE6D6]">Abrir onde:</span>
+              <span className="text-[11px] text-[#8C98B4]">
+                {waTargetMode === 'desktop_app'
+                  ? '📱 Programa WhatsApp do Computador / App Celular'
+                  : '🌐 WhatsApp Web (Navegador)'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-[#172644] p-0.5 rounded-lg border border-[#2B3D63] self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => handleUpdateWaMode('desktop_app')}
+                className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  waTargetMode === 'desktop_app'
+                    ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
+                    : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                }`}
+                title="Abre direto no Aplicativo WhatsApp instalado no seu computador ou celular (recomendado)"
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>App WhatsApp</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleUpdateWaMode('same_tab')}
+                className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                  waTargetMode !== 'desktop_app'
+                    ? 'bg-[#1F3057] text-[#EDE6D6] shadow-sm'
+                    : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                }`}
+                title="Abre no WhatsApp Web no navegador"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>WhatsApp Web</span>
+              </button>
+            </div>
+          </div>
+
           {/* Auto mark option */}
           <label className="flex items-center gap-2.5 text-xs text-[#EDE6D6] cursor-pointer select-none bg-[#101B2D]/40 p-2.5 rounded-lg border border-[#2B3D63]/50">
             <input
@@ -1004,11 +1075,19 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               {isAudio ? <Mic className="w-4 h-4" /> : <Send className="w-4 h-4 fill-current" />}
               {isAudio
                 ? hasNext
-                  ? 'Abrir WhatsApp p/ Gravar & Próximo'
-                  : 'Abrir WhatsApp para Gravar'
+                  ? waTargetMode === 'desktop_app'
+                    ? 'Abrir no App p/ Gravar & Próximo'
+                    : 'Abrir no Web p/ Gravar & Próximo'
+                  : waTargetMode === 'desktop_app'
+                  ? 'Abrir no App para Gravar'
+                  : 'Abrir no Web para Gravar'
                 : hasNext
-                ? 'Enviar no WhatsApp & Próximo Aluno'
-                : 'Enviar no WhatsApp'}
+                ? waTargetMode === 'desktop_app'
+                  ? 'Enviar no App WhatsApp & Próximo'
+                  : 'Enviar no WhatsApp Web & Próximo'
+                : waTargetMode === 'desktop_app'
+                ? 'Enviar no App WhatsApp'
+                : 'Enviar no WhatsApp Web'}
               {hasNext && <FastForward className="w-4 h-4 ml-0.5" />}
             </button>
           </div>

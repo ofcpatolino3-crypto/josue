@@ -11,6 +11,65 @@ export const TEMP_COLORS: Record<Temperature, string> = {
 export const TEMP_ORDER: Temperature[] = ['Frio', 'Morno', 'Potencial', 'Quente', 'Pagou'];
 
 export const DEFAULT_TEMPLATES: MessageTemplate[] = [
+  // 0. RETA FINAL & SUPER PROMOÇÃO (Alta Conversão / Chamada para Ação "QUERO")
+  {
+    id: 't_promo_reta_final_exata',
+    titulo: '🚨 Reta Final da Promoção (Manda "QUERO")',
+    categoria: 'geral',
+    gatilho: '🚨 Urgência Máxima + 🔥 Curiosidade & Resposta "QUERO"',
+    emocao: 'Empolgação, senso de oportunidade imperdível e facilidade de resposta.',
+    logica: 'Mensagem direta com baixo atrito de resposta (apenas mandar "QUERO") gera até 3.4x mais conversas.',
+    descricao: 'Disparo de alta conversão ideal para campanhas em massa, listas de transmissão e leads mornos/frios.',
+    tags: ['Promoção', 'Reta Final', 'QUERO', 'Alta Conversão'],
+    texto: `🚨 RETA FINAL DA PROMOÇÃO! 🚨
+
+Se você vai fazer *{curso}*, TRANSPETRO, SEDUC-CE ou qualquer outro concurso, essa oportunidade é para você! 🎯
+
+Estamos com uma super promoção na maior escola de aprovados em concursos do Brasil! 📚🔥
+
+Quer saber quais benefícios e condições especiais estão disponíveis para você?
+
+👉 Manda “QUERO” aqui que eu te explico tudo e te mostro como garantir!`
+  },
+  {
+    id: 't_promo_personalizada_nome',
+    titulo: '🚨 Reta Final da Promoção (Personalizada com {nome})',
+    categoria: 'fechamento_pix',
+    gatilho: '🎯 Personalização Direta + ⚡ Condição Exclusiva no Cadastro',
+    emocao: 'Atenção imediata pelo nome e desejo de aproveitar o desconto antes do encerramento.',
+    logica: 'Chamar o lead pelo nome e citar o concurso dele aumenta a taxa de abertura e resposta imediata.',
+    descricao: 'Versão personalizada com o primeiro nome do aluno para envios individuais ou em fila rápida.',
+    tags: ['Promoção', 'Personalizada', 'QUERO', 'Fechamento'],
+    texto: `Oi, {nome}! 🚨 RETA FINAL DA PROMOÇÃO! 🚨
+
+Se você vai fazer *{curso}*, TRANSPETRO, SEDUC-CE ou qualquer outro concurso, essa oportunidade é para você! 🎯
+
+Estamos com uma super promoção na maior escola de aprovados em concursos do Brasil! 📚🔥
+
+Quer saber quais benefícios e condições especiais estão disponíveis para o seu cadastro?
+
+👉 Manda “QUERO” aqui que eu te explico tudo e te mostro como garantir!`
+  },
+  {
+    id: 't_promo_audio_reta_final',
+    titulo: '🎙️ Áudio: Reta Final da Promoção (Chamada "QUERO")',
+    categoria: 'roteiro_audio',
+    tipo: 'audio',
+    duracaoEstimada: '25 a 30 segundos',
+    tomDeVoz: 'Energético, confiante, direto e entusiasmado',
+    dicasGravacao: [
+      'Grave com energia alta e sorriso na voz.',
+      'Destaque que é a reta final da condição especial da escola.',
+      'Peça para a pessoa responder apenas "QUERO" no WhatsApp.'
+    ],
+    gatilho: '🎙️ Entusiasmo de Voz + Resposta Rápida "QUERO"',
+    emocao: 'Sensação de não poder ficar de fora dessa oportunidade única.',
+    logica: 'O áudio quebra a barreira comercial e convida a uma ação simples de 1 palavra.',
+    descricao: 'Roteiro de áudio para gravar no WhatsApp em campanhas de promoção e lotes promocionais.',
+    tags: ['Roteiro de Áudio', 'Promoção', 'QUERO', 'Voz'],
+    texto: `Fala, {nome}! Tudo bem por aí? Gravando esse áudio rapidinho porque estamos na reta final da super promoção do Portal Concursos pra quem vai fazer *{curso}*, Transpetro, SEDUC ou qualquer outro edital! A gente liberou condições especiais com muito benefício e o banco de 180 mil questões. Se você quiser saber como garantir essa condição, só me manda um 'QUERO' aqui no WhatsApp que eu te explico tudo agora!`
+  },
+
   // 1. PÓS-PROVA (Acolhimento + Sondagem Inteligente)
   {
     id: 't_pos_1',

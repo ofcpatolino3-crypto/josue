@@ -171,7 +171,7 @@ export const ContactCard: React.FC<CardProps> = ({
                 <span
                   onClick={handleOpenWhatsApp}
                   className="cursor-pointer hover:text-[#EDE6D6] border-b border-dotted border-[#8C98B4] transition-colors"
-                  title="Abrir no WhatsApp Web"
+                  title="Abrir no Aplicativo WhatsApp"
                 >
                   {contact.whatsapp}
                 </span>
