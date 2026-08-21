@@ -1445,12 +1445,18 @@ export default function App() {
   };
 
   const handleMarkToday = (id: string) => {
-    const target = contacts.find((c) => c.id === id);
+    const today = todayStr();
+    const now = Date.now();
+    const target = contacts.find((c) => c.id === id) || globalContacts.find((c) => c.id === id);
     if (target) {
       const updated: Contact = {
         ...target,
-        ultimoContato: todayStr(),
-        dataContato: target.dataContato || todayStr(),
+        ultimoContato: today,
+        dataContato: target.dataContato || today,
+        status: target.status === 'Novo Lead' || target.status === 'Pendente' || !target.status ? 'Contatado' : target.status,
+        lastMessageAt: now,
+        messagesSentCount: (target.messagesSentCount || 0) + 1,
+        isSeenByAttendant: true,
       };
       saveContactToCloud(updated);
     }
@@ -1459,16 +1465,62 @@ export default function App() {
         if (c.id !== id) return c;
         return {
           ...c,
-          ultimoContato: todayStr(),
-          dataContato: c.dataContato || todayStr(),
+          ultimoContato: today,
+          dataContato: c.dataContato || today,
+          status: c.status === 'Novo Lead' || c.status === 'Pendente' || !c.status ? 'Contatado' : c.status,
+          lastMessageAt: now,
+          messagesSentCount: (c.messagesSentCount || 0) + 1,
+          isSeenByAttendant: true,
         };
       })
     );
-    addToast('Contato marcado como contatado hoje!', 'success');
+    setGlobalContacts((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c;
+        return {
+          ...c,
+          ultimoContato: today,
+          dataContato: c.dataContato || today,
+          status: c.status === 'Novo Lead' || c.status === 'Pendente' || !c.status ? 'Contatado' : c.status,
+          lastMessageAt: now,
+          messagesSentCount: (c.messagesSentCount || 0) + 1,
+          isSeenByAttendant: true,
+        };
+      })
+    );
+    setMessageModalContact((prev) => {
+      if (prev && prev.id === id) {
+        return {
+          ...prev,
+          ultimoContato: today,
+          dataContato: prev.dataContato || today,
+          status: prev.status === 'Novo Lead' || prev.status === 'Pendente' || !prev.status ? 'Contatado' : prev.status,
+          lastMessageAt: now,
+          messagesSentCount: (prev.messagesSentCount || 0) + 1,
+          isSeenByAttendant: true,
+        };
+      }
+      return prev;
+    });
+    setSalesAssistantContact((prev) => {
+      if (prev && prev.id === id) {
+        return {
+          ...prev,
+          ultimoContato: today,
+          dataContato: prev.dataContato || today,
+          status: prev.status === 'Novo Lead' || prev.status === 'Pendente' || !prev.status ? 'Contatado' : prev.status,
+          lastMessageAt: now,
+          messagesSentCount: (prev.messagesSentCount || 0) + 1,
+          isSeenByAttendant: true,
+        };
+      }
+      return prev;
+    });
+    addToast('✓ Contato marcado como contatado hoje!', 'success');
   };
 
   const handleMarkEmailContacted = (id: string, emailSubject?: string) => {
-    const target = contacts.find((c) => c.id === id);
+    const target = contacts.find((c) => c.id === id) || globalContacts.find((c) => c.id === id);
     const now = Date.now();
     const today = todayStr();
     if (target) {
@@ -1483,6 +1535,7 @@ export default function App() {
         lastMessageAt: now,
         lastMessageText: emailSubject ? `E-mail: ${emailSubject.slice(0, 50)}` : 'E-mail enviado via SendGrid',
         status: target.status && !target.status.includes('E-mail') ? `${target.status} (E-mail)` : (target.status || 'Contatado via E-mail'),
+        isSeenByAttendant: true,
       };
       saveContactToCloud(updated);
     }
@@ -1500,6 +1553,25 @@ export default function App() {
           lastMessageAt: now,
           lastMessageText: emailSubject ? `E-mail: ${emailSubject.slice(0, 50)}` : 'E-mail enviado via SendGrid',
           status: c.status && !c.status.includes('E-mail') ? `${c.status} (E-mail)` : (c.status || 'Contatado via E-mail'),
+          isSeenByAttendant: true,
+        };
+      })
+    );
+    setGlobalContacts((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c;
+        return {
+          ...c,
+          ultimoContato: today,
+          dataContato: c.dataContato || today,
+          lastEmailSentAt: now,
+          lastEmailSubject: emailSubject || c.lastEmailSubject,
+          emailSentCount: (c.emailSentCount || 0) + 1,
+          lastMessageType: 'email',
+          lastMessageAt: now,
+          lastMessageText: emailSubject ? `E-mail: ${emailSubject.slice(0, 50)}` : 'E-mail enviado via SendGrid',
+          status: c.status && !c.status.includes('E-mail') ? `${c.status} (E-mail)` : (c.status || 'Contatado via E-mail'),
+          isSeenByAttendant: true,
         };
       })
     );
@@ -1564,7 +1636,7 @@ export default function App() {
   };
 
   const handleUndoContact = (id: string) => {
-    const target = contacts.find((c) => c.id === id);
+    const target = contacts.find((c) => c.id === id) || globalContacts.find((c) => c.id === id);
     if (target) {
       const updated: Contact = { ...target, ultimoContato: '' };
       saveContactToCloud(updated);
@@ -1572,11 +1644,26 @@ export default function App() {
     setContacts((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ultimoContato: '' } : c))
     );
+    setGlobalContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ultimoContato: '' } : c))
+    );
+    setMessageModalContact((prev) => {
+      if (prev && prev.id === id) {
+        return { ...prev, ultimoContato: '' };
+      }
+      return prev;
+    });
+    setSalesAssistantContact((prev) => {
+      if (prev && prev.id === id) {
+        return { ...prev, ultimoContato: '' };
+      }
+      return prev;
+    });
     addToast('Marcação de contato desfeita.', 'info');
   };
 
   const handleUpdateField = (id: string, field: keyof Contact, value: string) => {
-    const target = contacts.find((c) => c.id === id);
+    const target = contacts.find((c) => c.id === id) || globalContacts.find((c) => c.id === id);
     if (target) {
       const updated: Contact = { ...target, [field]: value };
       saveContactToCloud(updated);
@@ -1587,6 +1674,24 @@ export default function App() {
         return { ...c, [field]: value };
       })
     );
+    setGlobalContacts((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c;
+        return { ...c, [field]: value };
+      })
+    );
+    setMessageModalContact((prev) => {
+      if (prev && prev.id === id) {
+        return { ...prev, [field]: value };
+      }
+      return prev;
+    });
+    setSalesAssistantContact((prev) => {
+      if (prev && prev.id === id) {
+        return { ...prev, [field]: value };
+      }
+      return prev;
+    });
   };
 
   const handleDeleteContact = (id: string) => {

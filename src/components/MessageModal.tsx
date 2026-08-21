@@ -34,6 +34,8 @@ import {
   getWhatsAppTargetMode,
   setWhatsAppTargetMode,
   WhatsAppTargetMode,
+  formatDateBR,
+  todayStr,
 } from '../utils/excel';
 
 interface MessageModalProps {
@@ -62,9 +64,17 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [templateFilter, setTemplateFilter] = useState<'all' | 'audio' | 'text'>('all');
   const [customText, setCustomText] = useState<string>('');
-  const [autoMarkContacted, setAutoMarkContacted] = useState<boolean>(true);
+  const [autoMarkContacted, setAutoMarkContacted] = useState<boolean>(() => {
+    const saved = localStorage.getItem('siga_auto_mark_contacted');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [copied, setCopied] = useState<boolean>(false);
   const [waTargetMode, setWaTargetModeState] = useState<WhatsAppTargetMode>(() => getWhatsAppTargetMode());
+
+  const handleToggleAutoMark = (val: boolean) => {
+    setAutoMarkContacted(val);
+    localStorage.setItem('siga_auto_mark_contacted', String(val));
+  };
 
   const handleUpdateWaMode = (mode: WhatsAppTargetMode) => {
     setWaTargetModeState(mode);
@@ -460,6 +470,33 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     {contact.email}
                   </a>
                 </span>
+              )}
+            </div>
+
+            {/* Contacted Status Badge & Direct Manual Toggle */}
+            <div className="flex flex-wrap items-center gap-2 mt-2.5">
+              {contact.ultimoContato ? (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-xs">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
+                  <span>Contatado {contact.ultimoContato === todayStr() ? 'Hoje' : `em ${formatDateBR(contact.ultimoContato)}`}</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Pendente de Primeiro Contato</span>
+                </span>
+              )}
+
+              {onMarkContacted && (
+                <button
+                  type="button"
+                  onClick={() => onMarkContacted(contact.id)}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] cursor-pointer transition-all active:scale-95"
+                  title="Marcar contato realizado hoje"
+                >
+                  <Check className="w-3 h-3 text-[#C9A227] stroke-[3]" />
+                  <span>{contact.ultimoContato === todayStr() ? 'Re-confirmar Contato Hoje' : 'Marcar Contato Hoje'}</span>
+                </button>
               )}
             </div>
           </div>
@@ -1010,7 +1047,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             <input
               type="checkbox"
               checked={autoMarkContacted}
-              onChange={(e) => setAutoMarkContacted(e.target.checked)}
+              onChange={(e) => handleToggleAutoMark(e.target.checked)}
               className="rounded accent-[#C9A227] w-4 h-4 cursor-pointer"
             />
             <span>Marcar automaticamente como <b>"Contatado Hoje"</b> ao enviar pelo WhatsApp</span>

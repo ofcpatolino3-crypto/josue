@@ -18,6 +18,7 @@ import { TEMP_COLORS, TEMP_ORDER } from '../data/defaults';
 import {
   waLink,
   formatDateBR,
+  todayStr,
   isOverdue,
   getContactInactivityStatus,
   isWithoutContactFor3Days,
@@ -61,7 +62,7 @@ export const ContactCard: React.FC<CardProps> = ({
   const handleOpenWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!contact.whatsapp) return;
-    onUpdateField(contact.id, 'ultimoContato', new Date().toISOString().split('T')[0]);
+    onMarkToday(contact.id);
     openWhatsAppDirect(contact.whatsapp);
   };
 
@@ -128,6 +129,17 @@ export const ContactCard: React.FC<CardProps> = ({
                 </span>
               );
             })()}
+
+            {/* WhatsApp Contatado Badge */}
+            {contact.ultimoContato && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs"
+                title={`Contatado via WhatsApp em ${formatDateBR(contact.ultimoContato)}${contact.messagesSentCount ? ` (${contact.messagesSentCount} disparos)` : ''}`}
+              >
+                <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />
+                <span>Contatado ({contact.ultimoContato === todayStr() ? 'Hoje' : formatDateBR(contact.ultimoContato)})</span>
+              </span>
+            )}
 
             {/* Email Contacted Badge */}
             {contact.lastEmailSentAt && (
@@ -268,8 +280,9 @@ export const ContactCard: React.FC<CardProps> = ({
             </button>
           ) : (
             <div className="flex items-center gap-2">
-              <div className="border-2 border-[#B14432] text-[#B14432] rounded px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider font-serif transform -rotate-3 select-none">
-                Contatado
+              <div className="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 rounded-lg px-3 py-1 text-xs font-bold shadow-xs">
+                <Check className="w-3.5 h-3.5 stroke-[3] text-emerald-400" />
+                <span>Contatado {contact.ultimoContato === todayStr() ? 'Hoje' : formatDateBR(contact.ultimoContato)}</span>
               </div>
               <button
                 type="button"
