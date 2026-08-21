@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   X,
   Sparkles,
@@ -64,15 +64,21 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
   const [batchName, setBatchName] = useState('');
   const [summaryInfo, setSummaryInfo] = useState('');
 
-  // Distribution settings
-  const [distMode, setDistMode] = useState<'unassigned' | 'equal' | 'single' | 'self'>('unassigned');
+  // Distribution settings (defaults to 'self' for attendants so they get contacts immediately)
+  const [distMode, setDistMode] = useState<'unassigned' | 'equal' | 'single' | 'self'>(() => {
+    return currentProfile?.role === 'attendant' ? 'self' : 'self';
+  });
   const [singleTargetUid, setSingleTargetUid] = useState('');
   const [selectedAttendantUids, setSelectedAttendantUids] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const approvedAttendants = users.filter((u) => u.status === 'approved' && u.role === 'attendant');
+  const approvedAttendants = useMemo(() => {
+    const direct = users.filter((u) => u.status === 'approved' && (u.role === 'attendant' || u.role === 'supervisor'));
+    if (direct.length > 0) return direct;
+    return users.filter((u) => u.status === 'approved');
+  }, [users]);
 
   // Reset modal state
   const resetState = () => {
@@ -83,7 +89,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
     setSummaryInfo('');
     setErrorMsg('');
     setTextInput('');
-    setDistMode('unassigned');
+    setDistMode('self');
     setSingleTargetUid('');
     setSelectedAttendantUids(approvedAttendants.map((a) => a.uid));
   };
@@ -709,25 +715,30 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {/* Option 1: Unassigned in Pool */}
+                  {/* Option 1: Assign to Self (Default & Instant) */}
                   <label
                     className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
-                      distMode === 'unassigned'
-                        ? 'border-[#C9A227] bg-[#C9A227]/10'
+                      distMode === 'self'
+                        ? 'border-[#22C55E] bg-[#22C55E]/15 shadow-sm'
                         : 'border-[#2B3D63] hover:border-[#8C98B4] bg-[#172644]/50'
                     }`}
                   >
                     <input
                       type="radio"
                       name="dist_mode"
-                      checked={distMode === 'unassigned'}
-                      onChange={() => setDistMode('unassigned')}
-                      className="accent-[#C9A227] mt-0.5"
+                      checked={distMode === 'self'}
+                      onChange={() => setDistMode('self')}
+                      className="accent-[#22C55E] mt-0.5"
                     />
                     <div>
-                      <div className="text-xs font-bold text-white">📦 Banco Geral (Livre)</div>
-                      <p className="text-[11px] text-[#8C98B4]">
-                        Fica salvo no painel admin para o supervisor distribuir depois na aba "Distribuir Planilhas".
+                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span>🎯 Atribuir para Mim</span>
+                        <span className="text-[10px] font-bold bg-[#22C55E]/20 text-[#4ADE80] border border-[#22C55E]/40 px-1.5 py-0.2 rounded uppercase">
+                          Liberado Imediato
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#8C98B4] mt-0.5">
+                        Libera os contatos na hora na sua carteira de atendimento, sem precisar de aprovação do supervisor.
                       </p>
                     </div>
                   </label>
@@ -749,7 +760,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                     />
                     <div>
                       <div className="text-xs font-bold text-white">⚖️ Distribuir Igualmente</div>
-                      <p className="text-[11px] text-[#8C98B4]">
+                      <p className="text-[11px] text-[#8C98B4] mt-0.5">
                         Divide os {selectedCount} contatos igualmente entre os atendentes ativos da equipe.
                       </p>
                     </div>
@@ -772,16 +783,16 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                     />
                     <div>
                       <div className="text-xs font-bold text-white">👤 Atribuir a 1 Atendente</div>
-                      <p className="text-[11px] text-[#8C98B4]">
+                      <p className="text-[11px] text-[#8C98B4] mt-0.5">
                         Direciona todos os contatos do lote para um consultor específico.
                       </p>
                     </div>
                   </label>
 
-                  {/* Option 4: Assign to Self */}
+                  {/* Option 4: Unassigned in Pool */}
                   <label
                     className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
-                      distMode === 'self'
+                      distMode === 'unassigned'
                         ? 'border-[#C9A227] bg-[#C9A227]/10'
                         : 'border-[#2B3D63] hover:border-[#8C98B4] bg-[#172644]/50'
                     }`}
@@ -789,14 +800,14 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                     <input
                       type="radio"
                       name="dist_mode"
-                      checked={distMode === 'self'}
-                      onChange={() => setDistMode('self')}
+                      checked={distMode === 'unassigned'}
+                      onChange={() => setDistMode('unassigned')}
                       className="accent-[#C9A227] mt-0.5"
                     />
                     <div>
-                      <div className="text-xs font-bold text-white">🎯 Atribuir para Mim</div>
-                      <p className="text-[11px] text-[#8C98B4]">
-                        Adiciona diretamente à minha própria lista de atendimento diário.
+                      <div className="text-xs font-bold text-white">📦 Banco Geral (Livre)</div>
+                      <p className="text-[11px] text-[#8C98B4] mt-0.5">
+                        Salva no banco central para distribuição posterior pelo supervisor.
                       </p>
                     </div>
                   </label>
@@ -822,10 +833,47 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                 )}
 
                 {distMode === 'equal' && (
-                  <div className="pt-2 border-t border-[#2B3D63] space-y-1.5">
-                    <label className="text-xs font-semibold text-[#8C98B4]">
-                      Atendentes que participarão da divisão ({selectedAttendantUids.length} selecionados):
-                    </label>
+                  <div className="pt-3 border-t border-[#2B3D63] space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span>⚖️ Equipe para Divisão Igualitária:</span>
+                        <span className="text-[#38BDF8] font-extrabold bg-[#38BDF8]/15 border border-[#38BDF8]/30 px-2 py-0.5 rounded text-[11px]">
+                          {selectedAttendantUids.length} selecionado(s)
+                        </span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAttendantUids(approvedAttendants.map((a) => a.uid))}
+                          className="text-[11px] text-[#C9A227] hover:underline font-bold cursor-pointer"
+                        >
+                          Selecionar Todos
+                        </button>
+                        <span className="text-[#8C98B4] text-[11px]">|</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAttendantUids([])}
+                          className="text-[11px] text-[#8C98B4] hover:text-white font-medium cursor-pointer"
+                        >
+                          Limpar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Calculation preview pill */}
+                    <div className="bg-[#172644] p-3 rounded-xl border border-[#2B3D63] flex flex-wrap items-center gap-2 text-xs">
+                      <span className="text-[#8C98B4]">Resultado:</span>
+                      <strong className="text-[#C9A227]">{selectedCount} leads</strong>
+                      <span>÷</span>
+                      <strong className="text-[#38BDF8]">{selectedAttendantUids.length} atendentes</strong>
+                      <span>=</span>
+                      <span className="bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/40 px-2.5 py-0.5 rounded font-extrabold">
+                        {selectedAttendantUids.length > 0
+                          ? `~${Math.floor(selectedCount / selectedAttendantUids.length)} contatos para cada um`
+                          : 'Selecione pelo menos 1 atendente'}
+                      </span>
+                    </div>
+
                     <div className="flex flex-wrap gap-2">
                       {approvedAttendants.map((att) => {
                         const isChecked = selectedAttendantUids.includes(att.uid);
@@ -838,14 +886,14 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({
                                 isChecked ? prev.filter((id) => id !== att.uid) : [...prev, att.uid]
                               );
                             }}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                               isChecked
-                                ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold'
-                                : 'bg-[#172644] text-[#8C98B4] border-[#2B3D63]'
+                                ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] shadow-sm font-bold'
+                                : 'bg-[#172644] text-[#8C98B4] border-[#2B3D63] hover:border-[#8C98B4]'
                             }`}
                           >
-                            {isChecked ? '✓ ' : '+ '}
-                            {att.displayName || att.username || att.email}
+                            <span>{isChecked ? '✓' : '+'}</span>
+                            <span>{att.displayName || att.username || att.email}</span>
                           </button>
                         );
                       })}

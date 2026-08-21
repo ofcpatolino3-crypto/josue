@@ -97,7 +97,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] text-[#101B2D] px-3 py-1 rounded-md font-bold transition-all shadow-sm cursor-pointer hover:brightness-110"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Importador de Planilhas (Com Distribuição)</span>
+                <span>⚡ Importar / Divisão Igualitária</span>
               </button>
             )}
 
@@ -200,7 +200,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                   className="flex items-center gap-1.5 bg-gradient-to-r from-[#C9A227] to-[#8C6D1F] hover:brightness-110 text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-md cursor-pointer whitespace-nowrap"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>Importador com Distribuição</span>
+                  <span>⚡ Importar Planilhas (Liberação Imediata)</span>
                 </button>
               )}
 

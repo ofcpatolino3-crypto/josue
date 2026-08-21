@@ -103,7 +103,7 @@ const MASTER_ADMIN_PROFILE: UserProfile = {
   uid: 'master_admin_root',
   email: MASTER_ADMIN_EMAIL,
   username: 'admin',
-  displayName: 'Administrador Master',
+  displayName: 'Lucas Henrique',
   password: DEFAULT_MASTER_PASSWORD,
   role: 'admin',
   status: 'approved',
@@ -911,10 +911,10 @@ export default function App() {
         displayName: name.trim(),
         password: pass,
         role: isMaster ? 'admin' : 'attendant',
-        status: isMaster ? 'approved' : 'pending',
+        status: 'approved',
         createdAt: Date.now(),
-        approvedAt: isMaster ? Date.now() : undefined,
-        approvedBy: isMaster ? 'system_master' : undefined,
+        approvedAt: Date.now(),
+        approvedBy: isMaster ? 'system_master' : 'auto_liberado',
       };
 
       // Save to Firestore
@@ -932,7 +932,7 @@ export default function App() {
       if (isMaster) {
         addToast('Conta de Administrador Master criada com sucesso!', 'success');
       } else {
-        addToast('Cadastro realizado! Sua conta foi enviada para aprovação do Administrador.', 'success');
+        addToast(`Bem-vindo, ${name}! Conta liberada para atendimento e importação de contatos.`, 'success');
       }
       return true;
     } catch (e: any) {
@@ -1259,15 +1259,40 @@ export default function App() {
       let distributedCount = 0;
 
       if (distributionMode === 'unassigned') {
-        newItems.forEach((c) => {
-          const globalRef = doc(db, 'global_contacts', c.id);
-          batch.set(globalRef, c, { merge: true });
-        });
+        if (currentProfile?.role === 'attendant' && currentProfile?.uid) {
+          // Attendants get contacts directly liberated into their own queue
+          newItems.forEach((c) => {
+            const updated: Contact = {
+              ...c,
+              assignedTo: currentProfile.uid,
+              assignedToEmail: currentProfile.email,
+            };
+            const userRef = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
+            batch.set(userRef, updated, { merge: true });
+            const globalRef = doc(db, 'global_contacts', c.id);
+            batch.set(globalRef, updated, { merge: true });
+          });
+          setContacts((prev) => [
+            ...newItems.map((c) => ({
+              ...c,
+              assignedTo: currentProfile.uid,
+              assignedToEmail: currentProfile.email,
+            })),
+            ...prev,
+          ]);
+          distributedCount = newItems.length;
+        } else {
+          // Admin / Supervisor saves to global pool for manual distribution
+          newItems.forEach((c) => {
+            const globalRef = doc(db, 'global_contacts', c.id);
+            batch.set(globalRef, c, { merge: true });
+          });
+        }
         batch.set(batchDocRef, {
           id: batchDocId,
           name: batchName,
           totalLeads: newItems.length,
-          distributedLeads: 0,
+          distributedLeads: distributedCount,
           createdAt: Date.now(),
           createdBy: currentProfile?.email || 'admin',
         });
@@ -1322,25 +1347,48 @@ export default function App() {
           createdBy: currentProfile?.email || 'admin',
         });
       } else if (distributionMode === 'equal') {
-        const targetAttendants = allUsers.filter(
+        const availableAttendants = allUsers.filter(
           (u) =>
             u.status === 'approved' &&
-            u.role === 'attendant' &&
-            (!selectedAttendantUids || selectedAttendantUids.length === 0 || selectedAttendantUids.includes(u.uid))
+            (u.role === 'attendant' || u.role === 'supervisor')
         );
+        // Fallback to all approved users if no specific attendants are tagged
+        const eligibleUsers = availableAttendants.length > 0
+          ? availableAttendants
+          : allUsers.filter((u) => u.status === 'approved');
+
+        const targetAttendants = eligibleUsers.filter(
+          (u) =>
+            !selectedAttendantUids ||
+            selectedAttendantUids.length === 0 ||
+            selectedAttendantUids.includes(u.uid)
+        );
+
         if (targetAttendants.length > 0) {
+          const myAssigned: Contact[] = [];
           newItems.forEach((c, idx) => {
             const assignedUser = targetAttendants[idx % targetAttendants.length];
             const updated: Contact = {
               ...c,
               assignedTo: assignedUser.uid,
               assignedToEmail: assignedUser.email,
+              assignedAt: Date.now(),
+              isSeenByAttendant: false,
+              status: 'Novo Lead',
             };
             const userRef = doc(db, 'users', assignedUser.uid, 'contacts', c.id);
             batch.set(userRef, updated, { merge: true });
             const globalRef = doc(db, 'global_contacts', c.id);
             batch.set(globalRef, updated, { merge: true });
+
+            if (currentProfile && assignedUser.uid === currentProfile.uid) {
+              myAssigned.push(updated);
+            }
           });
+
+          if (myAssigned.length > 0) {
+            setContacts((prev) => [...myAssigned, ...prev]);
+          }
           distributedCount = newItems.length;
         } else {
           newItems.forEach((c) => {

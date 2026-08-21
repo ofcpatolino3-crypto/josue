@@ -574,17 +574,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-5 shadow-lg">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 text-xs font-extrabold bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/50 px-3 py-1 rounded-full uppercase tracking-wider">
                 <Shield className="w-3.5 h-3.5" />
-                {currentProfile?.role === 'admin' ? '👑 Painel Administrador Master' : '🛡️ Painel de Supervisão & Vendas'}
+                👑 Painel Administrativo — Lucas Henrique
               </span>
               <span className="text-xs text-[#8C98B4]">
-                • Supervisor: <strong className="text-white">{currentProfile?.displayName || currentProfile?.email}</strong>
+                • Administrador Master: <strong className="text-white">Lucas Henrique</strong>
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6] tracking-tight">
-              Central de Divisão de Leads & Gestão de Vendedores
+              Painel Administrativo Lucas Henrique · Gestão de Leads & Vendas
             </h2>
             <p className="text-xs text-[#8C98B4]">
               Distribua leads por roleta equitativa, acompanhe o radar de inatividade (+3 dias) e monitore o desempenho da equipe.

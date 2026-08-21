@@ -266,7 +266,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Shield className="w-4 h-4" />
-            <span>Supervisão & Leads</span>
+            <span>Admin Lucas Henrique</span>
             {inactiveAlertsCount > 0 && (
               <span
                 className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-[#DC2626] text-white animate-pulse shadow-sm"
