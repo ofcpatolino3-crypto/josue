@@ -71,6 +71,15 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
   const [waTargetMode, setWaTargetModeState] = useState<WhatsAppTargetMode>(() => getWhatsAppTargetMode());
 
+  // Track if contacted today for immediate visual feedback in modal
+  const [isMarkedToday, setIsMarkedToday] = useState<boolean>(() => {
+    return Boolean(contact?.ultimoContato === todayStr());
+  });
+
+  useEffect(() => {
+    setIsMarkedToday(Boolean(contact?.ultimoContato === todayStr()));
+  }, [contact?.id, contact?.ultimoContato]);
+
   const handleToggleAutoMark = (val: boolean) => {
     setAutoMarkContacted(val);
     localStorage.setItem('siga_auto_mark_contacted', String(val));
@@ -246,7 +255,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const handleCopy = () => {
     navigator.clipboard.writeText(customText);
     setCopied(true);
-    onToast('Mensagem copiada para a área de transferência!', 'success');
+    if (onMarkContacted && contact) {
+      onMarkContacted(contact.id);
+      setIsMarkedToday(true);
+      onToast(`📋 Mensagem copiada e ${contact.nome} registrado como Contatado Hoje!`, 'success');
+    } else {
+      onToast('Mensagem copiada para a área de transferência!', 'success');
+    }
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -265,14 +280,15 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     // Abre no destino configurado (App desktop ou Web)
     openWhatsAppDirect(contact.whatsapp, customText, waTargetMode);
 
-    if (autoMarkContacted && onMarkContacted) {
+    if (onMarkContacted) {
       onMarkContacted(contact.id);
+      setIsMarkedToday(true);
     }
 
     onToast(
       waTargetMode === 'desktop_app'
-        ? `📱 Abrindo no Aplicativo WhatsApp para ${contact.nome}...`
-        : `🌐 Abrindo WhatsApp Web para ${contact.nome}...`,
+        ? `📱 Abrindo App WhatsApp e registrando contato realizado para ${contact.nome}...`
+        : `🌐 Abrindo WhatsApp Web e registrando contato realizado para ${contact.nome}...`,
       'success'
     );
 
@@ -292,14 +308,15 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
     openWhatsAppDirect(contact.whatsapp, customText, waTargetMode);
 
-    if (autoMarkContacted && onMarkContacted) {
+    if (onMarkContacted) {
       onMarkContacted(contact.id);
+      setIsMarkedToday(true);
     }
 
     onToast(
       waTargetMode === 'desktop_app'
-        ? `📱 Abrindo no Aplicativo WhatsApp para ${contact.nome}...`
-        : `🌐 Abrindo WhatsApp Web para ${contact.nome}...`,
+        ? `📱 Abrindo App WhatsApp e registrando contato realizado para ${contact.nome}...`
+        : `🌐 Abrindo WhatsApp Web e registrando contato realizado para ${contact.nome}...`,
       'success'
     );
     onClose();
@@ -475,13 +492,18 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
             {/* Contacted Status Badge & Direct Manual Toggle */}
             <div className="flex flex-wrap items-center gap-2 mt-2.5">
-              {contact.ultimoContato ? (
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-xs">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
-                  <span>Contatado {contact.ultimoContato === todayStr() ? 'Hoje' : `em ${formatDateBR(contact.ultimoContato)}`}</span>
+              {isMarkedToday || contact.ultimoContato === todayStr() ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg bg-emerald-500/25 text-emerald-300 border border-emerald-500/60 shadow-sm animate-fadeIn">
+                  <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                  <span>✓ Contatado Hoje ({todayStr()})</span>
+                </span>
+              ) : contact.ultimoContato ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                  <Clock className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Último Contato: {formatDateBR(contact.ultimoContato)}</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
                   <span>Pendente de Primeiro Contato</span>
                 </span>
@@ -490,12 +512,24 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               {onMarkContacted && (
                 <button
                   type="button"
-                  onClick={() => onMarkContacted(contact.id)}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] cursor-pointer transition-all active:scale-95"
+                  onClick={() => {
+                    onMarkContacted(contact.id);
+                    setIsMarkedToday(true);
+                    onToast(`✓ ${contact.nome} marcado como Contatado Hoje!`, 'success');
+                  }}
+                  className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border cursor-pointer transition-all active:scale-95 ${
+                    isMarkedToday || contact.ultimoContato === todayStr()
+                      ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/50'
+                      : 'bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] border-[#C9A227] shadow-sm'
+                  }`}
                   title="Marcar contato realizado hoje"
                 >
-                  <Check className="w-3 h-3 text-[#C9A227] stroke-[3]" />
-                  <span>{contact.ultimoContato === todayStr() ? 'Re-confirmar Contato Hoje' : 'Marcar Contato Hoje'}</span>
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>
+                    {isMarkedToday || contact.ultimoContato === todayStr()
+                      ? '✓ Confirmado Contatado Hoje'
+                      : 'Marcar como Contatado Hoje'}
+                  </span>
                 </button>
               )}
             </div>
@@ -1050,8 +1084,59 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               onChange={(e) => handleToggleAutoMark(e.target.checked)}
               className="rounded accent-[#C9A227] w-4 h-4 cursor-pointer"
             />
-            <span>Marcar automaticamente como <b>"Contatado Hoje"</b> ao enviar pelo WhatsApp</span>
+            <span>Marcar automaticamente como <b>"Contatado Hoje"</b> ao enviar pelo WhatsApp ou copiar</span>
           </label>
+
+          {/* Real-time Status feedback block */}
+          {isMarkedToday || contact.ultimoContato === todayStr() ? (
+            <div className="bg-emerald-950/40 border border-emerald-500/50 rounded-xl p-3 flex items-center justify-between gap-3 shadow-xs animate-fadeIn">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 border border-emerald-500/40">
+                  ✓
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-emerald-300">
+                    Registrado como Contatado Hoje ({todayStr()})
+                  </div>
+                  <div className="text-[11px] text-emerald-400/80">
+                    Este contato foi registrado no sistema e agora está visível na aba "Contatados".
+                  </div>
+                </div>
+              </div>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">
+                Salvo
+              </span>
+            </div>
+          ) : (
+            <div className="bg-amber-950/30 border border-amber-500/40 rounded-xl p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 border border-amber-500/40">
+                  ⏳
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-amber-200">
+                    Pendente de Primeiro Contato Hoje
+                  </div>
+                  <div className="text-[11px] text-amber-300/70">
+                    Ao clicar em "Enviar" ou "Copiar", o status é marcado automaticamente.
+                  </div>
+                </div>
+              </div>
+              {onMarkContacted && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onMarkContacted(contact.id);
+                    setIsMarkedToday(true);
+                    onToast(`✓ ${contact.nome} marcado como Contatado Hoje!`, 'success');
+                  }}
+                  className="bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] text-xs font-extrabold px-3 py-1.5 rounded-lg transition-transform active:scale-95 cursor-pointer shrink-0 shadow-sm"
+                >
+                  Marcar Agora
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Modal Footer with Queue Flow Actions */}

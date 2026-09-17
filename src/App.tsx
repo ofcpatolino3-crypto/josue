@@ -18,6 +18,9 @@ import {
   Shield,
   Layers,
   Clipboard,
+  AlertCircle,
+  Clock,
+  Zap,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -87,6 +90,7 @@ import { ToastContainer } from './components/Toast';
 import { SmartImportModal, SmartImportResult } from './components/SmartImportModal';
 import { NewLeadsAlertBanner, playNewLeadChime } from './components/NewLeadsAlertBanner';
 import { PortalWatermarkBackground } from './components/BrandLogo';
+import { AuthGateway } from './components/AuthGateway';
 
 const STORAGE_CONTACTS = 'contacts_v3';
 const STORAGE_OBJECTIONS = 'objections_v3';
@@ -135,25 +139,34 @@ export default function App() {
   const [globalContacts, setGlobalContacts] = useState<Contact[]>([]);
   const [leadBatches, setLeadBatches] = useState<LeadBatch[]>([]);
 
-  // --- LOCAL STATE (with LocalStorage cache fallback) ---
+  // --- LOCAL STATE (with strict per-user storage isolation) ---
   const [contacts, setContacts] = useState<Contact[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_CONTACTS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          // Strictly purge any legacy demo contacts
-          return parsed.filter(
-            (c: Contact) =>
-              c &&
-              c.id &&
-              !c.id.startsWith('c_demo_') &&
-              c.nome !== 'Ana Carolina Mendes' &&
-              c.nome !== 'Rodrigo Silveira Ramos' &&
-              c.nome !== 'Beatriz Vasconcelos' &&
-              c.nome !== 'Lucas Albuquerque' &&
-              c.nome !== 'Mariana Duarte Costa'
-          );
+      // Purge legacy unpartitioned key to prevent data leaks across sessions
+      localStorage.removeItem(STORAGE_CONTACTS);
+
+      const savedSession = localStorage.getItem(STORAGE_SESSION);
+      if (savedSession) {
+        const prof = JSON.parse(savedSession);
+        if (prof?.uid) {
+          const userStorageKey = `contacts_v3_${prof.uid}`;
+          const saved = localStorage.getItem(userStorageKey);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+              return parsed.filter(
+                (c: Contact) =>
+                  c &&
+                  c.id &&
+                  !c.id.startsWith('c_demo_') &&
+                  c.nome !== 'Ana Carolina Mendes' &&
+                  c.nome !== 'Rodrigo Silveira Ramos' &&
+                  c.nome !== 'Beatriz Vasconcelos' &&
+                  c.nome !== 'Lucas Albuquerque' &&
+                  c.nome !== 'Mariana Duarte Costa'
+              );
+            }
+          }
         }
       }
     } catch (e) {
@@ -225,6 +238,7 @@ export default function App() {
   const [showAIChatAssistant, setShowAIChatAssistant] = useState(false);
   const [showAppSmartImport, setShowAppSmartImport] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [recentlyContactedNotice, setRecentlyContactedNotice] = useState<{ contactName: string; contactId: string } | null>(null);
 
   // Global Ctrl+V / Cmd+V shortcut to open Quick Paste when not typing in an input
   useEffect(() => {
@@ -314,7 +328,25 @@ export default function App() {
         }
       );
 
-      // Listen to global contacts database in real-time
+      return () => {
+        unsubUsers();
+      };
+    } catch (e) {
+      console.warn('Firebase users listener init:', e);
+    }
+  }, [currentProfile]);
+
+  // --- FIRESTORE REAL-TIME SYNC FOR ADMIN / SUPERVISOR (GLOBAL CONTACTS & BATCHES) ---
+  useEffect(() => {
+    // SECURITY & PRIVACY RULE: If no profile is logged in or role is attendant, NEVER listen to global database!
+    if (!currentProfile || (currentProfile.role !== 'admin' && currentProfile.role !== 'supervisor')) {
+      setGlobalContacts([]);
+      setLeadBatches([]);
+      return;
+    }
+
+    try {
+      // Listen to global contacts database in real-time for Admin & Supervisors
       const globalContactsRef = collection(db, 'global_contacts');
       const unsubGlobal = onSnapshot(
         globalContactsRef,
@@ -325,29 +357,17 @@ export default function App() {
             if (data && data.id && !data.id.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
               list.push(data);
             } else if (data?.id?.startsWith('c_demo_')) {
-              // Automatically cleanup demo document from cloud
               deleteDoc(doc(db, 'global_contacts', data.id)).catch(() => {});
             }
           });
           list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
           setGlobalContacts(list);
-
-          // If current user is Admin, Supervisor, Master or not assigned to attendant role:
-          // Synchronize main contacts view in real-time with global database
-          const isAttendantRole = currentProfile?.role === 'attendant';
-          if (!isAttendantRole) {
-            setContacts(list);
-            try {
-              localStorage.setItem(STORAGE_CONTACTS, JSON.stringify(list));
-            } catch (err) {
-              console.warn(err);
-            }
-          }
+          setContacts(list);
         },
         (err) => console.warn('Firestore global contacts info:', err)
       );
 
-      // Listen to batches
+      // Listen to lead distribution batches for Admin & Supervisors
       const batchesRef = collection(db, 'lead_batches');
       const unsubBatches = onSnapshot(
         batchesRef,
@@ -367,51 +387,48 @@ export default function App() {
       );
 
       return () => {
-        unsubUsers();
         unsubGlobal();
         unsubBatches();
       };
     } catch (e) {
-      console.warn('Firebase listeners init:', e);
+      console.warn('Firebase admin listeners init:', e);
     }
-  }, [currentProfile]);
+  }, [currentProfile?.uid, currentProfile?.role]);
 
-  // --- FIRESTORE REAL-TIME SYNC FOR CURRENT USER'S ASSIGNED / OWN CONTACTS ---
+  // --- FIRESTORE REAL-TIME SYNC FOR ATTENDANT (ONLY ASSIGNED CONTACTS & OWN TEMPLATES) ---
   useEffect(() => {
-    if (!currentProfile) return;
+    // If not logged in, clear contacts state immediately
+    if (!currentProfile) {
+      setContacts([]);
+      return;
+    }
+
+    // Only attendants listen to their isolated user subcollection
+    if (currentProfile.role !== 'attendant') return;
 
     try {
-      // If attendant, listen to attendant's assigned contacts subcollection
-      let unsubContacts = () => {};
-      if (currentProfile.role === 'attendant') {
-        const contactsRef = collection(db, 'users', currentProfile.uid, 'contacts');
-        unsubContacts = onSnapshot(
-          contactsRef,
-          (snapshot) => {
-            const cloudContacts: Contact[] = [];
-            snapshot.forEach((d) => {
-              const data = d.data() as Contact;
-              if (data && data.id && !data.id.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
-                cloudContacts.push(data);
-              } else if (data?.id?.startsWith('c_demo_')) {
-                deleteDoc(doc(db, 'users', currentProfile.uid, 'contacts', data.id)).catch(() => {});
-              }
-            });
-            cloudContacts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            setContacts(cloudContacts);
-            try {
-              localStorage.setItem(STORAGE_CONTACTS, JSON.stringify(cloudContacts));
-            } catch (err) {
-              console.warn(err);
+      const contactsRef = collection(db, 'users', currentProfile.uid, 'contacts');
+      const unsubContacts = onSnapshot(
+        contactsRef,
+        (snapshot) => {
+          const cloudContacts: Contact[] = [];
+          snapshot.forEach((d) => {
+            const data = d.data() as Contact;
+            if (data && data.id && !data.id.startsWith('c_demo_') && data.nome !== 'Ana Carolina Mendes') {
+              cloudContacts.push(data);
+            } else if (data?.id?.startsWith('c_demo_')) {
+              deleteDoc(doc(db, 'users', currentProfile.uid, 'contacts', data.id)).catch(() => {});
             }
-          },
-          (error) => {
-            console.warn('Firestore sync error:', error);
-          }
-        );
-      }
+          });
+          cloudContacts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          setContacts(cloudContacts);
+        },
+        (error) => {
+          console.warn('Firestore attendant sync error:', error);
+        }
+      );
 
-      // Listen to templates
+      // Listen to attendant's custom templates
       const templatesRef = collection(db, 'users', currentProfile.uid, 'templates');
       const unsubTemplates = onSnapshot(
         templatesRef,
@@ -434,18 +451,20 @@ export default function App() {
         unsubTemplates();
       };
     } catch (e) {
-      console.warn('Firebase user sync init:', e);
+      console.warn('Firebase attendant sync init:', e);
     }
   }, [currentProfile?.uid, currentProfile?.role]);
 
-  // --- LOCAL PERSISTENCE BACKUP ---
+  // --- LOCAL PERSISTENCE BACKUP (Partitioned strictly by User UID) ---
   useEffect(() => {
+    if (!currentProfile?.uid) return;
     try {
-      localStorage.setItem(STORAGE_CONTACTS, JSON.stringify(contacts));
+      const userKey = `contacts_v3_${currentProfile.uid}`;
+      localStorage.setItem(userKey, JSON.stringify(contacts));
     } catch (e) {
-      console.error('Failed to save contacts', e);
+      console.error('Failed to save contacts locally', e);
     }
-  }, [contacts]);
+  }, [contacts, currentProfile?.uid]);
 
   useEffect(() => {
     try {
@@ -475,18 +494,24 @@ export default function App() {
   const saveContactToCloud = async (contact: Contact) => {
     try {
       setSyncing(true);
-      // 1. Always update in global_contacts
-      const globalRef = doc(db, 'global_contacts', contact.id);
-      await setDoc(globalRef, contact, { merge: true });
-
-      // 2. If assigned to a specific attendant, update in their collection
-      if (contact.assignedTo) {
-        const targetRef = doc(db, 'users', contact.assignedTo, 'contacts', contact.id);
+      // 1. First, save to attendant's assigned subcollection for guaranteed local isolation & persistence
+      const assignedUid = contact.assignedTo || currentProfile?.uid;
+      if (assignedUid) {
+        const targetRef = doc(db, 'users', assignedUid, 'contacts', contact.id);
         await setDoc(targetRef, contact, { merge: true });
-      } else if (currentProfile?.uid) {
-        const myRef = doc(db, 'users', currentProfile.uid, 'contacts', contact.id);
-        await setDoc(myRef, contact, { merge: true });
       }
+
+      // If currentProfile is different from assignedTo, update currentProfile's subcollection as well
+      if (currentProfile?.uid && currentProfile.uid !== contact.assignedTo) {
+        const myRef = doc(db, 'users', currentProfile.uid, 'contacts', contact.id);
+        await setDoc(myRef, contact, { merge: true }).catch(() => {});
+      }
+
+      // 2. Sync to global_contacts for administration view
+      const globalRef = doc(db, 'global_contacts', contact.id);
+      await setDoc(globalRef, contact, { merge: true }).catch((err) => {
+        console.warn('Sync to global_contacts:', err);
+      });
     } catch (e) {
       console.error('Error saving contact to Firestore:', e);
     } finally {
@@ -670,29 +695,56 @@ export default function App() {
     if (contactsToAssign.length === 0) return;
     try {
       setSyncing(true);
-      const batch = writeBatch(db);
+      const CHUNK_SIZE = 100;
+      const updatedList: Contact[] = [];
 
-      contactsToAssign.forEach((c) => {
-        const updatedContact: Contact = {
-          ...c,
-          assignedTo: targetUserUid,
-          assignedToEmail: targetUserEmail,
-          assignedAt: Date.now(),
-          isSeenByAttendant: false,
-          status: c.status === 'Enviado' ? c.status : 'Novo Lead',
-        };
+      for (let i = 0; i < contactsToAssign.length; i += CHUNK_SIZE) {
+        const chunk = contactsToAssign.slice(i, i + CHUNK_SIZE);
+        const batch = writeBatch(db);
 
-        // 1. Save in target user's contacts
-        const targetRef = doc(db, 'users', targetUserUid, 'contacts', c.id);
-        batch.set(targetRef, updatedContact, { merge: true });
+        chunk.forEach((c) => {
+          const updatedContact: Contact = {
+            ...c,
+            assignedTo: targetUserUid,
+            assignedToEmail: targetUserEmail,
+            assignedAt: Date.now(),
+            isSeenByAttendant: false,
+            status: c.status === 'Enviado' ? c.status : 'Novo Lead',
+          };
+          updatedList.push(updatedContact);
 
-        // 2. Update global contact reference
-        const globalRef = doc(db, 'global_contacts', c.id);
-        batch.set(globalRef, updatedContact, { merge: true });
-      });
+          // If previously assigned to another user, delete from old user's subcollection
+          if (c.assignedTo && c.assignedTo !== targetUserUid) {
+            const oldRef = doc(db, 'users', c.assignedTo, 'contacts', c.id);
+            batch.delete(oldRef);
+          }
 
-      await batch.commit();
-      addToast(`${contactsToAssign.length} contatos distribuídos para ${targetUserEmail}!`, 'success');
+          // 1. Save in target user's isolated subcollection
+          const targetRef = doc(db, 'users', targetUserUid, 'contacts', c.id);
+          batch.set(targetRef, updatedContact, { merge: true });
+
+          // 2. Update global contact reference
+          const globalRef = doc(db, 'global_contacts', c.id);
+          batch.set(globalRef, updatedContact, { merge: true });
+        });
+
+        await batch.commit();
+      }
+
+      // Update state locally
+      setGlobalContacts((prev) =>
+        prev.map((c) => updatedList.find((u) => u.id === c.id) || c)
+      );
+
+      // If current user is the recipient attendant, update local contacts list
+      if (currentProfile?.uid === targetUserUid) {
+        setContacts((prev) => [...updatedList, ...prev.filter((p) => !updatedList.some((u) => u.id === p.id))]);
+      } else if (currentProfile?.role === 'attendant') {
+        // If current user was the previous owner, remove reassigned contacts from view
+        setContacts((prev) => prev.filter((p) => !contactsToAssign.some((c) => c.id === p.id)));
+      }
+
+      addToast(`⚡ ${contactsToAssign.length} contatos liberados e atribuídos para ${targetUserEmail}!`, 'success');
     } catch (e: any) {
       console.error('Error distributing contacts:', e);
       addToast('Erro na distribuição: ' + e.message, 'error');
@@ -702,35 +754,66 @@ export default function App() {
   };
 
   const handleDistributeEqually = async (
-    unassignedContacts: Contact[],
+    contactsToDistribute: Contact[],
     targetUsers: UserProfile[]
   ) => {
-    if (unassignedContacts.length === 0 || targetUsers.length === 0) return;
+    if (contactsToDistribute.length === 0 || targetUsers.length === 0) return;
     try {
       setSyncing(true);
-      const batch = writeBatch(db);
+      const CHUNK_SIZE = 100;
+      const updatedList: Contact[] = [];
 
-      unassignedContacts.forEach((contact, idx) => {
-        const assignedUser = targetUsers[idx % targetUsers.length];
-        const updated: Contact = {
-          ...contact,
-          assignedTo: assignedUser.uid,
-          assignedToEmail: assignedUser.email,
-          assignedAt: Date.now(),
-          isSeenByAttendant: false,
-          status: contact.status === 'Enviado' ? contact.status : 'Novo Lead',
-        };
+      for (let i = 0; i < contactsToDistribute.length; i += CHUNK_SIZE) {
+        const chunk = contactsToDistribute.slice(i, i + CHUNK_SIZE);
+        const batch = writeBatch(db);
 
-        const targetRef = doc(db, 'users', assignedUser.uid, 'contacts', contact.id);
-        batch.set(targetRef, updated, { merge: true });
+        chunk.forEach((contact, chunkIdx) => {
+          const globalIdx = i + chunkIdx;
+          const assignedUser = targetUsers[globalIdx % targetUsers.length];
+          const updated: Contact = {
+            ...contact,
+            assignedTo: assignedUser.uid,
+            assignedToEmail: assignedUser.email,
+            assignedAt: Date.now(),
+            isSeenByAttendant: false,
+            status: contact.status === 'Enviado' ? contact.status : 'Novo Lead',
+          };
+          updatedList.push(updated);
 
-        const globalRef = doc(db, 'global_contacts', contact.id);
-        batch.set(globalRef, updated, { merge: true });
-      });
+          // If previously assigned to another user, delete from old user's subcollection
+          if (contact.assignedTo && contact.assignedTo !== assignedUser.uid) {
+            const oldRef = doc(db, 'users', contact.assignedTo, 'contacts', contact.id);
+            batch.delete(oldRef);
+          }
 
-      await batch.commit();
+          // 1. Save in assigned user's isolated subcollection
+          const targetRef = doc(db, 'users', assignedUser.uid, 'contacts', contact.id);
+          batch.set(targetRef, updated, { merge: true });
+
+          // 2. Update global reference
+          const globalRef = doc(db, 'global_contacts', contact.id);
+          batch.set(globalRef, updated, { merge: true });
+        });
+
+        await batch.commit();
+      }
+
+      // Update state locally
+      setGlobalContacts((prev) =>
+        prev.map((c) => updatedList.find((u) => u.id === c.id) || c)
+      );
+
+      // If current user is an attendant, reflect their own slice
+      if (currentProfile?.role === 'attendant') {
+        const myLeads = updatedList.filter((u) => u.assignedTo === currentProfile.uid);
+        setContacts((prev) => [
+          ...myLeads,
+          ...prev.filter((p) => !contactsToDistribute.some((c) => c.id === p.id)),
+        ]);
+      }
+
       addToast(
-        `${unassignedContacts.length} contatos divididos igualmente entre ${targetUsers.length} atendentes!`,
+        `⚡ ${contactsToDistribute.length} contatos liberados e divididos igualmente entre ${targetUsers.length} atendente(s)!`,
         'success'
       );
     } catch (e: any) {
@@ -824,6 +907,8 @@ export default function App() {
         };
         setCurrentProfile(masterProfile);
         localStorage.setItem(STORAGE_SESSION, JSON.stringify(masterProfile));
+        setContacts([]);
+        setGlobalContacts([]);
         // Also persist/update in Firestore
         try {
           await setDoc(doc(db, 'user_profiles', 'master_admin_root'), masterProfile, { merge: true });
@@ -863,6 +948,8 @@ export default function App() {
 
       setCurrentProfile(finalProfile);
       localStorage.setItem(STORAGE_SESSION, JSON.stringify(finalProfile));
+      setContacts([]);
+      setGlobalContacts([]);
 
       if (isMasterUser) {
         setActiveView('admin');
@@ -928,6 +1015,8 @@ export default function App() {
       setAllUsers((prev) => [...prev, newProf]);
       setCurrentProfile(newProf);
       localStorage.setItem(STORAGE_SESSION, JSON.stringify(newProf));
+      setContacts([]);
+      setGlobalContacts([]);
 
       if (isMaster) {
         addToast('Conta de Administrador Master criada com sucesso!', 'success');
@@ -982,6 +1071,12 @@ export default function App() {
     try {
       localStorage.removeItem(STORAGE_SESSION);
       setCurrentProfile(null);
+      setContacts([]);
+      setGlobalContacts([]);
+      setLeadBatches([]);
+      setMessageModalContact(null);
+      setSalesAssistantContact(null);
+      setActiveView('contatos');
       addToast('Sessão encerrada com sucesso.', 'info');
     } catch (e) {
       console.error('Sign Out Error:', e);
@@ -1448,6 +1543,9 @@ export default function App() {
     const today = todayStr();
     const now = Date.now();
     const target = contacts.find((c) => c.id === id) || globalContacts.find((c) => c.id === id);
+    const targetName = target?.nome || 'Contato';
+    setRecentlyContactedNotice({ contactName: targetName, contactId: id });
+
     if (target) {
       const updated: Contact = {
         ...target,
@@ -1516,7 +1614,7 @@ export default function App() {
       }
       return prev;
     });
-    addToast('✓ Contato marcado como contatado hoje!', 'success');
+    addToast(`✓ ${targetName} marcado como Contatado Hoje! (Salvo na aba Contatados)`, 'success');
   };
 
   const handleMarkEmailContacted = (id: string, emailSubject?: string) => {
@@ -1781,41 +1879,92 @@ export default function App() {
       <PortalWatermarkBackground />
 
       <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col relative z-10">
-        {/* Top Header with Navigation Tabs */}
-        <Header
-          activeView={activeView}
-          onSelectView={setActiveView}
-          onOpenDailyExport={() => setShowDailyExport(true)}
-          onOpenAIAssistant={() => setShowAIChatAssistant(true)}
-          onOpenQuickPaste={() => setShowQuickPasteModal(true)}
-          contactsCount={contacts.length}
-          currentProfile={currentProfile}
-          pendingApprovalsCount={pendingApprovalsCount}
-          inactiveAlertsCount={inactiveAlertsCount}
-        />
+        {!currentProfile ? (
+          <AuthGateway
+            onLogin={handleDirectLogin}
+            onRegister={handleDirectRegister}
+            loading={authLoading}
+          />
+        ) : (
+          <>
+            {/* Top Header with Navigation Tabs */}
+            <Header
+              activeView={activeView}
+              onSelectView={setActiveView}
+              onOpenDailyExport={() => setShowDailyExport(true)}
+              onOpenAIAssistant={() => setShowAIChatAssistant(true)}
+              onOpenQuickPaste={() => setShowQuickPasteModal(true)}
+              contactsCount={contacts.length}
+              currentProfile={currentProfile}
+              pendingApprovalsCount={pendingApprovalsCount}
+              inactiveAlertsCount={inactiveAlertsCount}
+            />
 
-        {/* Auth status & Login banner */}
-        <AuthBanner
-          user={null}
-          profile={currentProfile}
-          loading={authLoading}
-          syncing={syncing}
-          onOpenLogin={() => {
-            setLoginModalTab('login');
-            setShowLoginModal(true);
-          }}
-          onSignOut={handleSignOut}
-          contactsCount={contacts.length}
-        />
+            {/* Auth status & Login banner */}
+            <AuthBanner
+              user={null}
+              profile={currentProfile}
+              loading={authLoading}
+              syncing={syncing}
+              onOpenLogin={() => {
+                setLoginModalTab('login');
+                setShowLoginModal(true);
+              }}
+              onSignOut={handleSignOut}
+              contactsCount={contacts.length}
+            />
 
-        {/* Global AI Chat Assistant Modal */}
-        <AIChatAssistant
-          isOpen={showAIChatAssistant}
-          onClose={() => setShowAIChatAssistant(false)}
-          contacts={contacts}
-          objections={objections}
-          plans={plans}
-        />
+            {/* Blocked state */}
+            {currentProfile.status === 'blocked' && (
+              <div className="bg-[#172644] border border-[#B14432] rounded-2xl p-8 text-center max-w-xl mx-auto my-8 shadow-2xl animate-fadeIn">
+                <div className="w-16 h-16 rounded-full bg-[#B14432]/20 border border-[#B14432] flex items-center justify-center text-[#B14432] mx-auto mb-4">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-bold text-[#EDE6D6] mb-2">Acesso Desativado</h3>
+                <p className="text-sm text-[#8C98B4] mb-6">
+                  Seu usuário foi temporariamente bloqueado pela administração. Entre em contato com a gerência para regularizar seu acesso.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] px-6 py-2.5 rounded-lg text-sm font-semibold hover:border-[#C9A227] transition-all cursor-pointer"
+                >
+                  Sair do Sistema
+                </button>
+              </div>
+            )}
+
+            {/* Pending approval state */}
+            {currentProfile.status === 'pending' && (
+              <div className="bg-[#172644] border border-[#C9A227] rounded-2xl p-8 text-center max-w-xl mx-auto my-8 shadow-2xl animate-fadeIn">
+                <div className="w-16 h-16 rounded-full bg-[#C9A227]/20 border border-[#C9A227] flex items-center justify-center text-[#C9A227] mx-auto mb-4 animate-pulse">
+                  <Clock className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-bold text-[#EDE6D6] mb-2">Aguardando Liberação do Administrador</h3>
+                <p className="text-sm text-[#8C98B4] mb-6 leading-relaxed">
+                  Olá, <strong className="text-[#EDE6D6]">{currentProfile.displayName || currentProfile.email}</strong>! Seu cadastro foi realizado com sucesso. Assim que o Administrador liberar seu acesso no painel, sua carteira individual de leads será sincronizada automaticamente.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] px-6 py-2.5 rounded-lg text-sm font-semibold hover:border-[#B14432] transition-all cursor-pointer"
+                >
+                  Trocar de Conta / Sair
+                </button>
+              </div>
+            )}
+
+            {/* Active approved views */}
+            {currentProfile.status === 'approved' && (
+              <>
+                {/* Global AI Chat Assistant Modal */}
+                <AIChatAssistant
+                  isOpen={showAIChatAssistant}
+                  onClose={() => setShowAIChatAssistant(false)}
+                  contacts={contacts}
+                  objections={objections}
+                  plans={plans}
+                />
 
         {/* VIEW 0: ADMIN & SUPERVISION PANEL (For Admin and Supervisors) */}
         {activeView === 'admin' && (currentProfile?.role === 'admin' || currentProfile?.role === 'supervisor') && (
@@ -1976,6 +2125,19 @@ export default function App() {
 
                 {/* Action Buttons: Colar Rápido, Marcar Todos Disparados, Novo Contato */}
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  {(currentProfile?.role === 'admin' || currentProfile?.role === 'supervisor') && (
+                    <button
+                      type="button"
+                      id="roleta-quick-access-btn"
+                      onClick={() => setActiveView('admin')}
+                      className="flex items-center justify-center gap-1.5 bg-[#C9A227]/20 hover:bg-[#C9A227]/30 text-[#FCD34D] border border-[#C9A227]/50 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
+                      title="Abrir Central de Divisão & Roleta de Leads para liberar contatos de forma igualitária"
+                    >
+                      <Zap className="w-4 h-4 text-[#C9A227]" />
+                      <span>⚡ Liberar Contatos (Roleta)</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     id="quick-paste-action-btn"
@@ -2106,6 +2268,47 @@ export default function App() {
                 }
                 availableCourses={uniqueCourses}
               />
+            )}
+
+            {/* Live Feedback Alert when a contact is contacted */}
+            {recentlyContactedNotice && (
+              <div className="bg-emerald-950/40 border border-emerald-500/50 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-md animate-fadeIn">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 border border-emerald-500/40">
+                    ✓
+                  </div>
+                  <div className="text-xs text-[#EDE6D6] truncate">
+                    <strong className="text-emerald-300">{recentlyContactedNotice.contactName}</strong> foi registrado com sucesso como <b>Contatado Hoje</b>!
+                    {tabFilter === 'pendente' && (
+                      <span className="text-emerald-400/90 ml-1.5 hidden sm:inline">
+                        (O lead foi arquivado da lista de pendentes e transferido para a aba "Contatados")
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {tabFilter !== 'enviado' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTabFilter('enviado');
+                        setRecentlyContactedNotice(null);
+                      }}
+                      className="bg-emerald-500 hover:bg-emerald-400 text-[#101B2D] text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-xs active:scale-95"
+                    >
+                      Ver na aba Contatados
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setRecentlyContactedNotice(null)}
+                    className="text-[#8C98B4] hover:text-[#EDE6D6] text-xs px-1.5 py-1 rounded hover:bg-[#172644] cursor-pointer"
+                    title="Fechar aviso"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Contacts Cards Stream */}
@@ -2273,6 +2476,10 @@ export default function App() {
             onRemoveBenefit={handleRemoveBenefit}
             onCopyPlan={(msg) => addToast(msg, 'success')}
           />
+        )}
+              </>
+            )}
+          </>
         )}
       </div>
 

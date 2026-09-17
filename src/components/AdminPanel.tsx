@@ -97,6 +97,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [customAmountToDistribute, setCustomAmountToDistribute] = useState<number>(20);
   const [targetAttendantForCustom, setTargetAttendantForCustom] = useState<string>('');
   
+  // Advanced Roleta / Equitative Division Controls
+  const [roletaLeadSource, setRoletaLeadSource] = useState<'unassigned' | 'batch' | 'all'>('unassigned');
+  const [roletaSelectedBatch, setRoletaSelectedBatch] = useState<string>('todos');
+  const [roletaQuotaMode, setRoletaQuotaMode] = useState<'all_equal' | 'fixed_per_attendant'>('all_equal');
+  const [roletaFixedAmount, setRoletaFixedAmount] = useState<number>(10);
+
   // By Course routing
   const [selectedCourseForRouting, setSelectedCourseForRouting] = useState<string>('');
   const [targetAttendantForCourse, setTargetAttendantForCourse] = useState<string>('');
@@ -144,6 +150,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Base Contacts pools
   const unassignedContacts = useMemo(() => globalContacts.filter((c) => !c.assignedTo), [globalContacts]);
   const assignedContacts = useMemo(() => globalContacts.filter((c) => !!c.assignedTo), [globalContacts]);
+
+  // Available Batches
+  const availableBatches = useMemo(() => {
+    const map = new Map<string, number>();
+    globalContacts.forEach((c) => {
+      if (c.batchName) {
+        map.set(c.batchName, (map.get(c.batchName) || 0) + 1);
+      }
+    });
+    return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
+  }, [globalContacts]);
+
+  // Dynamic Contact Pool for Roleta Distribution
+  const roletaContactsPool = useMemo(() => {
+    let pool = globalContacts;
+    if (roletaLeadSource === 'unassigned') {
+      pool = pool.filter((c) => !c.assignedTo);
+    } else if (roletaLeadSource === 'batch') {
+      if (roletaSelectedBatch !== 'todos') {
+        pool = pool.filter((c) => c.batchName === roletaSelectedBatch);
+      }
+    }
+    return pool;
+  }, [globalContacts, roletaLeadSource, roletaSelectedBatch]);
 
   // 3+ Days Inactivity Alert Contacts
   const inactiveAlertContacts = useMemo(() => {
@@ -279,22 +309,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       showNotification('Selecione pelo menos um atendente para participar da divisão.', true);
       return;
     }
-    if (unassignedContacts.length === 0) {
-      showNotification('Não há leads livres disponíveis para distribuição no momento.', true);
+    if (roletaContactsPool.length === 0) {
+      showNotification('Não há contatos disponíveis na fonte selecionada para distribuição.', true);
       return;
     }
 
-    const leadsPerPerson = Math.floor(unassignedContacts.length / selectedUsers.length);
-    const confirmText = `Deseja dividir ${unassignedContacts.length} leads livres igualmente entre os ${selectedUsers.length} atendentes selecionados (~${leadsPerPerson} leads para cada)?`;
+    let contactsToDistribute = roletaContactsPool;
+    let leadsPerPerson = Math.floor(roletaContactsPool.length / selectedUsers.length);
+
+    if (roletaQuotaMode === 'fixed_per_attendant') {
+      const maxPossible = Math.floor(roletaContactsPool.length / selectedUsers.length);
+      leadsPerPerson = Math.min(Math.max(1, roletaFixedAmount), maxPossible);
+      const totalAmount = leadsPerPerson * selectedUsers.length;
+      contactsToDistribute = roletaContactsPool.slice(0, totalAmount);
+    }
+
+    if (contactsToDistribute.length === 0 || leadsPerPerson === 0) {
+      showNotification('Quantidade insuficiente de contatos para realizar a divisão com a cota escolhida.', true);
+      return;
+    }
+
+    const confirmText = `Deseja liberar ${contactsToDistribute.length} contatos divididos igualmente entre os ${selectedUsers.length} atendentes selecionados (${leadsPerPerson} contatos para cada um)?`;
     
     if (!window.confirm(confirmText)) return;
 
     setIsProcessing(true);
     try {
-      await onDistributeEqually(unassignedContacts, selectedUsers);
-      showNotification(`⚡ Sucesso! ${unassignedContacts.length} leads foram divididos igualmente entre ${selectedUsers.length} atendentes.`);
+      await onDistributeEqually(contactsToDistribute, selectedUsers);
+      showNotification(`⚡ Sucesso! ${contactsToDistribute.length} contatos foram liberados igualmente (${leadsPerPerson} para cada um dos ${selectedUsers.length} atendentes).`);
     } catch (e: any) {
-      showNotification('Erro na divisão de leads: ' + e.message, true);
+      showNotification('Erro na divisão de contatos: ' + e.message, true);
     } finally {
       setIsProcessing(false);
     }
@@ -893,10 +937,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div>
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
                       <Zap className="w-4 h-4 text-[#C9A227]" />
-                      Divisão Balanceada / Roleta Automática
+                      Liberação de Contatos Igualitária / Roleta Automática
                     </h4>
                     <p className="text-xs text-[#8C98B4] mt-0.5">
-                      Marque quem vai receber leads nesta rodada. Se um vendedor faltou, desmarque-o abaixo.
+                      Distribua leads de forma 100% equilibrada e proporcional entre a equipe de vendas.
                     </p>
                   </div>
 
@@ -906,7 +950,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       onClick={selectAllAttendantsInRoleta}
                       className="text-xs text-[#C9A227] hover:underline font-semibold cursor-pointer"
                     >
-                      Selecionar Todos
+                      Selecionar Todos ({attendants.length})
                     </button>
                     <span className="text-[#2B3D63]">|</span>
                     <button
@@ -919,75 +963,210 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                {/* Attendants Checklist Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                  {attendants.length === 0 ? (
-                    <div className="col-span-full py-4 text-center text-xs text-[#8C98B4]">
-                      Nenhum atendente cadastrado e aprovado no momento. Cadastre atendentes na aba "Equipe & Permissões".
-                    </div>
-                  ) : (
-                    attendants.map((a) => {
-                      const isChecked = selectedAttendantsForRoleta.includes(a.uid);
-                      const myCount = globalContacts.filter((c) => c.assignedTo === a.uid).length;
+                {/* 1. Escolha da Fonte dos Contatos & Modo de Cota */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#172644]/70 p-3.5 rounded-xl border border-[#2B3D63]">
+                  {/* Fonte */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-white block">
+                      1. Origem dos Contatos a Liberar:
+                    </label>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setRoletaLeadSource('unassigned')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          roletaLeadSource === 'unassigned'
+                            ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold shadow-xs'
+                            : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
+                        }`}
+                      >
+                        ⚡ Leads Livres ({unassignedContacts.length})
+                      </button>
 
-                      return (
-                        <div
-                          key={a.uid}
-                          onClick={() => toggleAttendantInRoleta(a.uid)}
-                          className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
-                            isChecked
-                              ? 'bg-[#C9A227]/15 border-[#C9A227] text-white shadow-sm'
-                              : 'bg-[#172644] border-[#2B3D63] text-[#8C98B4] opacity-60 hover:opacity-100'
+                      {availableBatches.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setRoletaLeadSource('batch')}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                            roletaLeadSource === 'batch'
+                              ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold shadow-xs'
+                              : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            {isChecked ? (
-                              <CheckSquare className="w-4 h-4 text-[#C9A227] shrink-0" />
-                            ) : (
-                              <Square className="w-4 h-4 text-[#8C98B4] shrink-0" />
-                            )}
-                            <div className="min-w-0">
-                              <div className="text-xs font-bold text-white truncate">
-                                {a.displayName || a.email}
-                              </div>
-                              <div className="text-[10px] text-[#8C98B4]">
-                                Carteira atual: <strong className="text-[#C9A227]">{myCount} leads</strong>
+                          📁 Por Lote / Planilha ({availableBatches.length})
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setRoletaLeadSource('all')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          roletaLeadSource === 'all'
+                            ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold shadow-xs'
+                            : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
+                        }`}
+                      >
+                        🌐 Toda a Base ({globalContacts.length})
+                      </button>
+                    </div>
+
+                    {roletaLeadSource === 'batch' && (
+                      <div className="mt-2">
+                        <select
+                          value={roletaSelectedBatch}
+                          onChange={(e) => setRoletaSelectedBatch(e.target.value)}
+                          className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-[#C9A227]"
+                        >
+                          <option value="todos">Todos os Lotes ({availableBatches.reduce((acc, b) => acc + b.count, 0)} leads)</option>
+                          {availableBatches.map((b) => (
+                            <option key={b.name} value={b.name}>
+                              {b.name} ({b.count} leads)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cota */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-white block">
+                      2. Modo de Liberação:
+                    </label>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setRoletaQuotaMode('all_equal')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          roletaQuotaMode === 'all_equal'
+                            ? 'bg-[#38BDF8] text-[#101B2D] border-[#38BDF8] font-bold shadow-xs'
+                            : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
+                        }`}
+                      >
+                        ⚖️ Dividir Todos Igualmente
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setRoletaQuotaMode('fixed_per_attendant')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          roletaQuotaMode === 'fixed_per_attendant'
+                            ? 'bg-[#38BDF8] text-[#101B2D] border-[#38BDF8] font-bold shadow-xs'
+                            : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
+                        }`}
+                      >
+                        🎯 Cota Fixa por Atendente
+                      </button>
+                    </div>
+
+                    {roletaQuotaMode === 'fixed_per_attendant' && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-[#8C98B4]">Liberar exatamente</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={1000}
+                          value={roletaFixedAmount}
+                          onChange={(e) => setRoletaFixedAmount(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-20 bg-[#101B2D] border border-[#2B3D63] rounded-lg px-2 py-1 text-xs text-white text-center font-bold focus:outline-none focus:border-[#38BDF8]"
+                        />
+                        <span className="text-xs text-[#8C98B4]">contatos para cada atendente selecionado</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Seleção dos Atendentes Participantes */}
+                <div>
+                  <div className="text-xs font-bold text-white mb-2 flex items-center justify-between">
+                    <span>3. Atendentes que receberão os contatos ({selectedAttendantsForRoleta.length} selecionados):</span>
+                    <span className="text-[11px] text-[#8C98B4]">Clique no cartão para ativar ou desativar</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                    {attendants.length === 0 ? (
+                      <div className="col-span-full py-4 text-center text-xs text-[#8C98B4]">
+                        Nenhum atendente cadastrado e aprovado no momento. Cadastre atendentes na aba "Equipe & Permissões".
+                      </div>
+                    ) : (
+                      attendants.map((a) => {
+                        const isChecked = selectedAttendantsForRoleta.includes(a.uid);
+                        const myCount = globalContacts.filter((c) => c.assignedTo === a.uid).length;
+
+                        return (
+                          <div
+                            key={a.uid}
+                            onClick={() => toggleAttendantInRoleta(a.uid)}
+                            className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 select-none ${
+                              isChecked
+                                ? 'bg-[#C9A227]/15 border-[#C9A227] text-white shadow-sm'
+                                : 'bg-[#172644] border-[#2B3D63] text-[#8C98B4] opacity-50 hover:opacity-90'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              {isChecked ? (
+                                <CheckSquare className="w-4 h-4 text-[#C9A227] shrink-0" />
+                              ) : (
+                                <Square className="w-4 h-4 text-[#8C98B4] shrink-0" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-xs font-bold text-white truncate">
+                                  {a.displayName || a.email}
+                                </div>
+                                <div className="text-[10px] text-[#8C98B4]">
+                                  Carteira atual: <strong className="text-[#C9A227]">{myCount} contatos</strong>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
-                {/* Calculation Box & Action Button */}
-                <div className="bg-[#172644] p-4 rounded-xl border border-[#2B3D63] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="text-xs text-[#8C98B4]">Cálculo da Divisão:</div>
-                    <div className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
-                      <span className="text-[#C9A227] font-extrabold">{unassignedContacts.length} leads livres</span>
-                      <span>÷</span>
-                      <span className="text-[#38BDF8] font-extrabold">{selectedAttendantsForRoleta.length} atendente(s)</span>
-                      <span>=</span>
-                      <span className="bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/40 px-2.5 py-0.5 rounded font-extrabold text-sm">
-                        {selectedAttendantsForRoleta.length > 0
-                          ? `~${Math.floor(unassignedContacts.length / selectedAttendantsForRoleta.length)} leads para cada`
-                          : 'Selecione atendentes'}
-                      </span>
-                    </div>
+                        );
+                      })
+                    )}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleExecuteRoletaDistribution}
-                    disabled={isProcessing || unassignedContacts.length === 0 || selectedAttendantsForRoleta.length === 0}
-                    className="bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-                  >
-                    <Zap className="w-4 h-4" />
-                    <span>Executar Divisão Automática Agora</span>
-                  </button>
                 </div>
+
+                {/* 3. Resumo Matemático da Divisão & Botão de Execução */}
+                {(() => {
+                  const selCount = selectedAttendantsForRoleta.length;
+                  const availableTotal = roletaContactsPool.length;
+                  let perPerson = selCount > 0 ? Math.floor(availableTotal / selCount) : 0;
+                  let effectiveTotal = perPerson * selCount;
+
+                  if (roletaQuotaMode === 'fixed_per_attendant' && selCount > 0) {
+                    const maxPer = Math.floor(availableTotal / selCount);
+                    perPerson = Math.min(roletaFixedAmount, maxPer);
+                    effectiveTotal = perPerson * selCount;
+                  }
+
+                  return (
+                    <div className="bg-[#172644] p-4 rounded-xl border border-[#2B3D63] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="text-xs text-[#8C98B4] font-semibold">Resumo da Liberação Igualitária:</div>
+                        <div className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+                          <span className="text-[#C9A227] font-extrabold">{effectiveTotal} contatos a liberar</span>
+                          <span>÷</span>
+                          <span className="text-[#38BDF8] font-extrabold">{selCount} atendente(s)</span>
+                          <span>=</span>
+                          <span className="bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/40 px-2.5 py-0.5 rounded font-extrabold text-sm">
+                            {selCount > 0 ? `${perPerson} contatos para cada um` : 'Selecione atendentes'}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-[#8C98B4]">
+                          Fonte selecionada possui {availableTotal} contatos disponíveis.
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleExecuteRoletaDistribution}
+                        disabled={isProcessing || availableTotal === 0 || selCount === 0 || effectiveTotal === 0}
+                        className="bg-[#C9A227] hover:bg-[#8C6D1F] text-[#101B2D] font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                      >
+                        <Zap className="w-4 h-4" />
+                        <span>⚡ Liberar e Distribuir Contatos Igualmente Agora</span>
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
