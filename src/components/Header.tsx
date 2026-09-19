@@ -187,21 +187,24 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </button>
 
-        <button
-          id="nav-btn-disparos"
-          onClick={() => onSelectView('disparos')}
-          className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
-            activeView === 'disparos'
-              ? 'bg-[#16A34A] text-white shadow-sm font-bold'
-              : 'text-[#8C98B4] hover:text-[#4ADE80] hover:bg-[#172644]'
-          }`}
-        >
-          <Zap className="w-4 h-4 text-[#4ADE80]" />
-          <span>Disparador Rápido</span>
-          <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-black/20 text-white">
-            Zap & E-mail
-          </span>
-        </button>
+        {currentProfile?.role === 'admin' && (
+          <button
+            id="nav-btn-disparos"
+            onClick={() => onSelectView('disparos')}
+            className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
+              activeView === 'disparos'
+                ? 'bg-[#16A34A] text-white shadow-sm font-bold'
+                : 'text-[#8C98B4] hover:text-[#4ADE80] hover:bg-[#172644]'
+            }`}
+            title="Disparador rápido WhatsApp & E-mail exclusivo do Administrador"
+          >
+            <Zap className="w-4 h-4 text-[#4ADE80]" />
+            <span>Disparador Rápido</span>
+            <span className="text-[10px] uppercase font-black px-1.5 py-0.2 rounded bg-black/20 text-white border border-white/20">
+              Admin
+            </span>
+          </button>
+        )}
 
         <button
           id="nav-btn-mensagens"

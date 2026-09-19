@@ -85,7 +85,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onImportSmartContacts,
 }) => {
   // Main Navigation Tabs
-  const [activeTab, setActiveTab] = useState<'distribution' | 'alerts' | 'activity' | 'users'>('distribution');
+  const [activeTab, setActiveTab] = useState<'distribution' | 'sent_leads' | 'alerts' | 'activity' | 'users'>('distribution');
   const [showSmartImportModal, setShowSmartImportModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -98,7 +98,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [targetAttendantForCustom, setTargetAttendantForCustom] = useState<string>('');
   
   // Advanced Roleta / Equitative Division Controls
-  const [roletaLeadSource, setRoletaLeadSource] = useState<'unassigned' | 'batch' | 'all'>('unassigned');
+  const [roletaLeadSource, setRoletaLeadSource] = useState<'admin_stock' | 'unassigned' | 'batch' | 'all'>('admin_stock');
   const [roletaSelectedBatch, setRoletaSelectedBatch] = useState<string>('todos');
   const [roletaQuotaMode, setRoletaQuotaMode] = useState<'all_equal' | 'fixed_per_attendant'>('all_equal');
   const [roletaFixedAmount, setRoletaFixedAmount] = useState<number>(10);
@@ -117,6 +117,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
   const [actionFilter, setActionFilter] = useState<'todos' | 'unassigned' | 'assigned' | 'alerts'>('unassigned');
   const [distributionSearch, setDistributionSearch] = useState('');
+
+  // Sent Leads & Destination Tracking State
+  const [sentAttendantFilter, setSentAttendantFilter] = useState<string>('todos');
+  const [sentBatchFilter, setSentBatchFilter] = useState<string>('todos');
+  const [sentSearch, setSentSearch] = useState<string>('');
+  const [sentStatusFilter, setSentStatusFilter] = useState<'todos' | 'novo' | 'contatado'>('todos');
+  const [reassignSentTargetByContact, setReassignSentTargetByContact] = useState<Record<string, string>>({});
 
   // Alerts Tab Filters
   const [alertSearch, setAlertSearch] = useState('');
@@ -151,6 +158,57 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const unassignedContacts = useMemo(() => globalContacts.filter((c) => !c.assignedTo), [globalContacts]);
   const assignedContacts = useMemo(() => globalContacts.filter((c) => !!c.assignedTo), [globalContacts]);
 
+  // Sent Contacts pool (sorted by most recently sent first)
+  const sentContacts = useMemo(() => {
+    return assignedContacts
+      .slice()
+      .sort((a, b) => {
+        const timeA = a.sentByAdminAt || a.assignedAt || a.createdAt || 0;
+        const timeB = b.sentByAdminAt || b.assignedAt || b.createdAt || 0;
+        return timeB - timeA;
+      });
+  }, [assignedContacts]);
+
+  // Breakdown by attendant for sent leads
+  const sentBreakdownByAttendant = useMemo(() => {
+    return attendants.map((a) => {
+      const leads = sentContacts.filter((c) => c.assignedTo === a.uid);
+      const contacted = leads.filter((c) => !!c.ultimoContato || c.status === 'Contatado' || c.status === 'Enviado').length;
+      return {
+        attendant: a,
+        totalSent: leads.length,
+        contactedCount: contacted,
+        pendingCount: leads.length - contacted,
+      };
+    }).sort((a, b) => b.totalSent - a.totalSent);
+  }, [attendants, sentContacts]);
+
+  // Filtered sent leads
+  const filteredSentContacts = useMemo(() => {
+    return sentContacts.filter((c) => {
+      if (sentAttendantFilter !== 'todos' && c.assignedTo !== sentAttendantFilter) {
+        return false;
+      }
+      if (sentBatchFilter !== 'todos' && c.batchName !== sentBatchFilter) {
+        return false;
+      }
+      if (sentStatusFilter === 'novo') {
+        if (c.ultimoContato || c.status === 'Contatado' || c.status === 'Enviado') return false;
+      } else if (sentStatusFilter === 'contatado') {
+        if (!c.ultimoContato && c.status !== 'Contatado' && c.status !== 'Enviado') return false;
+      }
+      if (sentSearch.trim()) {
+        const q = sentSearch.toLowerCase();
+        const mNome = (c.nome || '').toLowerCase().includes(q);
+        const mWpp = (c.whatsapp || '').includes(q);
+        const mCur = (c.curso || '').toLowerCase().includes(q);
+        const mAtt = (c.sentToAttendantName || c.assignedToName || c.assignedToEmail || '').toLowerCase().includes(q);
+        if (!mNome && !mWpp && !mCur && !mAtt) return false;
+      }
+      return true;
+    });
+  }, [sentContacts, sentAttendantFilter, sentBatchFilter, sentStatusFilter, sentSearch]);
+
   // Available Batches
   const availableBatches = useMemo(() => {
     const map = new Map<string, number>();
@@ -162,10 +220,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
   }, [globalContacts]);
 
+  // Admin Stock contacts (unassigned or assigned to current admin)
+  const adminStockContacts = useMemo(() => {
+    return globalContacts.filter(
+      (c) => !c.assignedTo || c.assignedTo === currentProfile?.uid || c.assignedTo === 'master_admin_root'
+    );
+  }, [globalContacts, currentProfile?.uid]);
+
   // Dynamic Contact Pool for Roleta Distribution
   const roletaContactsPool = useMemo(() => {
     let pool = globalContacts;
-    if (roletaLeadSource === 'unassigned') {
+    if (roletaLeadSource === 'admin_stock') {
+      pool = adminStockContacts;
+    } else if (roletaLeadSource === 'unassigned') {
       pool = pool.filter((c) => !c.assignedTo);
     } else if (roletaLeadSource === 'batch') {
       if (roletaSelectedBatch !== 'todos') {
@@ -173,7 +240,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       }
     }
     return pool;
-  }, [globalContacts, roletaLeadSource, roletaSelectedBatch]);
+  }, [globalContacts, adminStockContacts, roletaLeadSource, roletaSelectedBatch]);
 
   // 3+ Days Inactivity Alert Contacts
   const inactiveAlertContacts = useMemo(() => {
@@ -304,6 +371,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // 1. Roleta / Equitative Division
   const handleExecuteRoletaDistribution = async () => {
+    if (currentProfile?.role !== 'admin') {
+      showNotification('Apenas o Administrador possui autorização para enviar e liberar contatos.', true);
+      return;
+    }
     const selectedUsers = attendants.filter((a) => selectedAttendantsForRoleta.includes(a.uid));
     if (selectedUsers.length === 0) {
       showNotification('Selecione pelo menos um atendente para participar da divisão.', true);
@@ -346,6 +417,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // 2. Custom Amount Distribution
   const handleExecuteCustomAmountDistribution = async () => {
+    if (currentProfile?.role !== 'admin') {
+      showNotification('Apenas o Administrador possui autorização para enviar e liberar contatos.', true);
+      return;
+    }
     if (!targetAttendantForCustom) {
       showNotification('Selecione o atendente que receberá os leads.', true);
       return;
@@ -374,6 +449,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // 3. By Course Routing
   const handleExecuteCourseRouting = async () => {
+    if (currentProfile?.role !== 'admin') {
+      showNotification('Apenas o Administrador possui autorização para enviar e liberar contatos.', true);
+      return;
+    }
     if (!selectedCourseForRouting) {
       showNotification('Selecione o concurso para roteamento.', true);
       return;
@@ -408,6 +487,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // 4. Transfer whole portfolio
   const handleExecutePortfolioTransfer = async () => {
+    if (currentProfile?.role !== 'admin') {
+      showNotification('Apenas o Administrador possui autorização para transferir carteiras de contatos.', true);
+      return;
+    }
     if (!portfolioSourceUser) {
       showNotification('Selecione o atendente de origem (quem vai transferir).', true);
       return;
@@ -566,6 +649,49 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setTimeout(() => setCopiedMessageId(null), 3000);
   };
 
+  // Format date and time for Sent Leads history
+  const formatDateTime = (ts?: number | string) => {
+    if (!ts) return 'Data não reg.';
+    const d = typeof ts === 'number' ? new Date(ts) : new Date(ts);
+    if (isNaN(d.getTime())) return String(ts);
+    return (
+      d.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }) +
+      ' às ' +
+      d.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    );
+  };
+
+  // Reassign single lead from Sent Leads table
+  const handleReassignFromSentTable = async (contact: Contact, targetUid: string) => {
+    if (currentProfile?.role !== 'admin') {
+      showNotification('Apenas o Administrador possui permissão para remanejar contatos.', true);
+      return;
+    }
+    const targetUser = users.find((u) => u.uid === targetUid);
+    if (!targetUser) return;
+    setIsProcessing(true);
+    try {
+      await onDistributeContacts([contact], targetUser.uid, targetUser.email);
+      showNotification(`✅ Lead "${contact.nome}" transferido com sucesso para ${targetUser.displayName || targetUser.email}!`);
+      setReassignSentTargetByContact((prev) => {
+        const next = { ...prev };
+        delete next[contact.id];
+        return next;
+      });
+    } catch (err: any) {
+      showNotification('Erro ao transferir lead: ' + err.message, true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Supervisor Export
   const handleExportSupervisorAll = async () => {
     if (globalContacts.length === 0) {
@@ -660,8 +786,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
 
         {/* Executive KPI Summary Counters - High Contrast Color-Coded Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-[#2B3D63]/70">
-          {/* Card 1: Piscina de Leads Livres */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4 pt-4 border-t border-[#2B3D63]/70">
+          {/* Card 1: Piscina de Leads Livres (Estoque do Admin) */}
           <div
             onClick={() => {
               setActiveTab('distribution');
@@ -675,7 +801,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-[#FCD34D] uppercase tracking-wider flex items-center gap-1">
-                <Zap className="w-3.5 h-3.5 text-[#C9A227]" /> Leads Livres (Estoque)
+                <Zap className="w-3.5 h-3.5 text-[#C9A227]" /> Estoque Admin
               </span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
@@ -683,12 +809,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 {unassignedContacts.length}
               </span>
               <span className="text-[11px] text-[#C9A227] font-semibold">
-                aguardando divisão
+                livres p/ envio
               </span>
             </div>
           </div>
 
-          {/* Card 2: Radar de Inatividade */}
+          {/* Card 2: Leads Enviados aos Atendentes */}
+          <div
+            onClick={() => setActiveTab('sent_leads')}
+            className={`p-3.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
+              activeTab === 'sent_leads'
+                ? 'bg-[#10B981]/25 border-[#10B981] ring-2 ring-[#10B981]'
+                : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#10B981]'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#6EE7B7] uppercase tracking-wider flex items-center gap-1">
+                <UserCheck className="w-3.5 h-3.5 text-[#10B981]" /> Leads Enviados
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-1.5">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#34D399]">
+                {sentContacts.length}
+              </span>
+              <span className="text-[11px] text-[#8C98B4]">
+                distribuídos
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Radar de Inatividade */}
           <div
             onClick={() => setActiveTab('alerts')}
             className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
@@ -714,7 +864,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Interações Hoje */}
+          {/* Card 4: Interações Hoje */}
           <div
             onClick={() => setActiveTab('activity')}
             className="p-3.5 rounded-xl border border-[#2B3D63] bg-[#101B2D] hover:border-[#10B981] transition-all cursor-pointer"
@@ -732,10 +882,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
 
-          {/* Card 4: Equipe de Atendentes */}
+          {/* Card 5: Equipe de Atendentes */}
           <div
             onClick={() => setActiveTab('users')}
-            className="p-3.5 rounded-xl border border-[#2B3D63] bg-[#101B2D] hover:border-[#C9A227] transition-all cursor-pointer"
+            className="p-3.5 rounded-xl border border-[#2B3D63] bg-[#101B2D] hover:border-[#C9A227] transition-all cursor-pointer col-span-2 sm:col-span-1"
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-[#8C98B4] uppercase tracking-wider flex items-center gap-1">
@@ -770,10 +920,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           }`}
         >
           <Share2 className="w-4 h-4" />
-          <span>Central de Divisão & Roleta de Leads</span>
+          <span>Estoque da Planilha & Envio de Leads</span>
           {unassignedContacts.length > 0 && (
             <span className="bg-[#101B2D] text-[#C9A227] text-[11px] px-2 py-0.5 rounded-full font-extrabold">
               {unassignedContacts.length} livres
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('sent_leads')}
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shadow-sm ${
+            activeTab === 'sent_leads'
+              ? 'bg-[#10B981] text-[#101B2D] shadow-md ring-2 ring-[#10B981]/40'
+              : 'text-[#8C98B4] hover:text-white hover:bg-[#172644]'
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          <span>Contatos Enviados (Destino dos Leads)</span>
+          {sentContacts.length > 0 && (
+            <span className={`text-[11px] px-2 py-0.5 rounded-full font-extrabold ${
+              activeTab === 'sent_leads' ? 'bg-[#101B2D] text-[#10B981]' : 'bg-[#10B981]/20 text-[#34D399]'
+            }`}>
+              {sentContacts.length}
             </span>
           )}
         </button>
@@ -973,6 +1143,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="flex flex-wrap gap-2 text-xs">
                       <button
                         type="button"
+                        onClick={() => setRoletaLeadSource('admin_stock')}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          roletaLeadSource === 'admin_stock'
+                            ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold shadow-xs'
+                            : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
+                        }`}
+                        title="Desconta da conta do Administrador e transfere para os atendentes"
+                      >
+                        ⚡ Estoque Conta Admin ({adminStockContacts.length})
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => setRoletaLeadSource('unassigned')}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                           roletaLeadSource === 'unassigned'
@@ -980,7 +1163,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-white'
                         }`}
                       >
-                        ⚡ Leads Livres ({unassignedContacts.length})
+                        👥 Leads Sem Atendente ({unassignedContacts.length})
                       </button>
 
                       {availableBatches.length > 0 && (
@@ -1605,6 +1788,340 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 Livre (Sem atendente)
                               </span>
                             )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: 📋 CONTATOS ENVIADOS & DESTINO DOS LEADS (PRA QUAL ATENDENTE FOI)    */}
+      {/* ========================================================================= */}
+      {activeTab === 'sent_leads' && (
+        <div className="space-y-4">
+          {/* Header Description Card */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl p-4 shadow-sm space-y-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-[#10B981]" />
+                  <span>Destino dos Leads & Histórico de Envios para Atendentes</span>
+                </h3>
+                <p className="text-xs text-[#8C98B4] mt-0.5">
+                  Visualize todos os contatos que o <b>Administrador enviou aos atendentes</b>. Acompanhe em tempo real para qual atendente cada lead foi direcionado, a data e hora exata do envio e se o lead já foi contatado.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-[#8C98B4]">Total Distribuído:</span>
+                <span className="bg-[#10B981]/20 border border-[#10B981]/50 text-[#34D399] font-extrabold text-sm px-3 py-1 rounded-xl">
+                  {sentContacts.length} contatos
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Attendant Breakdown Grid */}
+            {sentBreakdownByAttendant.length > 0 && (
+              <div className="pt-3 border-t border-[#2B3D63]/70">
+                <div className="text-[11px] font-bold text-[#8C98B4] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-[#C9A227]" />
+                  <span>Distribuição por Atendente (Clique para filtrar):</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                  {sentBreakdownByAttendant.map(({ attendant, totalSent, contactedCount, pendingCount }) => {
+                    const isSelected = sentAttendantFilter === attendant.uid;
+                    return (
+                      <div
+                        key={attendant.uid}
+                        onClick={() => setSentAttendantFilter(isSelected ? 'todos' : attendant.uid)}
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#10B981]/20 border-[#10B981] ring-1 ring-[#10B981]'
+                            : 'bg-[#101B2D] border-[#2B3D63] hover:border-[#10B981]/60'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-bold text-white truncate" title={attendant.displayName || attendant.email}>
+                            {attendant.displayName || attendant.email.split('@')[0]}
+                          </span>
+                          <span className="text-xs font-extrabold text-[#34D399] bg-[#172644] px-1.5 py-0.5 rounded border border-[#10B981]/30">
+                            {totalSent}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-[#8C98B4] mt-1.5">
+                          <span className="text-[#4ADE80]">✓ {contactedCount} contatados</span>
+                          <span className="text-[#FCD34D]">• {pendingCount} novos</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Search and Filters Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-3 border-t border-[#2B3D63]">
+              <div className="sm:col-span-4 relative">
+                <Search className="w-4 h-4 text-[#8C98B4] absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Buscar por aluno, whatsapp, curso ou atendente..."
+                  value={sentSearch}
+                  onChange={(e) => setSentSearch(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-white text-xs pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                />
+              </div>
+
+              <div className="sm:col-span-3">
+                <select
+                  value={sentAttendantFilter}
+                  onChange={(e) => setSentAttendantFilter(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                >
+                  <option value="todos">Todos os Atendentes ({sentContacts.length})</option>
+                  {attendants.map((a) => {
+                    const count = sentContacts.filter((c) => c.assignedTo === a.uid).length;
+                    return (
+                      <option key={a.uid} value={a.uid}>
+                        {a.displayName || a.email} ({count} leads)
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div className="sm:col-span-3">
+                <select
+                  value={sentBatchFilter}
+                  onChange={(e) => setSentBatchFilter(e.target.value)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                >
+                  <option value="todos">Todas as Planilhas ({availableBatches.length})</option>
+                  {availableBatches.map((b) => (
+                    <option key={b.name} value={b.name}>
+                      {b.name} ({b.count} contatos)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <select
+                  value={sentStatusFilter}
+                  onChange={(e) => setSentStatusFilter(e.target.value as any)}
+                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="novo">Aguardando Contato</option>
+                  <option value="contatado">Já Contatado</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Table of Sent Contacts */}
+          <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-3 bg-[#101B2D] border-b border-[#2B3D63] flex flex-wrap items-center justify-between gap-2 text-xs text-[#8C98B4]">
+              <div className="flex items-center gap-2">
+                <span>Exibindo <b>{filteredSentContacts.length}</b> de <b>{sentContacts.length}</b> contato(s) enviados</span>
+                {sentAttendantFilter !== 'todos' && (
+                  <button
+                    type="button"
+                    onClick={() => setSentAttendantFilter('todos')}
+                    className="text-[11px] text-[#34D399] hover:underline cursor-pointer"
+                  >
+                    (Limpar filtro de atendente)
+                  </button>
+                )}
+              </div>
+              <span className="text-[#34D399] font-medium flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" /> Ordenado pelo envio mais recente
+              </span>
+            </div>
+
+            <div className="overflow-x-auto max-h-[650px] overflow-y-auto">
+              <table className="w-full text-left text-xs text-white">
+                <thead className="bg-[#101B2D] text-[#8C98B4] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#2B3D63] z-10">
+                  <tr>
+                    <th className="py-2.5 px-3">Aluno / Lead</th>
+                    <th className="py-2.5 px-3">WhatsApp</th>
+                    <th className="py-2.5 px-3">Concurso / Curso</th>
+                    <th className="py-2.5 px-3">Planilha de Origem</th>
+                    <th className="py-2.5 px-3 bg-[#10B981]/15 text-[#34D399]">🎯 PRA QUAL ATENDENTE FOI</th>
+                    <th className="py-2.5 px-3">🕒 Data do Envio</th>
+                    <th className="py-2.5 px-3">Status Atual</th>
+                    <th className="py-2.5 px-3 text-right">Ação / Reatribuir</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2B3D63]">
+                  {filteredSentContacts.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-12 text-center text-[#8C98B4]">
+                        <UserCheck className="w-10 h-10 text-[#8C98B4]/40 mx-auto mb-2" />
+                        <p className="font-semibold text-sm text-[#EDE6D6]">Nenhum contato enviado com os filtros atuais.</p>
+                        <p className="text-xs text-[#8C98B4] mt-1">
+                          Vá até a aba "Estoque da Planilha & Envio de Leads" para distribuir contatos para os atendentes.
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSentContacts.map((c) => {
+                      const attendantUser = users.find((u) => u.uid === c.assignedTo);
+                      const attendantDisplayName =
+                        c.sentToAttendantName ||
+                        c.assignedToName ||
+                        attendantUser?.displayName ||
+                        attendantUser?.username ||
+                        c.assignedToEmail ||
+                        'Atendente';
+                      const attendantEmail = c.sentToAttendantEmail || c.assignedToEmail || attendantUser?.email || '';
+                      const isContacted = !!c.ultimoContato || c.status === 'Contatado' || c.status === 'Enviado';
+                      const sendDateText = formatDateTime(c.sentByAdminAt || c.assignedAt || c.createdAt);
+
+                      return (
+                        <tr key={c.id} className="hover:bg-[#1F3057]/60 transition-colors">
+                          {/* Aluno / Lead */}
+                          <td className="py-2.5 px-3">
+                            <div className="font-bold text-white text-sm">{c.nome}</div>
+                            {c.email && (
+                              <div className="text-[11px] text-[#8C98B4] truncate max-w-[180px]">{c.email}</div>
+                            )}
+                            {c.temperatura && (
+                              <span
+                                className={`inline-block mt-0.5 text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                                  c.temperatura === 'Quente'
+                                    ? 'bg-[#DC2626]/20 text-[#F87171] border border-[#DC2626]/40'
+                                    : c.temperatura === 'Morno'
+                                    ? 'bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40'
+                                    : 'bg-[#3B82F6]/20 text-[#93C5FD] border border-[#3B82F6]/40'
+                                }`}
+                              >
+                                {c.temperatura}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* WhatsApp */}
+                          <td className="py-2.5 px-3">
+                            {c.whatsapp ? (
+                              <button
+                                type="button"
+                                onClick={() => openWhatsAppDirect(c.whatsapp)}
+                                className="text-xs text-[#4ADE80] hover:text-[#86EFAC] font-mono hover:underline flex items-center gap-1 cursor-pointer"
+                                title="Abrir WhatsApp"
+                              >
+                                <span>{c.whatsapp}</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </button>
+                            ) : (
+                              <span className="text-[#8C98B4] italic text-[11px]">Não informado</span>
+                            )}
+                          </td>
+
+                          {/* Concurso / Curso */}
+                          <td className="py-2.5 px-3">
+                            <span className="text-xs text-[#EDE6D6] font-medium">
+                              {c.curso || 'Geral / Não especificado'}
+                            </span>
+                          </td>
+
+                          {/* Planilha de Origem */}
+                          <td className="py-2.5 px-3">
+                            <span className="inline-flex items-center gap-1 bg-[#101B2D] border border-[#2B3D63] text-[#8C98B4] text-[11px] px-2 py-0.5 rounded">
+                              <FileSpreadsheet className="w-3 h-3 text-[#C9A227]" />
+                              <span className="truncate max-w-[140px]" title={c.batchName || 'Importação'}>
+                                {c.batchName || 'Planilha Importada'}
+                              </span>
+                            </span>
+                          </td>
+
+                          {/* PRA QUAL ATENDENTE FOI */}
+                          <td className="py-2.5 px-3 bg-[#10B981]/10 border-l border-r border-[#10B981]/20">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-[#10B981]/20 border border-[#10B981] flex items-center justify-center text-[#34D399] font-bold text-xs shrink-0">
+                                {attendantDisplayName.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-extrabold text-[#34D399] text-xs flex items-center gap-1">
+                                  <span>{attendantDisplayName}</span>
+                                  <span className="bg-[#10B981]/20 text-[#86EFAC] text-[9px] px-1 py-0.2 rounded font-bold uppercase tracking-wider">
+                                    Atendente
+                                  </span>
+                                </div>
+                                {attendantEmail && (
+                                  <div className="text-[10px] text-[#8C98B4] truncate max-w-[160px]">
+                                    {attendantEmail}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Data do Envio */}
+                          <td className="py-2.5 px-3">
+                            <div className="text-xs text-[#EDE6D6] font-medium flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-[#C9A227]" />
+                              <span>{sendDateText}</span>
+                            </div>
+                            <span className="text-[10px] text-[#8C98B4]">Descontado do Admin</span>
+                          </td>
+
+                          {/* Status Atual */}
+                          <td className="py-2.5 px-3">
+                            {isContacted ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#4ADE80] bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>Contatado {c.ultimoContato ? `(${c.ultimoContato})` : ''}</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#FCD34D] bg-[#F59E0B]/15 border border-[#F59E0B]/30 px-2 py-0.5 rounded">
+                                <Clock className="w-3 h-3" />
+                                <span>Aguardando Atendente</span>
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Ação / Reatribuir */}
+                          <td className="py-2.5 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <select
+                                value={reassignSentTargetByContact[c.id] || ''}
+                                onChange={(e) =>
+                                  setReassignSentTargetByContact((prev) => ({
+                                    ...prev,
+                                    [c.id]: e.target.value,
+                                  }))
+                                }
+                                className="bg-[#101B2D] border border-[#2B3D63] text-white text-[11px] p-1.5 rounded focus:outline-none focus:border-[#C9A227] max-w-[130px]"
+                              >
+                                <option value="">Mudar atendente...</option>
+                                {attendants
+                                  .filter((a) => a.uid !== c.assignedTo)
+                                  .map((a) => (
+                                    <option key={a.uid} value={a.uid}>
+                                      {a.displayName || a.email.split('@')[0]}
+                                    </option>
+                                  ))}
+                              </select>
+
+                              {reassignSentTargetByContact[c.id] && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleReassignFromSentTable(c, reassignSentTargetByContact[c.id])}
+                                  disabled={isProcessing}
+                                  className="bg-[#C9A227] hover:bg-[#b58f1f] text-[#101B2D] font-bold text-[11px] px-2 py-1.5 rounded transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                  title="Transferir para o atendente selecionado"
+                                >
+                                  Mover
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );

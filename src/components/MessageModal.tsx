@@ -27,7 +27,7 @@ import {
   Monitor,
   Globe,
 } from 'lucide-react';
-import { Contact, MessageTemplate, MessageTemplateCategory } from '../types';
+import { Contact, MessageTemplate, MessageTemplateCategory, UserProfile } from '../types';
 import {
   fillTemplate,
   openWhatsAppDirect,
@@ -48,6 +48,8 @@ interface MessageModalProps {
   onMarkContacted?: (id: string) => void;
   onAddTemplate?: (newTmpl: MessageTemplate) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
+  isAdmin?: boolean;
+  attendants?: UserProfile[];
 }
 
 export const MessageModal: React.FC<MessageModalProps> = ({
@@ -60,6 +62,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   onMarkContacted,
   onAddTemplate,
   onToast,
+  isAdmin = false,
+  attendants = [],
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [templateFilter, setTemplateFilter] = useState<'all' | 'audio' | 'text'>('all');
@@ -271,7 +275,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     }
   };
 
-  const handleSendWhatsAppAndNext = () => {
+  const handleSendWhatsAppAndNext = async () => {
     if (!contact.whatsapp) {
       onToast('Contato não possui telefone WhatsApp cadastrado.', 'error');
       return;
@@ -283,14 +287,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     if (onMarkContacted) {
       onMarkContacted(contact.id);
       setIsMarkedToday(true);
+      onToast(
+        waTargetMode === 'desktop_app'
+          ? `📱 Abrindo App WhatsApp e registrando contato realizado para ${contact.nome}...`
+          : `🌐 Abrindo WhatsApp Web e registrando contato realizado para ${contact.nome}...`,
+        'success'
+      );
     }
-
-    onToast(
-      waTargetMode === 'desktop_app'
-        ? `📱 Abrindo App WhatsApp e registrando contato realizado para ${contact.nome}...`
-        : `🌐 Abrindo WhatsApp Web e registrando contato realizado para ${contact.nome}...`,
-      'success'
-    );
 
     // Auto advance to next contact in queue
     if (hasNext && onSelectContact) {
@@ -300,7 +303,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     }
   };
 
-  const handleSendWhatsAppOnly = () => {
+  const handleSendWhatsAppOnly = async () => {
     if (!contact.whatsapp) {
       onToast('Contato não possui telefone WhatsApp cadastrado.', 'error');
       return;
@@ -311,14 +314,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     if (onMarkContacted) {
       onMarkContacted(contact.id);
       setIsMarkedToday(true);
+      onToast(
+        waTargetMode === 'desktop_app'
+          ? `📱 Abrindo App WhatsApp e registrando contato realizado para ${contact.nome}...`
+          : `🌐 Abrindo WhatsApp Web e registrando contato realizado para ${contact.nome}...`,
+        'success'
+      );
     }
-
-    onToast(
-      waTargetMode === 'desktop_app'
-        ? `📱 Abrindo App WhatsApp e registrando contato realizado para ${contact.nome}...`
-        : `🌐 Abrindo WhatsApp Web e registrando contato realizado para ${contact.nome}...`,
-      'success'
-    );
     onClose();
   };
 

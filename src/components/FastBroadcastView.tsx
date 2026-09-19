@@ -36,7 +36,7 @@ import {
   Terminal,
   Filter,
 } from 'lucide-react';
-import { Contact, MessageTemplate, BroadcastLog, Temperature } from '../types';
+import { Contact, MessageTemplate, BroadcastLog, Temperature, UserProfile } from '../types';
 import { SendGridEmailBroadcast } from './SendGridEmailBroadcast';
 import {
   fillTemplate,
@@ -55,6 +55,14 @@ interface FastBroadcastViewProps {
   onMarkContacted?: (id: string) => void;
   onMarkEmailContacted?: (id: string, emailSubject?: string) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'error') => void;
+  isAdmin?: boolean;
+  attendants?: UserProfile[];
+  onSendAndTransferContact?: (
+    contactId: string,
+    targetAttendantUid: string,
+    messageText: string,
+    channel?: 'whatsapp' | 'email'
+  ) => Promise<void>;
 }
 
 export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
@@ -64,9 +72,34 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   onMarkContacted,
   onMarkEmailContacted,
   onToast,
+  isAdmin = false,
+  attendants = [],
+  onSendAndTransferContact,
 }) => {
+  // If not admin, block view with informative banner
+  if (!isAdmin) {
+    return (
+      <div className="max-w-2xl mx-auto my-12 bg-[#172644] border border-[#2B3D63] rounded-2xl p-8 text-center space-y-4 shadow-xl">
+        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#C9A227] flex items-center justify-center mx-auto text-2xl font-bold">
+          🔒
+        </div>
+        <h2 className="text-xl font-bold text-[#EDE6D6]">
+          Acesso Restrito ao Administrador
+        </h2>
+        <p className="text-sm text-[#8C98B4] leading-relaxed">
+          O envio de contatos e disparos em massa é restrito exclusivamente ao Administrador.
+          Conforme o Administrador realiza os envios, os leads são descontados imediatamente da conta admin e creditados na sua fila de atendimento em <strong>"Meus Contatos"</strong>.
+        </p>
+      </div>
+    );
+  }
+
   // Mode: single quick broadcast, batch queue broadcast, automated mass broadcast (zero tabs), email mass (SendGrid), history
   const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'auto_mass' | 'email_mass' | 'history'>('auto_mass');
+
+  // Lead Transfer Settings for Admin Broadcasts
+  const [broadcastTransferMode, setBroadcastTransferMode] = useState<string>('roleta');
+  const [enableAutoTransferOnBroadcast, setEnableAutoTransferOnBroadcast] = useState<boolean>(true);
 
   // Single Broadcast Form States
   const [selectedContactId, setSelectedContactId] = useState<string>('');
@@ -375,6 +408,10 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
       handleAutoSaveContact();
     }
 
+    if (selectedContactId && enableAutoTransferOnBroadcast && onSendAndTransferContact) {
+      onSendAndTransferContact(selectedContactId, broadcastTransferMode, processedText, 'whatsapp');
+    }
+
     recordBroadcast('whatsapp', nome || digits, processedText);
     onToast(
       waTargetMode === 'same_tab'
@@ -498,9 +535,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
       handleCopyImageToClipboard();
     }
     openWhatsAppDirect(digits, processedText, waTargetMode);
-    if (onMarkContacted) {
+
+    if (enableAutoTransferOnBroadcast && onSendAndTransferContact) {
+      onSendAndTransferContact(currentBatchContact.id, broadcastTransferMode, processedText, 'whatsapp');
+    } else if (onMarkContacted) {
       onMarkContacted(currentBatchContact.id);
     }
+
     recordBroadcast('whatsapp', currentBatchContact.nome, processedText);
     onToast(
       `Disparo realizado para ${currentBatchContact.nome}! (${waTargetMode === 'same_tab' ? 'Mesma aba' : waTargetMode === 'desktop_app' ? 'App Desktop' : 'Nova aba'})`,
@@ -899,6 +940,47 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Admin Lead Transfer Setting */}
+        {attendants.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-[#2B3D63]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#101B2D]/60 p-2.5 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+              <span className="font-bold text-[#EDE6D6]">
+                ⚡ Desconto & Transferência Imediata Pós-Disparo:
+              </span>
+              <span className="text-[#8C98B4] text-[11px] hidden md:inline">
+                (O lead sai imediatamente da conta Admin e vai para o atendente)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-[#8C98B4] text-[11px]">Destino:</label>
+              <select
+                value={broadcastTransferMode}
+                onChange={(e) => setBroadcastTransferMode(e.target.value)}
+                className="bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#C9A227]"
+              >
+                <option value="roleta">🎲 Roleta Automática (Revezar entre os {attendants.length} atendentes)</option>
+                {attendants.map((a) => (
+                  <option key={a.uid} value={a.uid}>
+                    👤 {a.displayName || a.email}
+                  </option>
+                ))}
+              </select>
+
+              <label className="flex items-center gap-1.5 cursor-pointer ml-1">
+                <input
+                  type="checkbox"
+                  checked={enableAutoTransferOnBroadcast}
+                  onChange={(e) => setEnableAutoTransferOnBroadcast(e.target.checked)}
+                  className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-0 cursor-pointer"
+                />
+                <span className="text-[11px] text-[#EDE6D6] font-semibold">Ativo</span>
+              </label>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* TAB 1: SINGLE DISPATCH (O QUE O USUÁRIO PEDIU: EMAIL, NOME, NÚMERO, MSG, FOTO E PRONTO) */}

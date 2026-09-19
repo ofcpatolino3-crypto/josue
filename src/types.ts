@@ -56,6 +56,11 @@ export interface Contact {
   lastEmailSentAt?: number; // Timestamp do último envio de e-mail SendGrid
   lastEmailSubject?: string; // Assunto do último e-mail enviado
   emailSentCount?: number; // Contador de e-mails já enviados
+  sentByAdminAt?: number; // Timestamp de quando o admin enviou o lead
+  sentByAdminEmail?: string; // Email do admin que fez o envio
+  sentToAttendantName?: string; // Nome do atendente que recebeu o lead do admin
+  sentToAttendantEmail?: string; // Email do atendente que recebeu o lead
+  transferredFromAdmin?: boolean; // Se foi descontado da conta admin e creditado ao atendente
 }
 
 export interface Objection {

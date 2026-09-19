@@ -139,6 +139,12 @@ export default function App() {
   const [globalContacts, setGlobalContacts] = useState<Contact[]>([]);
   const [leadBatches, setLeadBatches] = useState<LeadBatch[]>([]);
 
+  // Approved attendants list
+  const attendants = useMemo(
+    () => allUsers.filter((u) => u.status === 'approved' && u.role === 'attendant'),
+    [allUsers]
+  );
+
   // --- LOCAL STATE (with strict per-user storage isolation) ---
   const [contacts, setContacts] = useState<Contact[]>(() => {
     try {
@@ -527,17 +533,14 @@ export default function App() {
       const batch = writeBatch(db);
 
       newContacts.forEach((c) => {
-        // Save in global pool
+        // Save in global pool (central stock for Admin Panel)
         const globalRef = doc(db, 'global_contacts', c.id);
         batch.set(globalRef, { ...c, batchName: batchName || 'Planilha Manual' }, { merge: true });
 
-        // If user profile is logged in, also save to user's assigned contacts
+        // Only save to personal user subcollection if specifically assigned
         if (c.assignedTo) {
           const userRef = doc(db, 'users', c.assignedTo, 'contacts', c.id);
           batch.set(userRef, c, { merge: true });
-        } else if (currentProfile?.uid) {
-          const ref = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
-          batch.set(ref, c, { merge: true });
         }
       });
 
@@ -692,11 +695,18 @@ export default function App() {
     targetUserUid: string,
     targetUserEmail: string
   ) => {
+    if (currentProfile?.role !== 'admin') {
+      addToast('Apenas o Administrador possui autorização para distribuir e liberar contatos.', 'error');
+      return;
+    }
     if (contactsToAssign.length === 0) return;
     try {
       setSyncing(true);
       const CHUNK_SIZE = 100;
       const updatedList: Contact[] = [];
+
+      const targetUserProfile = allUsers.find((u) => u.uid === targetUserUid);
+      const recipientName = targetUserProfile?.displayName || targetUserProfile?.username || targetUserEmail;
 
       for (let i = 0; i < contactsToAssign.length; i += CHUNK_SIZE) {
         const chunk = contactsToAssign.slice(i, i + CHUNK_SIZE);
@@ -707,6 +717,12 @@ export default function App() {
             ...c,
             assignedTo: targetUserUid,
             assignedToEmail: targetUserEmail,
+            assignedToName: recipientName,
+            sentToAttendantName: recipientName,
+            sentToAttendantEmail: targetUserEmail,
+            sentByAdminAt: Date.now(),
+            sentByAdminEmail: currentProfile?.email || 'admin@portalconcursos.com',
+            transferredFromAdmin: true,
             assignedAt: Date.now(),
             isSeenByAttendant: false,
             status: c.status === 'Enviado' ? c.status : 'Novo Lead',
@@ -757,6 +773,10 @@ export default function App() {
     contactsToDistribute: Contact[],
     targetUsers: UserProfile[]
   ) => {
+    if (currentProfile?.role !== 'admin') {
+      addToast('Apenas o Administrador possui autorização para distribuir e liberar contatos.', 'error');
+      return;
+    }
     if (contactsToDistribute.length === 0 || targetUsers.length === 0) return;
     try {
       setSyncing(true);
@@ -770,10 +790,17 @@ export default function App() {
         chunk.forEach((contact, chunkIdx) => {
           const globalIdx = i + chunkIdx;
           const assignedUser = targetUsers[globalIdx % targetUsers.length];
+          const attendantName = assignedUser.displayName || assignedUser.username || assignedUser.email;
           const updated: Contact = {
             ...contact,
             assignedTo: assignedUser.uid,
             assignedToEmail: assignedUser.email,
+            assignedToName: attendantName,
+            sentToAttendantName: attendantName,
+            sentToAttendantEmail: assignedUser.email,
+            sentByAdminAt: Date.now(),
+            sentByAdminEmail: currentProfile?.email || 'admin@portalconcursos.com',
+            transferredFromAdmin: true,
             assignedAt: Date.now(),
             isSeenByAttendant: false,
             status: contact.status === 'Enviado' ? contact.status : 'Novo Lead',
@@ -819,6 +846,142 @@ export default function App() {
     } catch (e: any) {
       console.error('Error in equal distribution:', e);
       addToast('Erro na divisão: ' + e.message, 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  // --- IMMEDIATE ADMIN STOCK DEDUCTION & ATTENDANT TRANSFER UPON SENDING ---
+  const handleSendAndTransferContact = async (
+    contactId: string,
+    targetAttendantUid: string,
+    messageText: string,
+    channel: 'whatsapp' | 'email' = 'whatsapp'
+  ) => {
+    // 1. Security Check: Only admin can execute
+    if (currentProfile?.role !== 'admin') {
+      addToast('Apenas o Administrador possui autorização para enviar e creditar contatos para atendentes.', 'error');
+      return;
+    }
+
+    // 2. Locate target contact
+    const targetContact =
+      contacts.find((c) => c.id === contactId) ||
+      globalContacts.find((c) => c.id === contactId);
+
+    if (!targetContact) {
+      console.warn('Contato não encontrado para transferência:', contactId);
+      return;
+    }
+
+    // 3. Resolve destination attendant
+    const approvedAttendants = allUsers.filter(
+      (u) => u.status === 'approved' && u.role === 'attendant'
+    );
+
+    if (approvedAttendants.length === 0) {
+      addToast('Nenhum atendente aprovado encontrado no sistema para receber o lead.', 'error');
+      return;
+    }
+
+    let recipientUser: UserProfile | undefined;
+    if (targetAttendantUid === 'roleta') {
+      // Find attendant with lowest count of active leads for equitable balance
+      const countsMap = new Map<string, number>();
+      approvedAttendants.forEach((a) => countsMap.set(a.uid, 0));
+      globalContacts.forEach((c) => {
+        if (c.assignedTo && countsMap.has(c.assignedTo)) {
+          countsMap.set(c.assignedTo, (countsMap.get(c.assignedTo) || 0) + 1);
+        }
+      });
+
+      const sorted = [...approvedAttendants].sort(
+        (a, b) => (countsMap.get(a.uid) || 0) - (countsMap.get(b.uid) || 0)
+      );
+      recipientUser = sorted[0];
+    } else {
+      recipientUser = approvedAttendants.find((u) => u.uid === targetAttendantUid);
+    }
+
+    if (!recipientUser) {
+      recipientUser = approvedAttendants[0];
+    }
+
+    const now = Date.now();
+    const updatedContact: Contact = {
+      ...targetContact,
+      assignedTo: recipientUser.uid,
+      assignedToEmail: recipientUser.email,
+      assignedToName: recipientUser.displayName || recipientUser.email,
+      assignedAt: now,
+      isSeenByAttendant: false,
+      transferredFromAdmin: true,
+      sentByAdminAt: now,
+      sentByAdminEmail: currentProfile.email || 'admin@portalconcursos.com',
+      ultimoContato: todayStr(),
+      status: 'Contatado',
+      lastMessageAt: now,
+      lastMessageText: messageText ? messageText.substring(0, 120) : undefined,
+      lastMessageType: channel,
+      messagesSentCount: (targetContact.messagesSentCount || 0) + 1,
+    };
+
+    try {
+      setSyncing(true);
+      const batch = writeBatch(db);
+
+      // Immediate deduction: Remove from Admin's user contacts subcollection
+      if (currentProfile?.uid) {
+        const adminSubDoc = doc(db, 'users', currentProfile.uid, 'contacts', contactId);
+        batch.delete(adminSubDoc);
+      }
+      const masterAdminSubDoc = doc(db, 'users', 'master_admin_root', 'contacts', contactId);
+      batch.delete(masterAdminSubDoc);
+
+      // Transfer: Credit immediately to the recipient attendant's contacts subcollection
+      const attendantSubDoc = doc(db, 'users', recipientUser.uid, 'contacts', contactId);
+      batch.set(attendantSubDoc, updatedContact, { merge: true });
+
+      // Update central global contacts document
+      const globalDoc = doc(db, 'global_contacts', contactId);
+      batch.set(globalDoc, updatedContact, { merge: true });
+
+      await batch.commit();
+
+      // Immediately deduct from Admin's React state view
+      setContacts((prev) => prev.filter((c) => c.id !== contactId));
+
+      // Update globalContacts cache
+      setGlobalContacts((prev) =>
+        prev.map((c) => (c.id === contactId ? updatedContact : c))
+      );
+
+      // Clean from local storage of current admin session
+      if (currentProfile?.uid) {
+        try {
+          const userKey = `contacts_v3_${currentProfile.uid}`;
+          const currentSaved = localStorage.getItem(userKey);
+          if (currentSaved) {
+            const parsed = JSON.parse(currentSaved);
+            if (Array.isArray(parsed)) {
+              localStorage.setItem(
+                userKey,
+                JSON.stringify(parsed.filter((c: Contact) => c.id !== contactId))
+              );
+            }
+          }
+        } catch (storageErr) {
+          console.warn('Storage deduction error:', storageErr);
+        }
+      }
+
+      addToast(
+        `⚡ Contato enviado e descontado! Transferido para o atendente ${recipientUser.displayName || recipientUser.email}.`,
+        'success'
+      );
+    } catch (e: any) {
+      console.error('Erro ao transferir contato pós-disparo:', e);
+      addToast('Erro ao transferir contato: ' + e.message, 'error');
     } finally {
       setSyncing(false);
     }
@@ -1257,7 +1420,7 @@ export default function App() {
         return;
       }
 
-      const dup = contacts.some(
+      const dup = globalContacts.some(
         (c) =>
           (c.nome.trim().toLowerCase() === r.nome!.trim().toLowerCase() &&
             (c.whatsapp === r.whatsapp || (!r.whatsapp && !c.whatsapp))) ||
@@ -1279,26 +1442,36 @@ export default function App() {
         dataContato: r.dataContato || '',
         ultimoContato: r.ultimoContato || '',
         proximoContato: r.proximoContato || '',
-        status: r.status || '',
+        status: 'Aguardando Envio',
         observacao: r.observacao || '',
         createdAt: Date.now(),
-        assignedTo: currentProfile?.uid,
-        assignedToEmail: currentProfile?.email || undefined,
-        batchName: batchName || 'Importação Direta',
+        // Spreadsheet contacts route directly to the Admin Panel stock (unassigned)
+        assignedTo: undefined,
+        assignedToEmail: undefined,
+        assignedToName: undefined,
+        batchName: batchName || 'Planilha Importada',
       });
       added++;
     });
 
     if (added > 0) {
-      setContacts((prev) => [...prev, ...newItems]);
+      // Direct to Admin pool so AdminPanel reflects the new leads instantly
+      setGlobalContacts((prev) => [...prev, ...newItems]);
       saveBatchContactsToCloud(newItems, batchName);
       confetti({ particleCount: 60, spread: 70, origin: { y: 0.8 } });
-      addToast(
-        `${added} contato(s) importado(s) com sucesso!${
-          skipped ? ` (${skipped} ignorado(s) por duplicação/sem nome)` : ''
-        }`,
-        'success'
-      );
+
+      if (currentProfile?.role === 'admin') {
+        setActiveView('admin');
+        addToast(
+          `📥 ${added} contato(s) da planilha importados para o Painel Admin! Acesse o Painel Admin para enviar e dividir entre os atendentes.`,
+          'success'
+        );
+      } else {
+        addToast(
+          `📥 ${added} contato(s) importados e direcionados para o Painel Admin! O Administrador fará o envio para os atendentes.`,
+          'info'
+        );
+      }
     } else {
       addToast(
         `Nenhum novo contato importado. A planilha contém ${rows.length} linha(s), mas todas estavam sem nome ou já cadastradas.`,
@@ -1354,40 +1527,16 @@ export default function App() {
       let distributedCount = 0;
 
       if (distributionMode === 'unassigned') {
-        if (currentProfile?.role === 'attendant' && currentProfile?.uid) {
-          // Attendants get contacts directly liberated into their own queue
-          newItems.forEach((c) => {
-            const updated: Contact = {
-              ...c,
-              assignedTo: currentProfile.uid,
-              assignedToEmail: currentProfile.email,
-            };
-            const userRef = doc(db, 'users', currentProfile.uid, 'contacts', c.id);
-            batch.set(userRef, updated, { merge: true });
-            const globalRef = doc(db, 'global_contacts', c.id);
-            batch.set(globalRef, updated, { merge: true });
-          });
-          setContacts((prev) => [
-            ...newItems.map((c) => ({
-              ...c,
-              assignedTo: currentProfile.uid,
-              assignedToEmail: currentProfile.email,
-            })),
-            ...prev,
-          ]);
-          distributedCount = newItems.length;
-        } else {
-          // Admin / Supervisor saves to global pool for manual distribution
-          newItems.forEach((c) => {
-            const globalRef = doc(db, 'global_contacts', c.id);
-            batch.set(globalRef, c, { merge: true });
-          });
-        }
+        // Saves to central global pool for the Admin Panel
+        newItems.forEach((c) => {
+          const globalRef = doc(db, 'global_contacts', c.id);
+          batch.set(globalRef, c, { merge: true });
+        });
         batch.set(batchDocRef, {
           id: batchDocId,
           name: batchName,
           totalLeads: newItems.length,
-          distributedLeads: distributedCount,
+          distributedLeads: 0,
           createdAt: Date.now(),
           createdBy: currentProfile?.email || 'admin',
         });
@@ -2395,6 +2544,8 @@ export default function App() {
                         onDeleteContact={handleDeleteContact}
                         onOpenMessageModal={(contact) => setMessageModalContact(contact)}
                         onOpenSalesAssistant={(contact) => setSalesAssistantContact(contact)}
+                        isAdmin={currentProfile?.role === 'admin'}
+                        attendants={attendants}
                       />
                     </React.Fragment>
                   );
@@ -2413,6 +2564,9 @@ export default function App() {
             onMarkContacted={handleMarkToday}
             onMarkEmailContacted={handleMarkEmailContacted}
             onToast={addToast}
+            isAdmin={currentProfile?.role === 'admin'}
+            attendants={attendants}
+            onSendAndTransferContact={handleSendAndTransferContact}
           />
         )}
 
@@ -2496,6 +2650,8 @@ export default function App() {
         }}
         onAddTemplate={handleAddTemplate}
         onToast={addToast}
+        isAdmin={currentProfile?.role === 'admin'}
+        attendants={attendants}
       />
 
       {/* Sales Assistant AI Modal with Automated Objections & Plans Suggestions */}

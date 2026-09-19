@@ -12,8 +12,9 @@ import {
   Sparkles,
   Clock,
   AlertTriangle,
+  Zap,
 } from 'lucide-react';
-import { Contact, Temperature } from '../types';
+import { Contact, Temperature, UserProfile } from '../types';
 import { TEMP_COLORS, TEMP_ORDER } from '../data/defaults';
 import {
   waLink,
@@ -34,6 +35,8 @@ interface CardProps {
   onDeleteContact: (id: string) => void;
   onOpenMessageModal?: (contact: Contact) => void;
   onOpenSalesAssistant?: (contact: Contact) => void;
+  isAdmin?: boolean;
+  attendants?: UserProfile[];
 }
 
 export const ContactCard: React.FC<CardProps> = ({
@@ -45,6 +48,8 @@ export const ContactCard: React.FC<CardProps> = ({
   onDeleteContact,
   onOpenMessageModal,
   onOpenSalesAssistant,
+  isAdmin = false,
+  attendants = [],
 }) => {
   const [obsValue, setObsValue] = useState(contact.observacao || '');
   const [copiedWA, setCopiedWA] = useState(false);
@@ -152,6 +157,17 @@ export const ContactCard: React.FC<CardProps> = ({
               </span>
             )}
 
+            {/* Admin Sent / Transferred Badge */}
+            {contact.transferredFromAdmin && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#C9A227]/20 text-[#FCD34D] border border-[#C9A227]/40 shadow-xs"
+                title={`Lead enviado pelo Administrador${contact.assignedToName ? ` e transferido para ${contact.assignedToName}` : ''}`}
+              >
+                <Zap className="w-3 h-3 text-[#C9A227]" />
+                <span>Enviado pelo Admin {contact.assignedToName ? `→ ${contact.assignedToName}` : ''}</span>
+              </span>
+            )}
+
             {/* Inactivity Status Badge */}
             {contact.temperatura !== 'Pagou' && (
               <span
@@ -246,15 +262,27 @@ export const ContactCard: React.FC<CardProps> = ({
 
           {/* Quick message modal trigger */}
           {onOpenMessageModal && (
-            <button
-              type="button"
-              onClick={() => onOpenMessageModal(contact)}
-              className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] hover:border-[#C9A227] rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer shadow-sm"
-              title="Abrir mensagem pronta personalizável para este contato"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-[#C9A227]" />
-              <span>Mensagem Pronta</span>
-            </button>
+            isAdmin ? (
+              <button
+                type="button"
+                onClick={() => onOpenMessageModal(contact)}
+                className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold rounded-lg px-3 py-1.5 text-xs transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Abrir envio de mensagem WhatsApp com desconto imediato da conta Admin para atendente"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>⚡ Enviar & Descontar</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onOpenMessageModal(contact)}
+                className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] hover:border-[#C9A227] rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+                title="Abrir mensagem pronta e roteiro para atendimento"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-[#C9A227]" />
+                <span>Mensagem Pronta</span>
+              </button>
+            )
           )}
 
           {whatsappHref && (
