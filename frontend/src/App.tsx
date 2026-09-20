@@ -27,9 +27,6 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   signOut,
-  User as FirebaseUser,
-} from 'firebase/auth';
-import {
   collection,
   doc,
   setDoc,
@@ -38,8 +35,16 @@ import {
   onSnapshot,
   writeBatch,
   query,
-} from 'firebase/firestore';
-import { auth, googleProvider, db } from './lib/firebase';
+  auth,
+  googleProvider,
+  db,
+  apiLogin,
+  apiRegister,
+  apiAdminCreate,
+  apiLogout,
+  apiMe,
+  type User as FirebaseUser,
+} from './lib/store';
 
 import {
   Contact,
@@ -271,17 +276,23 @@ export default function App() {
     }
   }, [activeView, currentProfile]);
 
-  // --- USER PROFILE & FIRESTORE LISTENERS ---
-  // Always guarantee that Master Admin profile exists in Firestore and state
+  // --- SESSION RESTORE (verify secure JWT cookie with backend on mount) ---
   useEffect(() => {
-    const ensureMaster = async () => {
+    const restore = async () => {
       try {
-        await setDoc(doc(db, 'user_profiles', 'master_admin_root'), MASTER_ADMIN_PROFILE, { merge: true });
-      } catch (err) {
-        console.warn('Auto ensure master admin profile:', err);
+        const profile = await apiMe();
+        if (profile) {
+          setCurrentProfile(profile);
+          localStorage.setItem(STORAGE_SESSION, JSON.stringify(profile));
+        }
+      } catch (err: any) {
+        if (err?.status === 401) {
+          localStorage.removeItem(STORAGE_SESSION);
+          setCurrentProfile(null);
+        }
       }
     };
-    ensureMaster();
+    restore();
   }, []);
 
   // Listen to all registered profiles to keep sync & validate credentials
@@ -1045,89 +1056,29 @@ export default function App() {
     }
   };
 
-  // --- AUTH HANDLERS (Simples por Usuário / Senha & Administrador) ---
+  // --- AUTH HANDLERS (Secure JWT login via backend) ---
   const handleDirectLogin = async (userOrEmail: string, pass: string): Promise<boolean | string> => {
     try {
       setAuthLoading(true);
-      const cleanInput = userOrEmail.trim().toLowerCase();
-
-      // Check Master Admin first
-      const storedMasterPass = localStorage.getItem(STORAGE_ADMIN_PASS) || DEFAULT_MASTER_PASSWORD;
-      if (
-        (cleanInput === 'admin' || cleanInput === 'administrador' || cleanInput === MASTER_ADMIN_EMAIL.toLowerCase()) &&
-        pass === storedMasterPass
-      ) {
-        const masterProfile: UserProfile = {
-          uid: 'master_admin_root',
-          email: MASTER_ADMIN_EMAIL,
-          username: 'admin',
-          displayName: 'Administrador Master',
-          role: 'admin',
-          status: 'approved',
-          createdAt: Date.now(),
-          approvedAt: Date.now(),
-          approvedBy: 'system',
-        };
-        setCurrentProfile(masterProfile);
-        localStorage.setItem(STORAGE_SESSION, JSON.stringify(masterProfile));
-        setContacts([]);
-        setGlobalContacts([]);
-        // Also persist/update in Firestore
-        try {
-          await setDoc(doc(db, 'user_profiles', 'master_admin_root'), masterProfile, { merge: true });
-        } catch (e) {
-          console.warn('Firestore write warning:', e);
-        }
-        setActiveView('admin');
-        addToast('Bem-vindo, Administrador! Painel liberado.', 'success');
-        return true;
-      }
-
-      // Check among registered user profiles
-      const user = allUsers.find(
-        (u) =>
-          (u.email && u.email.toLowerCase() === cleanInput) ||
-          (u.username && u.username.toLowerCase() === cleanInput) ||
-          (u.displayName && u.displayName.toLowerCase() === cleanInput)
-      );
-
-      if (!user) {
-        return 'Usuário não encontrado. Se ainda não possui cadastro, crie sua conta na aba "Cadastrar Atendente".';
-      }
-
-      // Check password if configured
-      if (user.password && user.password !== pass && pass !== storedMasterPass && pass !== 'admin123') {
-        return 'Senha incorreta. Tente novamente ou peça ao administrador para resetar sua senha.';
-      }
-
-      const isMasterUser =
-        (user.email && user.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase()) ||
-        user.username === 'admin' ||
-        user.uid === 'master_admin_root';
-
-      const finalProfile: UserProfile = isMasterUser
-        ? { ...user, role: 'admin', status: 'approved', displayName: user.displayName || 'Administrador Master' }
-        : user;
-
-      setCurrentProfile(finalProfile);
-      localStorage.setItem(STORAGE_SESSION, JSON.stringify(finalProfile));
+      const profile = await apiLogin(userOrEmail.trim(), pass);
+      setCurrentProfile(profile);
+      localStorage.setItem(STORAGE_SESSION, JSON.stringify(profile));
       setContacts([]);
       setGlobalContacts([]);
 
-      if (isMasterUser) {
+      if (profile.role === 'admin') {
         setActiveView('admin');
-        addToast('Acesso de Administrador Master liberado!', 'success');
-      } else if (user.status === 'pending') {
-        addToast('Login efetuado! Sua conta está aguardando liberação do Administrador.', 'info');
-      } else if (user.status === 'blocked') {
+        addToast('Bem-vindo, Administrador! Painel liberado.', 'success');
+      } else if (profile.status === 'pending') {
+        addToast('Login efetuado! Sua conta aguarda liberação do Administrador.', 'info');
+      } else if (profile.status === 'blocked') {
         addToast('Sua conta está bloqueada pelo Administrador.', 'error');
       } else {
-        addToast(`Bem-vindo de volta, ${user.displayName || user.email}!`, 'success');
+        addToast(`Bem-vindo de volta, ${profile.displayName || profile.email}!`, 'success');
       }
-
       return true;
     } catch (e: any) {
-      return 'Erro ao autenticar: ' + e.message;
+      return e?.message || 'Erro ao autenticar.';
     } finally {
       setAuthLoading(false);
     }
@@ -1140,55 +1091,20 @@ export default function App() {
   ): Promise<boolean | string> => {
     try {
       setAuthLoading(true);
-      const cleanEmail = emailOrUser.trim().toLowerCase();
-      const isMaster = cleanEmail === MASTER_ADMIN_EMAIL.toLowerCase();
-
-      // Check if user already exists
-      const exists = allUsers.some(
-        (u) =>
-          (u.email && u.email.toLowerCase() === cleanEmail) ||
-          (u.username && u.username.toLowerCase() === cleanEmail)
-      );
-      if (exists) {
-        return 'Já existe uma conta cadastrada com este email ou usuário. Faça login diretamente.';
-      }
-
-      const newUid = 'usr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      const newProf: UserProfile = {
-        uid: newUid,
-        email: cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@portal.com`,
-        username: cleanEmail,
-        displayName: name.trim(),
-        password: pass,
-        role: isMaster ? 'admin' : 'attendant',
-        status: 'approved',
-        createdAt: Date.now(),
-        approvedAt: Date.now(),
-        approvedBy: isMaster ? 'system_master' : 'auto_liberado',
-      };
-
-      // Save to Firestore
-      try {
-        await setDoc(doc(db, 'user_profiles', newUid), newProf);
-      } catch (err) {
-        console.warn('Firestore user save:', err);
-      }
-
-      // Update local state and session
-      setAllUsers((prev) => [...prev, newProf]);
-      setCurrentProfile(newProf);
-      localStorage.setItem(STORAGE_SESSION, JSON.stringify(newProf));
+      const profile = await apiRegister(name.trim(), emailOrUser.trim(), pass);
+      setCurrentProfile(profile);
+      localStorage.setItem(STORAGE_SESSION, JSON.stringify(profile));
       setContacts([]);
       setGlobalContacts([]);
-
-      if (isMaster) {
-        addToast('Conta de Administrador Master criada com sucesso!', 'success');
+      if (profile.role === 'admin') {
+        setActiveView('admin');
+        addToast('Conta de Administrador criada com sucesso!', 'success');
       } else {
-        addToast(`Bem-vindo, ${name}! Conta liberada para atendimento e importação de contatos.`, 'success');
+        addToast(`Bem-vindo, ${name}! Conta liberada para atendimento.`, 'success');
       }
       return true;
     } catch (e: any) {
-      return 'Erro ao cadastrar: ' + e.message;
+      return e?.message || 'Erro ao cadastrar.';
     } finally {
       setAuthLoading(false);
     }
@@ -1201,37 +1117,21 @@ export default function App() {
     role: 'admin' | 'supervisor' | 'attendant'
   ): Promise<boolean | string> => {
     try {
-      const cleanEmail = emailOrUser.trim().toLowerCase();
-      const newUid = 'usr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      const newProf: UserProfile = {
-        uid: newUid,
-        email: cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@portal.com`,
-        username: cleanEmail,
-        displayName: name.trim(),
-        password: pass,
-        role: role,
-        status: 'approved',
-        createdAt: Date.now(),
-        approvedAt: Date.now(),
-        approvedBy: currentProfile?.displayName || 'admin',
-      };
-
-      try {
-        await setDoc(doc(db, 'user_profiles', newUid), newProf);
-      } catch (err) {
-        console.warn('Firestore user save by admin:', err);
-      }
-
-      setAllUsers((prev) => [...prev, newProf]);
-      addToast(`Usuário ${name} (${role === 'supervisor' ? 'Supervisor' : role === 'admin' ? 'Admin' : 'Atendente'}) criado com sucesso!`, 'success');
+      const profile = await apiAdminCreate(name.trim(), emailOrUser.trim(), pass, role);
+      setAllUsers((prev) => [...prev.filter((u) => u.uid !== profile.uid), profile]);
+      addToast(
+        `Usuário ${name} (${role === 'supervisor' ? 'Supervisor' : role === 'admin' ? 'Admin' : 'Atendente'}) criado com sucesso!`,
+        'success'
+      );
       return true;
     } catch (e: any) {
-      return 'Erro ao criar usuário: ' + e.message;
+      return e?.message || 'Erro ao criar usuário.';
     }
   };
 
   const handleSignOut = async () => {
     try {
+      await apiLogout();
       localStorage.removeItem(STORAGE_SESSION);
       setCurrentProfile(null);
       setContacts([]);
