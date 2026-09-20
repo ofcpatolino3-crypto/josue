@@ -113,33 +113,33 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative">
+      <div className="bg-[#111827] border border-[#25334A] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative">
         {/* Header */}
-        <div className="bg-[#101B2D] p-5 border-b border-[#2B3D63] flex items-center justify-between relative">
+        <div className="bg-[#0A0E17] p-5 border-b border-[#25334A] flex items-center justify-between relative">
           <div className="flex items-center gap-3">
-            <div className="p-1 bg-[#172644] border border-[#2B3D63] rounded-xl shadow-md shrink-0 flex items-center justify-center">
+            <div className="p-1 bg-[#111827] border border-[#25334A] rounded-xl shadow-md shrink-0 flex items-center justify-center">
               <PortalLogo size={36} />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#C9A227] uppercase tracking-wider mb-0.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider mb-0.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 Portal Concursos e OAB
               </div>
-              <h3 className="text-lg font-bold font-sans text-[#EDE6D6]">
+              <h3 className="text-lg font-bold font-sans text-[#F8FAFC]">
                 {tab === 'login' ? 'Acesso ao Sistema' : 'Novo Cadastro de Atendente'}
               </h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-[#8C98B4] hover:text-[#EDE6D6] p-1.5 rounded-lg hover:bg-[#172644] transition-colors cursor-pointer"
+            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg hover:bg-[#111827] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selector */}
-        <div className="grid grid-cols-2 bg-[#101B2D]/60 p-1.5 border-b border-[#2B3D63] text-xs font-semibold">
+        <div className="grid grid-cols-2 bg-[#0A0E17]/60 p-1.5 border-b border-[#25334A] text-xs font-semibold">
           <button
             type="button"
             onClick={() => {
@@ -149,8 +149,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             }}
             className={`py-2 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
               tab === 'login'
-                ? 'bg-[#C9A227] text-[#101B2D] font-bold shadow-md'
-                : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                ? 'bg-[#D4AF37] text-[#0A0E17] font-bold shadow-md'
+                : 'text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
             <LogIn className="w-3.5 h-3.5" />
@@ -166,8 +166,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             }}
             className={`py-2 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
               tab === 'register'
-                ? 'bg-[#C9A227] text-[#101B2D] font-bold shadow-md'
-                : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                ? 'bg-[#D4AF37] text-[#0A0E17] font-bold shadow-md'
+                : 'text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -178,14 +178,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         {/* Form Body */}
         <div className="p-6 space-y-4">
           {errorMsg && (
-            <div className="bg-[#B14432]/20 border border-[#B14432] text-[#EDE6D6] p-3 rounded-xl flex items-center gap-2.5 text-xs">
+            <div className="bg-[#B14432]/20 border border-[#B14432] text-[#F8FAFC] p-3 rounded-xl flex items-center gap-2.5 text-xs">
               <AlertCircle className="w-4 h-4 text-[#B14432] shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="bg-[#6E8F5C]/20 border border-[#6E8F5C] text-[#EDE6D6] p-3 rounded-xl flex items-center gap-2.5 text-xs">
+            <div className="bg-[#6E8F5C]/20 border border-[#6E8F5C] text-[#F8FAFC] p-3 rounded-xl flex items-center gap-2.5 text-xs">
               <CheckCircle2 className="w-4 h-4 text-[#6E8F5C] shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -195,40 +195,40 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {tab === 'login' && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                <label className="text-xs font-semibold text-[#94A3B8] block mb-1">
                   Usuário ou E-mail
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-[#8C98B4] absolute left-3 top-3" />
+                  <User className="w-4 h-4 text-[#94A3B8] absolute left-3 top-3" />
                   <input
                     type="text"
                     required
                     value={emailOrUser}
                     onChange={(e) => setEmailOrUser(e.target.value)}
                     placeholder="Seu usuário ou e-mail cadastrado"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                <label className="text-xs font-semibold text-[#94A3B8] block mb-1">
                   Senha de Acesso
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#8C98B4] absolute left-3 top-3" />
+                  <Lock className="w-4 h-4 text-[#94A3B8] absolute left-3 top-3" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Sua senha"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-[#8C98B4] hover:text-[#EDE6D6]"
+                    className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#F8FAFC]"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -238,19 +238,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold py-2.5 rounded-lg text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
+                className="w-full bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold py-2.5 rounded-lg text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 <LogIn className="w-4 h-4" />
                 {loading ? 'Entrando...' : 'Entrar no Sistema'}
               </button>
 
               <div className="text-center pt-2 flex flex-col items-center gap-1.5">
-                <span className="text-xs text-[#8C98B4]">
+                <span className="text-xs text-[#94A3B8]">
                   Novo na equipe?{' '}
                   <button
                     type="button"
                     onClick={() => setTab('register')}
-                    className="text-[#C9A227] hover:underline font-semibold cursor-pointer"
+                    className="text-[#D4AF37] hover:underline font-semibold cursor-pointer"
                   >
                     Cadastre-se aqui
                   </button>
@@ -263,57 +263,57 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {tab === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div>
-                <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                <label className="text-xs font-semibold text-[#94A3B8] block mb-1">
                   Seu Nome Completo
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-[#8C98B4] absolute left-3 top-3" />
+                  <User className="w-4 h-4 text-[#94A3B8] absolute left-3 top-3" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ex: Maria Atendente"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                <label className="text-xs font-semibold text-[#94A3B8] block mb-1">
                   Usuário ou E-mail para Login
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#8C98B4] absolute left-3 top-3" />
+                  <Mail className="w-4 h-4 text-[#94A3B8] absolute left-3 top-3" />
                   <input
                     type="text"
                     required
                     value={emailOrUser}
                     onChange={(e) => setEmailOrUser(e.target.value)}
                     placeholder="Ex: maria@portal.com ou maria.vendas"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#8C98B4] block mb-1">
+                <label className="text-xs font-semibold text-[#94A3B8] block mb-1">
                   Crie uma Senha
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#8C98B4] absolute left-3 top-3" />
+                  <Lock className="w-4 h-4 text-[#94A3B8] absolute left-3 top-3" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Mínimo 4 caracteres"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-[#8C98B4] hover:text-[#EDE6D6]"
+                    className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#F8FAFC]"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -330,12 +330,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </button>
 
               <div className="text-center pt-1">
-                <span className="text-xs text-[#8C98B4]">
+                <span className="text-xs text-[#94A3B8]">
                   Já possui conta?{' '}
                   <button
                     type="button"
                     onClick={() => setTab('login')}
-                    className="text-[#C9A227] hover:underline font-semibold cursor-pointer"
+                    className="text-[#D4AF37] hover:underline font-semibold cursor-pointer"
                   >
                     Faça login
                   </button>

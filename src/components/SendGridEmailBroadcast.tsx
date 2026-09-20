@@ -732,7 +732,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* SendGrid Status & Info Banner */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-lg">
+      <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30">
@@ -740,7 +740,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold font-serif text-[#EDE6D6]">
+                <h3 className="text-lg font-bold font-serif text-[#F8FAFC]">
                   Disparo de E-mails em Massa (SendGrid API)
                 </h3>
                 {sendGridStatus.loading ? (
@@ -757,7 +757,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#8C98B4] mt-1">
+              <p className="text-xs text-[#94A3B8] mt-1">
                 Dispare 100+ e-mails personalizados de uma só vez direto para a caixa de entrada dos alunos com alta taxa de entrega.
               </p>
             </div>
@@ -776,7 +776,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             <button
               type="button"
               onClick={() => setShowConfigGuide(!showConfigGuide)}
-              className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#C9A227] px-3 py-2 rounded-lg border border-[#2B3D63] flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="text-xs bg-[#0A0E17] hover:bg-[#1E293B] text-[#D4AF37] px-3 py-2 rounded-lg border border-[#25334A] flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Key className="w-3.5 h-3.5" />
               <span>{showConfigGuide ? 'Ocultar Instruções' : 'Como Configurar a Chave'}</span>
@@ -785,7 +785,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             <button
               type="button"
               onClick={checkStatus}
-              className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#8C98B4] hover:text-[#EDE6D6] p-2 rounded-lg border border-[#2B3D63] transition-colors cursor-pointer"
+              className="text-xs bg-[#0A0E17] hover:bg-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] p-2 rounded-lg border border-[#25334A] transition-colors cursor-pointer"
               title="Recarregar status da conexão"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${sendGridStatus.loading ? 'animate-spin' : ''}`} />
@@ -795,20 +795,20 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
         {/* Configuration Guide & Direct Key Input Dropdown */}
         {showConfigGuide && (
-          <div className="mt-4 pt-4 border-t border-[#2B3D63] bg-[#101B2D] p-4 rounded-lg text-xs space-y-4">
+          <div className="mt-4 pt-4 border-t border-[#25334A] bg-[#0A0E17] p-4 rounded-lg text-xs space-y-4">
             {/* Direct Key Activation Input Box */}
-            <div className="bg-[#172644] p-3.5 rounded-lg border border-[#C9A227]/40 space-y-3">
-              <div className="flex items-center gap-2 text-[#C9A227] font-bold">
+            <div className="bg-[#111827] p-3.5 rounded-lg border border-[#D4AF37]/40 space-y-3">
+              <div className="flex items-center gap-2 text-[#D4AF37] font-bold">
                 <Key className="w-4 h-4" />
                 <span>Colar Chave do SendGrid Diretamente no Painel (Ativação Instantânea)</span>
               </div>
-              <p className="text-[#8C98B4] text-[11px]">
+              <p className="text-[#94A3B8] text-[11px]">
                 Você pode colar sua chave diretamente aqui para ativar na hora sem precisar de variáveis de ambiente.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#EDE6D6] font-semibold mb-1">
+                  <label className="block text-[#F8FAFC] font-semibold mb-1">
                     Chave de API (Começa com SG.)
                   </label>
                   <input
@@ -816,12 +816,12 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                     value={directApiKey}
                     onChange={(e) => setDirectApiKey(e.target.value)}
                     placeholder="SG.xxxxxxxxxxxxxxxxxxxxxxxx..."
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] font-mono focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded px-3 py-2 text-[#F8FAFC] font-mono focus:outline-none focus:border-[#D4AF37]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#EDE6D6] font-semibold mb-1">
+                  <label className="block text-[#F8FAFC] font-semibold mb-1">
                     E-mail do Remetente (Verificado no SendGrid)
                   </label>
                   <input
@@ -829,13 +829,13 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                     value={directFromEmail}
                     onChange={(e) => setDirectFromEmail(e.target.value)}
                     placeholder="ofcpatolino3@gmail.com"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded px-3 py-2 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                   />
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-1">
-                <span className="text-[10px] text-[#8C98B4]">
+                <span className="text-[10px] text-[#94A3B8]">
                   🔒 A chave fica salva de forma segura na sua sessão local.
                 </span>
                 <button
@@ -849,7 +849,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[#EDE6D6] font-bold pt-1">
+            <div className="flex items-center gap-2 text-[#F8FAFC] font-bold pt-1">
               <ShieldCheck className="w-4 h-4 text-blue-400" />
               <span>Como pegar sua chave no SendGrid:</span>
             </div>
@@ -873,11 +873,11 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
         {/* Left Column: Settings, Filter & Message Builder (7 Cols) */}
         <div className="lg:col-span-7 space-y-5">
           {/* 1. Contact Selection & Filters with Anti-Duplication & Email Contact Status */}
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md space-y-4">
+          <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-md space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#C9A227]" />
-                <h4 className="font-bold text-[#EDE6D6] text-sm">
+                <Users className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="font-bold text-[#F8FAFC] text-sm">
                   1. Destinatários Selecionados ({targetContacts.length})
                 </h4>
               </div>
@@ -887,7 +887,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <button
                   type="button"
                   onClick={handleSelectFirst100}
-                  className="bg-[#101B2D] hover:bg-[#1F3057] text-[#C9A227] font-semibold text-xs px-2.5 py-1 rounded border border-[#2B3D63] transition-colors cursor-pointer"
+                  className="bg-[#0A0E17] hover:bg-[#1E293B] text-[#D4AF37] font-semibold text-xs px-2.5 py-1 rounded border border-[#25334A] transition-colors cursor-pointer"
                   title="Seleciona os primeiros 100 contatos com e-mail válido"
                 >
                   ⚡ 100 Primeiros
@@ -895,7 +895,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <button
                   type="button"
                   onClick={handleSelectVirgins}
-                  className="bg-[#101B2D] hover:bg-[#1F3057] text-emerald-400 font-semibold text-xs px-2.5 py-1 rounded border border-[#2B3D63] transition-colors cursor-pointer"
+                  className="bg-[#0A0E17] hover:bg-[#1E293B] text-emerald-400 font-semibold text-xs px-2.5 py-1 rounded border border-[#25334A] transition-colors cursor-pointer"
                   title="Seleciona apenas alunos que nunca receberam nenhum e-mail"
                 >
                   🆕 Apenas Virgens
@@ -903,7 +903,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <button
                   type="button"
                   onClick={handleDeselectAlreadyContacted}
-                  className="bg-[#101B2D] hover:bg-[#1F3057] text-blue-300 font-semibold text-xs px-2.5 py-1 rounded border border-[#2B3D63] transition-colors cursor-pointer"
+                  className="bg-[#0A0E17] hover:bg-[#1E293B] text-blue-300 font-semibold text-xs px-2.5 py-1 rounded border border-[#25334A] transition-colors cursor-pointer"
                   title="Remove da seleção quem já recebeu e-mail anteriormente"
                 >
                   🧹 Desmarcar Contatados
@@ -911,7 +911,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <button
                   type="button"
                   onClick={() => handleSelectAll(selectedIds.length !== contactsWithEmail.length)}
-                  className="text-xs text-[#8C98B4] hover:text-[#EDE6D6] px-2 py-1 rounded hover:bg-[#101B2D] transition-colors cursor-pointer"
+                  className="text-xs text-[#94A3B8] hover:text-[#F8FAFC] px-2 py-1 rounded hover:bg-[#0A0E17] transition-colors cursor-pointer"
                 >
                   {selectedIds.length === contactsWithEmail.length && selectedIds.length > 0
                     ? 'Desmarcar Todos'
@@ -944,7 +944,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                         {avoidDuplicates ? '✓ ATIVADO (1 envio por e-mail)' : 'DESATIVADO'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#8C98B4] mt-0.5">
+                    <p className="text-[11px] text-[#94A3B8] mt-0.5">
                       {avoidDuplicates
                         ? 'Garante que o mesmo endereço de e-mail não receba mensagens repetidas no mesmo disparo.'
                         : 'Permite múltiplos envios se o mesmo e-mail estiver cadastrado em contatos diferentes.'}
@@ -967,8 +967,8 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
               {/* Duplicates Notification Badge if detected */}
               {duplicateStats.duplicateEntriesCount > 0 && (
-                <div className="mt-2 pt-2 border-t border-[#2B3D63]/50 flex items-center justify-between text-[11px]">
-                  <span className="text-[#8C98B4]">
+                <div className="mt-2 pt-2 border-t border-[#25334A]/50 flex items-center justify-between text-[11px]">
+                  <span className="text-[#94A3B8]">
                     Identificados <strong>{duplicateStats.duplicateEntriesCount}</strong> e-mails duplicados na base selecionada.
                   </span>
                   <span className={`font-semibold ${avoidDuplicates ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -982,7 +982,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
             {/* Email Status Filter Tabs */}
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4]">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8]">
                 Filtrar por Histórico de Contato via E-mail:
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
@@ -991,8 +991,8 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   onClick={() => setEmailStatusFilter('all')}
                   className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
                     emailStatusFilter === 'all'
-                      ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] font-bold shadow-sm'
-                      : 'bg-[#101B2D] text-[#EDE6D6] border-[#2B3D63] hover:border-[#C9A227]/60'
+                      ? 'bg-[#D4AF37] text-[#0A0E17] border-[#D4AF37] font-bold shadow-sm'
+                      : 'bg-[#0A0E17] text-[#F8FAFC] border-[#25334A] hover:border-[#D4AF37]/60'
                   }`}
                 >
                   Todos ({duplicateStats.totalRaw})
@@ -1004,7 +1004,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
                     emailStatusFilter === 'uncontacted'
                       ? 'bg-emerald-600 text-white border-emerald-500 font-bold shadow-sm'
-                      : 'bg-[#101B2D] text-emerald-300 border-[#2B3D63] hover:border-emerald-500/60'
+                      : 'bg-[#0A0E17] text-emerald-300 border-[#25334A] hover:border-emerald-500/60'
                   }`}
                 >
                   🆕 Nunca Contatados ({duplicateStats.uncontactedCount})
@@ -1016,7 +1016,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
                     emailStatusFilter === 'contacted'
                       ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-sm'
-                      : 'bg-[#101B2D] text-blue-300 border-[#2B3D63] hover:border-blue-500/60'
+                      : 'bg-[#0A0E17] text-blue-300 border-[#25334A] hover:border-blue-500/60'
                   }`}
                 >
                   ✉️ Já Contatados ({duplicateStats.contactedCount})
@@ -1028,7 +1028,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   className={`px-2.5 py-1.5 rounded-lg border text-center font-medium transition-all cursor-pointer ${
                     emailStatusFilter === 'uncontacted_today'
                       ? 'bg-purple-600 text-white border-purple-500 font-bold shadow-sm'
-                      : 'bg-[#101B2D] text-purple-300 border-[#2B3D63] hover:border-purple-500/60'
+                      : 'bg-[#0A0E17] text-purple-300 border-[#25334A] hover:border-purple-500/60'
                   }`}
                 >
                   ⏳ Não Hoje
@@ -1041,7 +1041,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               <select
                 value={courseFilter}
                 onChange={(e) => setCourseFilter(e.target.value)}
-                className="bg-[#101B2D] border border-[#2B3D63] rounded-lg px-2.5 py-1.5 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                className="bg-[#0A0E17] border border-[#25334A] rounded-lg px-2.5 py-1.5 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
               >
                 <option value="">Todos os Cursos ({uniqueCourses.length})</option>
                 {uniqueCourses.map((c) => (
@@ -1054,7 +1054,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               <select
                 value={tempFilter}
                 onChange={(e) => setTempFilter(e.target.value)}
-                className="bg-[#101B2D] border border-[#2B3D63] rounded-lg px-2.5 py-1.5 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                className="bg-[#0A0E17] border border-[#25334A] rounded-lg px-2.5 py-1.5 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
               >
                 <option value="">Todas Temperaturas</option>
                 <option value="Quente">🔥 Quente</option>
@@ -1069,15 +1069,15 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 placeholder="Buscar por nome ou e-mail..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="bg-[#101B2D] border border-[#2B3D63] rounded-lg px-2.5 py-1.5 text-[#EDE6D6] placeholder-[#8C98B4] focus:outline-none focus:border-[#C9A227]"
+                className="bg-[#0A0E17] border border-[#25334A] rounded-lg px-2.5 py-1.5 text-[#F8FAFC] placeholder-[#94A3B8] focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
 
             {/* Contact count summary & Drawer Trigger */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs bg-[#101B2D] px-3.5 py-2.5 rounded-lg border border-[#2B3D63]/70">
-              <div className="flex items-center gap-2 text-[#8C98B4] flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs bg-[#0A0E17] px-3.5 py-2.5 rounded-lg border border-[#25334A]/70">
+              <div className="flex items-center gap-2 text-[#94A3B8] flex-wrap">
                 <span>Total pós-filtro:</span>
-                <strong className="text-[#EDE6D6]">{contactsWithEmail.length} alunos</strong>
+                <strong className="text-[#F8FAFC]">{contactsWithEmail.length} alunos</strong>
                 {avoidDuplicates && duplicateStats.duplicateEntriesCount > 0 && (
                   <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/40">
                     ({duplicateStats.duplicateEntriesCount} duplicatas excluídas)
@@ -1089,9 +1089,9 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <button
                   type="button"
                   onClick={() => setShowRecipientDrawer((prev) => !prev)}
-                  className="text-xs bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] px-2.5 py-1 rounded border border-[#2B3D63] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="text-xs bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#D4AF37] px-2.5 py-1 rounded border border-[#25334A] flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Eye className="w-3.5 h-3.5 text-[#C9A227]" />
+                  <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span>{showRecipientDrawer ? 'Ocultar Detalhes' : 'Inspecionar Lista'}</span>
                   {showRecipientDrawer ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                 </button>
@@ -1104,18 +1104,18 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
             {/* Collapsible Recipient Inspector Drawer */}
             {showRecipientDrawer && (
-              <div className="bg-[#101B2D] border border-[#2B3D63] rounded-lg p-3 space-y-2 animate-fadeIn max-h-72 overflow-y-auto">
-                <div className="flex items-center justify-between pb-2 border-b border-[#2B3D63] text-xs">
-                  <span className="font-semibold text-[#EDE6D6] flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-[#C9A227]" />
+              <div className="bg-[#0A0E17] border border-[#25334A] rounded-lg p-3 space-y-2 animate-fadeIn max-h-72 overflow-y-auto">
+                <div className="flex items-center justify-between pb-2 border-b border-[#25334A] text-xs">
+                  <span className="font-semibold text-[#F8FAFC] flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#D4AF37]" />
                     Lista Individual de Destinatários ({contactsWithEmail.length})
                   </span>
-                  <span className="text-[11px] text-[#8C98B4]">
+                  <span className="text-[11px] text-[#94A3B8]">
                     Clique na caixa para incluir/remover do envio
                   </span>
                 </div>
 
-                <div className="divide-y divide-[#2B3D63]/50 text-xs">
+                <div className="divide-y divide-[#25334A]/50 text-xs">
                   {contactsWithEmail.map((c) => {
                     const isSelected = selectedIds.length === 0 || selectedIds.includes(c.id);
                     const emailOccurrences = duplicateStats.emailCounts.get((c.email || '').trim().toLowerCase()) || 1;
@@ -1126,7 +1126,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                         key={c.id}
                         onClick={() => handleToggleContact(c.id)}
                         className={`py-2 px-2 rounded-md flex items-center justify-between gap-3 cursor-pointer transition-colors ${
-                          isSelected ? 'hover:bg-[#172644]' : 'opacity-40 hover:opacity-75 bg-[#0B141A]/50'
+                          isSelected ? 'hover:bg-[#111827]' : 'opacity-40 hover:opacity-75 bg-[#0B141A]/50'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
@@ -1134,20 +1134,20 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}} // Handled by div click
-                            className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-0 cursor-pointer"
+                            className="rounded border-[#25334A] text-[#D4AF37] focus:ring-0 cursor-pointer"
                           />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-[#EDE6D6] truncate">
+                              <span className="font-semibold text-[#F8FAFC] truncate">
                                 {c.nome || 'Sem Nome'}
                               </span>
                               {c.curso && (
-                                <span className="text-[10px] text-[#C9A227] truncate max-w-[140px]">
+                                <span className="text-[10px] text-[#D4AF37] truncate max-w-[140px]">
                                   {c.curso}
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-[#8C98B4] font-mono truncate flex items-center gap-1.5 mt-0.5">
+                            <div className="text-[11px] text-[#94A3B8] font-mono truncate flex items-center gap-1.5 mt-0.5">
                               <span>{c.email}</span>
                               {emailOccurrences > 1 && (
                                 <span className="text-[9px] bg-amber-950 text-amber-400 px-1 rounded border border-amber-800/40">
@@ -1184,11 +1184,11 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
           </div>
 
           {/* 2. Email Subject & Body Builder */}
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md space-y-4">
+          <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-md space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#C9A227]" />
-                <h4 className="font-bold text-[#EDE6D6] text-sm">
+                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="font-bold text-[#F8FAFC] text-sm">
                   2. Redação do E-mail Personalizado
                 </h4>
               </div>
@@ -1205,7 +1205,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                     }
                   }}
                   defaultValue=""
-                  className="bg-[#101B2D] border border-[#2B3D63] rounded text-xs px-2 py-1 text-[#C9A227] focus:outline-none"
+                  className="bg-[#0A0E17] border border-[#25334A] rounded text-xs px-2 py-1 text-[#D4AF37] focus:outline-none"
                 >
                   <option value="" disabled>
                     📖 Carregar Modelo do CRM...
@@ -1220,8 +1220,8 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             </div>
 
             {/* Variable Tags Quick Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-[#101B2D] p-2.5 rounded-lg border border-[#2B3D63]/70">
-              <span className="text-[11px] font-semibold text-[#8C98B4] mr-1">Inserir Tag:</span>
+            <div className="flex flex-wrap items-center gap-1.5 bg-[#0A0E17] p-2.5 rounded-lg border border-[#25334A]/70">
+              <span className="text-[11px] font-semibold text-[#94A3B8] mr-1">Inserir Tag:</span>
               {[
                 { tag: 'primeiro_nome', label: '{primeiro_nome}' },
                 { tag: 'nome', label: '{nome}' },
@@ -1233,7 +1233,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   key={v.tag}
                   type="button"
                   onClick={() => insertVariable(v.tag, 'body')}
-                  className="text-[11px] bg-[#1F3057] hover:bg-[#C9A227] hover:text-[#101B2D] text-[#EDE6D6] px-2 py-0.5 rounded font-mono transition-colors cursor-pointer border border-[#2B3D63]"
+                  className="text-[11px] bg-[#1E293B] hover:bg-[#D4AF37] hover:text-[#0A0E17] text-[#F8FAFC] px-2 py-0.5 rounded font-mono transition-colors cursor-pointer border border-[#25334A]"
                 >
                   {v.label}
                 </button>
@@ -1243,17 +1243,17 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             {/* Sender details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block text-[#8C98B4] mb-1 font-semibold">Nome do Remetente</label>
+                <label className="block text-[#94A3B8] mb-1 font-semibold">Nome do Remetente</label>
                 <input
                   type="text"
                   value={fromName}
                   onChange={(e) => setFromName(e.target.value)}
                   placeholder="Portal Concursos"
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
               <div>
-                <label className="block text-[#8C98B4] mb-1 font-semibold">
+                <label className="block text-[#94A3B8] mb-1 font-semibold">
                   E-mail Remetente (Verificado no SendGrid)
                 </label>
                 <input
@@ -1261,48 +1261,48 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
                   placeholder="contato@portalconcurso.com.br"
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
             </div>
 
             {/* Subject */}
             <div>
-              <label className="block text-xs font-semibold text-[#8C98B4] mb-1">
+              <label className="block text-xs font-semibold text-[#94A3B8] mb-1">
                 Assunto do E-mail
               </label>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-sm text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-sm text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
 
             {/* Body */}
             <div>
-              <label className="block text-xs font-semibold text-[#8C98B4] mb-1">
+              <label className="block text-xs font-semibold text-[#94A3B8] mb-1">
                 Mensagem do E-mail
               </label>
               <textarea
                 rows={7}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg p-3 text-xs sm:text-sm text-[#EDE6D6] leading-relaxed focus:outline-none focus:border-[#C9A227] font-sans"
+                className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-3 text-xs sm:text-sm text-[#F8FAFC] leading-relaxed focus:outline-none focus:border-[#D4AF37] font-sans"
               />
             </div>
 
             {/* Call to Action & WhatsApp Button Options */}
-            <div className="bg-[#101B2D] p-4 rounded-lg border border-[#2B3D63]/70 space-y-4">
+            <div className="bg-[#0A0E17] p-4 rounded-lg border border-[#25334A]/70 space-y-4">
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#EDE6D6]">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#F8FAFC]">
                   <input
                     type="checkbox"
                     checked={includeCta}
                     onChange={(e) => setIncludeCta(e.target.checked)}
-                    className="rounded border-[#2B3D63] text-[#10B981] focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded border-[#25334A] text-[#10B981] focus:ring-0 w-4 h-4 cursor-pointer"
                   />
-                  <span className="text-sm font-bold text-[#EDE6D6]">
+                  <span className="text-sm font-bold text-[#F8FAFC]">
                     Incluir Botão de Ação / WhatsApp no E-mail
                   </span>
                 </label>
@@ -1311,7 +1311,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               {includeCta && (
                 <div className="space-y-3.5 pt-1">
                   {/* Mode Selector */}
-                  <div className="grid grid-cols-2 gap-2 bg-[#172644] p-1 rounded-lg border border-[#2B3D63]">
+                  <div className="grid grid-cols-2 gap-2 bg-[#111827] p-1 rounded-lg border border-[#25334A]">
                     <button
                       type="button"
                       onClick={() => {
@@ -1321,7 +1321,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                       className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-bold transition-all cursor-pointer ${
                         ctaMode === 'whatsapp'
                           ? 'bg-[#25D366] text-slate-900 shadow'
-                          : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                          : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                       }`}
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
@@ -1337,7 +1337,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                       className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-bold transition-all cursor-pointer ${
                         ctaMode === 'custom_link'
                           ? 'bg-blue-600 text-white shadow'
-                          : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                          : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                       }`}
                     >
                       <Link2 className="w-3.5 h-3.5" />
@@ -1347,10 +1347,10 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
                   {ctaMode === 'whatsapp' ? (
                     /* WhatsApp Specific Inputs */
-                    <div className="space-y-3 bg-[#172644]/80 p-3.5 rounded-lg border border-[#25D366]/30">
+                    <div className="space-y-3 bg-[#111827]/80 p-3.5 rounded-lg border border-[#25D366]/30">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
-                          <label className="block text-[#EDE6D6] mb-1 font-semibold flex items-center gap-1">
+                          <label className="block text-[#F8FAFC] mb-1 font-semibold flex items-center gap-1">
                             <Phone className="w-3.5 h-3.5 text-[#25D366]" />
                             Seu Número de WhatsApp (com DDD)
                           </label>
@@ -1359,15 +1359,15 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                             value={waPhoneNumber}
                             onChange={(e) => setWaPhoneNumber(e.target.value)}
                             placeholder="Ex: 5511999998888 ou 11987654321"
-                            className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] font-mono focus:outline-none focus:border-[#25D366]"
+                            className="w-full bg-[#0A0E17] border border-[#25334A] rounded px-3 py-2 text-[#F8FAFC] font-mono focus:outline-none focus:border-[#25D366]"
                           />
-                          <span className="text-[10px] text-[#8C98B4] mt-0.5 block">
+                          <span className="text-[10px] text-[#94A3B8] mt-0.5 block">
                             Pode digitar com DDD (ex: 11 98765-4321). O sistema ajusta o link automaticamente.
                           </span>
                         </div>
 
                         <div>
-                          <label className="block text-[#EDE6D6] mb-1 font-semibold">
+                          <label className="block text-[#F8FAFC] mb-1 font-semibold">
                             Texto que vai escrito no Botão
                           </label>
                           <input
@@ -1375,13 +1375,13 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                             value={ctaText}
                             onChange={(e) => setCtaText(e.target.value)}
                             placeholder="🟢 Falar no WhatsApp com o Consultor"
-                            className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#25D366]"
+                            className="w-full bg-[#0A0E17] border border-[#25334A] rounded px-3 py-2 text-[#F8FAFC] focus:outline-none focus:border-[#25D366]"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-xs text-[#EDE6D6] mb-1 font-semibold">
+                        <label className="block text-xs text-[#F8FAFC] mb-1 font-semibold">
                           Mensagem Pré-pronta que o aluno vai enviar quando clicar:
                         </label>
                         <input
@@ -1389,9 +1389,9 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                           value={waMessage}
                           onChange={(e) => setWaMessage(e.target.value)}
                           placeholder="Olá! Vi o e-mail do Portal Concursos sobre {curso} e quero tirar dúvidas."
-                          className="w-full bg-[#101B2D] border border-[#2B3D63] rounded px-3 py-2 text-xs text-[#EDE6D6] focus:outline-none focus:border-[#25D366]"
+                          className="w-full bg-[#0A0E17] border border-[#25334A] rounded px-3 py-2 text-xs text-[#F8FAFC] focus:outline-none focus:border-[#25D366]"
                         />
-                        <span className="text-[10px] text-[#8C98B4] mt-1 block">
+                        <span className="text-[10px] text-[#94A3B8] mt-1 block">
                           Quando o aluno apertar o botão no e-mail, essa mensagem já vai digitada no WhatsApp dele!
                         </span>
                       </div>
@@ -1400,23 +1400,23 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                     /* Standard URL Input */
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div>
-                        <label className="block text-[#8C98B4] mb-1 font-semibold">Texto do Botão</label>
+                        <label className="block text-[#94A3B8] mb-1 font-semibold">Texto do Botão</label>
                         <input
                           type="text"
                           value={ctaText}
                           onChange={(e) => setCtaText(e.target.value)}
                           placeholder="Garantir Minha Vaga com Desconto"
-                          className="w-full bg-[#172644] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                          className="w-full bg-[#111827] border border-[#25334A] rounded px-3 py-2 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                         />
                       </div>
                       <div>
-                        <label className="block text-[#8C98B4] mb-1 font-semibold">Link de Destino</label>
+                        <label className="block text-[#94A3B8] mb-1 font-semibold">Link de Destino</label>
                         <input
                           type="url"
                           value={ctaLink}
                           onChange={(e) => setCtaLink(e.target.value)}
                           placeholder="https://portalconcurso.com.br"
-                          className="w-full bg-[#172644] border border-[#2B3D63] rounded px-3 py-2 text-[#EDE6D6] focus:outline-none focus:border-[#C9A227]"
+                          className="w-full bg-[#111827] border border-[#25334A] rounded px-3 py-2 text-[#F8FAFC] focus:outline-none focus:border-[#D4AF37]"
                         />
                       </div>
                     </div>
@@ -1427,14 +1427,14 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
           </div>
 
           {/* 3. Action Dispatch Box */}
-          <div className="bg-gradient-to-br from-[#172644] to-[#101B2D] border-2 border-[#10B981]/50 rounded-xl p-5 shadow-xl space-y-4">
+          <div className="bg-gradient-to-br from-[#111827] to-[#0A0E17] border-2 border-[#10B981]/50 rounded-xl p-5 shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h4 className="text-base font-bold text-white flex items-center gap-2">
                   <Send className="w-4 h-4 text-[#34D399]" />
                   Disparar para {targetContacts.length} Alunos com 1 Clique
                 </h4>
-                <p className="text-xs text-[#8C98B4] mt-0.5">
+                <p className="text-xs text-[#94A3B8] mt-0.5">
                   Cada aluno receberá um e-mail individual com seu nome e curso preenchidos.
                 </p>
               </div>
@@ -1443,7 +1443,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 <button
                   type="button"
                   onClick={handleCopyBccList}
-                  className="text-xs bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] px-3 py-2 rounded-lg border border-[#2B3D63] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="text-xs bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] px-3 py-2 rounded-lg border border-[#25334A] flex items-center gap-1.5 transition-colors cursor-pointer"
                   title="Copia os 100 e-mails para colar em CCO no Gmail/Outlook"
                 >
                   {copiedBcc ? (
@@ -1453,7 +1453,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-[#C9A227]" />
+                      <Copy className="w-3.5 h-3.5 text-[#D4AF37]" />
                       <span>Copiar em CCO</span>
                     </>
                   )}
@@ -1463,7 +1463,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
             {/* Live Progress Bar Section */}
             {isSending && sendProgress && (
-              <div className="bg-[#101B2D] border-2 border-emerald-500/50 rounded-xl p-4 space-y-3 animate-fadeIn shadow-lg">
+              <div className="bg-[#0A0E17] border-2 border-emerald-500/50 rounded-xl p-4 space-y-3 animate-fadeIn shadow-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-3 w-3">
@@ -1492,7 +1492,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 </div>
 
                 {/* Progress Bar Track */}
-                <div className="w-full bg-[#172644] h-3.5 rounded-full overflow-hidden border border-[#2B3D63] relative">
+                <div className="w-full bg-[#111827] h-3.5 rounded-full overflow-hidden border border-[#25334A] relative">
                   <div
                     className="bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 h-full rounded-full transition-all duration-300 relative overflow-hidden shadow"
                     style={{ width: `${Math.max(sendProgress.percent, 3)}%` }}
@@ -1503,10 +1503,10 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
                 {/* Current Contact and Live Stats */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs pt-1">
-                  <div className="text-[#8C98B4] truncate flex items-center gap-1.5">
+                  <div className="text-[#94A3B8] truncate flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                     <span>Enviando agora:</span>
-                    <strong className="text-[#EDE6D6] truncate">
+                    <strong className="text-[#F8FAFC] truncate">
                       {sendProgress.currentName} {sendProgress.currentEmail ? `(${sendProgress.currentEmail})` : ''}
                     </strong>
                   </div>
@@ -1555,13 +1555,13 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
             {/* Results Progress / Summary Box */}
             {dispatchResults && (
-              <div className="mt-4 pt-4 border-t border-[#2B3D63] space-y-3 bg-[#0B141A] p-4 rounded-lg">
+              <div className="mt-4 pt-4 border-t border-[#25334A] space-y-3 bg-[#0B141A] p-4 rounded-lg">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     Relatório do Último Disparo
                   </span>
-                  <span className="text-[#8C98B4]">Total: {dispatchResults.total} contatos</span>
+                  <span className="text-[#94A3B8]">Total: {dispatchResults.total} contatos</span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
@@ -1581,10 +1581,10 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
                 {/* Detailed mini logs */}
                 {dispatchResults.logs.length > 0 && (
-                  <div className="max-h-40 overflow-y-auto divide-y divide-[#2B3D63]/50 text-[11px]">
+                  <div className="max-h-40 overflow-y-auto divide-y divide-[#25334A]/50 text-[11px]">
                     {dispatchResults.logs.slice(0, 50).map((log, idx) => (
                       <div key={idx} className="py-1.5 flex items-center justify-between gap-2">
-                        <span className="text-[#EDE6D6] truncate font-medium">
+                        <span className="text-[#F8FAFC] truncate font-medium">
                           {log.nome} ({log.email})
                         </span>
                         <span
@@ -1607,15 +1607,15 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
         {/* Right Column: Live Email Inbox Preview (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md sticky top-6">
-            <div className="flex items-center justify-between mb-3 border-b border-[#2B3D63] pb-3">
+          <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-md sticky top-6">
+            <div className="flex items-center justify-between mb-3 border-b border-[#25334A] pb-3">
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#C9A227]" />
-                <h4 className="font-bold text-[#EDE6D6] text-sm">
+                <Mail className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="font-bold text-[#F8FAFC] text-sm">
                   Pré-visualização do Aluno
                 </h4>
               </div>
-              <span className="text-[10px] bg-[#101B2D] text-[#C9A227] px-2 py-0.5 rounded border border-[#2B3D63]">
+              <span className="text-[10px] bg-[#0A0E17] text-[#D4AF37] px-2 py-0.5 rounded border border-[#25334A]">
                 Simulação em Tempo Real
               </span>
             </div>
@@ -1647,15 +1647,15 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
               {/* Email Content Frame */}
               <div className="p-5 bg-slate-50 space-y-4 max-h-[480px] overflow-y-auto">
                 {/* Brand Banner with Official Logo */}
-                <div className="bg-slate-900 p-3.5 rounded-lg text-white flex items-center justify-between border-b-2 border-[#C9A227]">
+                <div className="bg-slate-900 p-3.5 rounded-lg text-white flex items-center justify-between border-b-2 border-[#D4AF37]">
                   <div className="flex items-center gap-2.5">
                     {/* Official Portal Icon */}
                     <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow bg-white flex items-center justify-center">
                       <img src="/logo.png" alt="Portal Concursos" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex flex-col leading-tight">
-                      <span className="text-sm font-black tracking-wider text-[#EDE6D6] uppercase">PORTAL</span>
-                      <span className="text-[8px] font-extrabold tracking-widest text-[#C9A227] uppercase">CONCURSOS E OAB</span>
+                      <span className="text-sm font-black tracking-wider text-[#F8FAFC] uppercase">PORTAL</span>
+                      <span className="text-[8px] font-extrabold tracking-widest text-[#D4AF37] uppercase">CONCURSOS E OAB</span>
                     </div>
                   </div>
                   <span className="text-[10px] font-medium text-slate-400">Comunicação Oficial</span>
@@ -1698,18 +1698,18 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
             </div>
 
             {/* Action Buttons for Preview */}
-            <div className="pt-3 border-t border-[#2B3D63] flex flex-col gap-2">
+            <div className="pt-3 border-t border-[#25334A] flex flex-col gap-2">
               <button
                 type="button"
                 onClick={() => setShowTestModal(true)}
-                className="w-full bg-[#101B2D] hover:bg-[#1A2D52] text-blue-400 hover:text-blue-300 font-bold text-xs py-2.5 px-4 rounded-lg border border-blue-500/40 flex items-center justify-center gap-2 transition-all cursor-pointer shadow"
+                className="w-full bg-[#0A0E17] hover:bg-[#1A2D52] text-blue-400 hover:text-blue-300 font-bold text-xs py-2.5 px-4 rounded-lg border border-blue-500/40 flex items-center justify-center gap-2 transition-all cursor-pointer shadow"
               >
                 <span>🧪</span>
                 <span>Enviar E-mail de Teste para o Meu Próprio Gmail</span>
               </button>
             </div>
 
-            <p className="text-[11px] text-[#8C98B4] mt-3 text-center">
+            <p className="text-[11px] text-[#94A3B8] mt-3 text-center">
               As tags como <code className="text-emerald-400 font-mono">&#123;primeiro_nome&#125;</code> são substituídas automaticamente pelos dados de cada aluno no momento exato do disparo.
             </p>
           </div>
@@ -1719,21 +1719,21 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
       {/* Test Email Modal Popup */}
       {showTestModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[#172644] border-2 border-blue-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#2B3D63] pb-3">
+          <div className="bg-[#111827] border-2 border-blue-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#25334A] pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
                   🧪
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#EDE6D6] text-base">Enviar E-mail de Teste</h3>
-                  <p className="text-[11px] text-[#8C98B4]">Receba na hora exatamente como o aluno verá</p>
+                  <h3 className="font-bold text-[#F8FAFC] text-base">Enviar E-mail de Teste</h3>
+                  <p className="text-[11px] text-[#94A3B8]">Receba na hora exatamente como o aluno verá</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowTestModal(false)}
-                className="text-[#8C98B4] hover:text-white p-1 rounded hover:bg-[#101B2D] text-lg font-bold"
+                className="text-[#94A3B8] hover:text-white p-1 rounded hover:bg-[#0A0E17] text-lg font-bold"
               >
                 ✕
               </button>
@@ -1741,7 +1741,7 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#EDE6D6] font-semibold mb-1">
+                <label className="block text-[#F8FAFC] font-semibold mb-1">
                   Seu E-mail de Destino (Onde você quer receber):
                 </label>
                 <input
@@ -1749,11 +1749,11 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                   value={testEmailAddress}
                   onChange={(e) => setTestEmailAddress(e.target.value)}
                   placeholder="exemplo@gmail.com"
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2.5 text-[#EDE6D6] focus:outline-none focus:border-blue-400 font-medium"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2.5 text-[#F8FAFC] focus:outline-none focus:border-blue-400 font-medium"
                 />
               </div>
 
-              <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63] space-y-1 text-[#CBD5E1] text-[11px]">
+              <div className="bg-[#0A0E17] p-3 rounded-lg border border-[#25334A] space-y-1 text-[#CBD5E1] text-[11px]">
                 <p>
                   <strong>Assunto:</strong> [TESTE] {subject || '(Sem assunto)'}
                 </p>
@@ -1762,16 +1762,16 @@ Clique no botão abaixo para falar diretamente com nosso suporte no WhatsApp e g
                 </p>
               </div>
 
-              <p className="text-[10px] text-[#8C98B4]">
+              <p className="text-[10px] text-[#94A3B8]">
                 💡 O e-mail de teste não afeta sua lista de contatos e gasta apenas 1 crédito de envio.
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2B3D63]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#25334A]">
               <button
                 type="button"
                 onClick={() => setShowTestModal(false)}
-                className="px-4 py-2 rounded-lg bg-[#101B2D] text-[#8C98B4] hover:text-white text-xs font-semibold"
+                className="px-4 py-2 rounded-lg bg-[#0A0E17] text-[#94A3B8] hover:text-white text-xs font-semibold"
               >
                 Cancelar
               </button>

@@ -144,21 +144,21 @@ export const AddContactForm: React.FC<AddContactProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-[#172644] border border-[#C9A227]/40 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      <div className="bg-[#111827] border border-[#D4AF37]/40 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#2B3D63] bg-[#121E33]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#25334A] bg-[#121E33]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#C9A227]/15 rounded-xl border border-[#C9A227]/30 text-[#C9A227]">
+            <div className="p-2 bg-[#D4AF37]/15 rounded-xl border border-[#D4AF37]/30 text-[#D4AF37]">
               <UserPlus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-[#EDE6D6] flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-[#F8FAFC] flex items-center gap-2">
                 <span>Adicionar Contato</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-[#C9A227]/20 text-[#C9A227] rounded-full border border-[#C9A227]/30">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full border border-[#D4AF37]/30">
                   Manual
                 </span>
               </h2>
-              <p className="text-xs text-[#8C98B4]">
+              <p className="text-xs text-[#94A3B8]">
                 Cadastre um lead individualmente ou cole múltiplos contatos de uma vez
               </p>
             </div>
@@ -166,21 +166,21 @@ export const AddContactForm: React.FC<AddContactProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#8C98B4] hover:text-[#EDE6D6] p-1.5 rounded-lg hover:bg-[#1F3057] transition-colors cursor-pointer"
+            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg hover:bg-[#1E293B] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center border-b border-[#2B3D63] bg-[#101B2D] px-5 pt-2 gap-2 text-xs">
+        <div className="flex items-center border-b border-[#25334A] bg-[#0A0E17] px-5 pt-2 gap-2 text-xs">
           <button
             type="button"
             onClick={() => setTab('single')}
             className={`flex items-center gap-1.5 px-4 py-2.5 font-bold border-b-2 transition-all cursor-pointer ${
               tab === 'single'
-                ? 'border-[#C9A227] text-[#C9A227] bg-[#172644]/60 rounded-t-lg'
-                : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+                ? 'border-[#D4AF37] text-[#D4AF37] bg-[#111827]/60 rounded-t-lg'
+                : 'border-transparent text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -191,8 +191,8 @@ export const AddContactForm: React.FC<AddContactProps> = ({
             onClick={() => setTab('batch')}
             className={`flex items-center gap-1.5 px-4 py-2.5 font-bold border-b-2 transition-all cursor-pointer ${
               tab === 'batch'
-                ? 'border-[#C9A227] text-[#C9A227] bg-[#172644]/60 rounded-t-lg'
-                : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+                ? 'border-[#D4AF37] text-[#D4AF37] bg-[#111827]/60 rounded-t-lg'
+                : 'border-transparent text-[#94A3B8] hover:text-[#F8FAFC]'
             }`}
           >
             <ClipboardList className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
               {/* Row 1: Name and WhatsApp */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center gap-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center gap-1">
                     <span>Nome Completo *</span>
                   </label>
                   <input
@@ -228,12 +228,12 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                       if (errorMessage) setErrorMessage('');
                     }}
                     placeholder="Ex: Carlos Eduardo Silva"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center justify-between">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center justify-between">
                     <span className="flex items-center gap-1">
                       <Phone className="w-3 h-3 text-[#25D366]" />
                       <span>WhatsApp / Telefone</span>
@@ -251,13 +251,13 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
                       placeholder="Ex: (85) 99876-5432 ou 85998765432"
-                      className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
+                      className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
                     />
                     {isZapValid && (
                       <CheckCircle2 className="w-4 h-4 text-[#4ADE80] absolute right-3 top-3" />
                     )}
                   </div>
-                  <span className="text-[10px] text-[#8C98B4]/80 mt-1 block">
+                  <span className="text-[10px] text-[#94A3B8]/80 mt-1 block">
                     Pode digitar com DDD ou colado. O sistema normaliza automaticamente.
                   </span>
                 </div>
@@ -266,7 +266,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
               {/* Row 2: E-mail and Curso */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center gap-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center gap-1">
                     <Mail className="w-3 h-3 text-[#60A5FA]" />
                     <span>E-mail do Aluno</span>
                   </label>
@@ -276,13 +276,13 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Ex: aluno@concursos.com.br"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center gap-1">
-                    <BookOpen className="w-3 h-3 text-[#C9A227]" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center gap-1">
+                    <BookOpen className="w-3 h-3 text-[#D4AF37]" />
                     <span>Curso / Concurso de Interesse</span>
                   </label>
                   <input
@@ -292,7 +292,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                     value={curso}
                     onChange={(e) => setCurso(e.target.value)}
                     placeholder="Ex: TJ-SP, PF, PM-SP, OAB..."
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors"
                   />
                   <datalist id="courses-datalist">
                     {suggestedCourses.map((c) => (
@@ -307,7 +307,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                         key={quick}
                         type="button"
                         onClick={() => setCurso(quick)}
-                        className="text-[10px] bg-[#101B2D] hover:bg-[#1F3057] text-[#8C98B4] hover:text-[#EDE6D6] px-2 py-0.5 rounded-md border border-[#2B3D63] transition-colors cursor-pointer"
+                        className="text-[10px] bg-[#0A0E17] hover:bg-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] px-2 py-0.5 rounded-md border border-[#25334A] transition-colors cursor-pointer"
                       >
                         +{quick}
                       </button>
@@ -319,7 +319,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
               {/* Row 3: Temperatura and Próximo Contato */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center gap-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center gap-1">
                     <Thermometer className="w-3 h-3 text-[#F59E0B]" />
                     <span>Temperatura Inicial do Lead</span>
                   </label>
@@ -329,19 +329,19 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                       const colorMap: Record<Temperature, string> = {
                         Frio: isSelected
                           ? 'bg-[#3B82F6] text-white border-[#60A5FA]'
-                          : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63]',
+                          : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A]',
                         Morno: isSelected
-                          ? 'bg-[#EAB308] text-[#101B2D] border-[#FACC15]'
-                          : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63]',
+                          ? 'bg-[#EAB308] text-[#0A0E17] border-[#FACC15]'
+                          : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A]',
                         Potencial: isSelected
                           ? 'bg-[#F97316] text-white border-[#FB923C]'
-                          : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63]',
+                          : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A]',
                         Quente: isSelected
                           ? 'bg-[#EF4444] text-white border-[#F87171]'
-                          : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63]',
+                          : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A]',
                         Pagou: isSelected
                           ? 'bg-[#16A34A] text-white border-[#4ADE80]'
-                          : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63]',
+                          : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A]',
                       };
 
                       return (
@@ -359,8 +359,8 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-[#C9A227]" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-[#D4AF37]" />
                     <span>Agendar Próximo Contato (Retorno)</span>
                   </label>
                   <input
@@ -368,15 +368,15 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                     id="f-proximo"
                     value={proximoContato}
                     onChange={(e) => setProximoContato(e.target.value)}
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] rounded-xl px-3.5 py-2 text-sm outline-none transition-colors"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] rounded-xl px-3.5 py-2 text-sm outline-none transition-colors"
                   />
                 </div>
               </div>
 
               {/* Row 4: Observações */}
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center gap-1">
-                  <FileText className="w-3 h-3 text-[#8C98B4]" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center gap-1">
+                  <FileText className="w-3 h-3 text-[#94A3B8]" />
                   <span>Observações / Histórico Inicial</span>
                 </label>
                 <textarea
@@ -385,17 +385,17 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                   value={observacao}
                   onChange={(e) => setObservacao(e.target.value)}
                   placeholder="Informações relevantes: dia da prova, matéria de maior dificuldade, proposta enviada..."
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-xl px-3.5 py-2 text-sm outline-none transition-colors resize-none"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-xl px-3.5 py-2 text-sm outline-none transition-colors resize-none"
                 />
               </div>
 
               {/* Buttons Row */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#2B3D63]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#25334A]">
                 <button
                   type="button"
                   id="f-cancel"
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057] transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -404,7 +404,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                   <button
                     type="button"
                     onClick={(e) => handleSingleSubmit(e, true)}
-                    className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] hover:text-[#D4AF37] border border-[#25334A] px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
                   >
                     <PlusCircle className="w-4 h-4" />
                     <span>Salvar e Adicionar Outro</span>
@@ -413,7 +413,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                   <button
                     type="submit"
                     id="f-save"
-                    className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer font-sans"
+                    className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer font-sans"
                   >
                     <Check className="w-4 h-4 stroke-[3]" />
                     <span>Salvar Contato</span>
@@ -425,9 +425,9 @@ export const AddContactForm: React.FC<AddContactProps> = ({
             /* Batch Paste Mode */
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C98B4] mb-1.5 flex items-center justify-between">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5 flex items-center justify-between">
                   <span>Cole a lista de contatos (Texto, WhatsApp ou Bloco de Notas)</span>
-                  <span className="text-[10px] text-[#C9A227]">
+                  <span className="text-[10px] text-[#D4AF37]">
                     {parsedBatch.length} contato(s) detectado(s)
                   </span>
                 </label>
@@ -436,32 +436,32 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                   value={rawBatchText}
                   onChange={(e) => handleProcessBatchText(e.target.value)}
                   placeholder={`Exemplo (uma linha por contato):\nCarlos Silva, (85) 99876-5432, TJ-SP\nMariana Santos, 11988887777, Polícia Federal, Quente\nJoão Pedro | 21977776666 | OAB`}
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-xl p-3 text-xs font-mono outline-none transition-colors resize-none"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-xl p-3 text-xs font-mono outline-none transition-colors resize-none"
                 />
               </div>
 
               {parsedBatch.length > 0 && (
-                <div className="border border-[#2B3D63] rounded-xl overflow-hidden bg-[#101B2D]">
-                  <div className="px-3 py-2 bg-[#121E33] border-b border-[#2B3D63] text-[11px] font-bold text-[#8C98B4] flex items-center justify-between">
+                <div className="border border-[#25334A] rounded-xl overflow-hidden bg-[#0A0E17]">
+                  <div className="px-3 py-2 bg-[#121E33] border-b border-[#25334A] text-[11px] font-bold text-[#94A3B8] flex items-center justify-between">
                     <span>Prévia dos Contatos Extraídos:</span>
                     <span className="text-[#4ADE80]">{parsedBatch.length} prontos</span>
                   </div>
-                  <div className="max-h-48 overflow-y-auto divide-y divide-[#2B3D63]/50">
+                  <div className="max-h-48 overflow-y-auto divide-y divide-[#25334A]/50">
                     {parsedBatch.map((item, idx) => (
                       <div key={idx} className="p-2.5 flex items-center justify-between text-xs gap-2">
                         <div className="truncate">
-                          <span className="font-semibold text-[#EDE6D6]">{item.nome}</span>
-                          <span className="text-[#8C98B4] text-[11px] ml-2 font-mono">
+                          <span className="font-semibold text-[#F8FAFC]">{item.nome}</span>
+                          <span className="text-[#94A3B8] text-[11px] ml-2 font-mono">
                             {item.whatsapp ? formatPhoneDisplay(item.whatsapp) : '(Sem fone)'}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {item.curso && (
-                            <span className="text-[10px] bg-[#172644] px-2 py-0.5 rounded text-[#C9A227] border border-[#2B3D63]">
+                            <span className="text-[10px] bg-[#111827] px-2 py-0.5 rounded text-[#D4AF37] border border-[#25334A]">
                               {item.curso}
                             </span>
                           )}
-                          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#172644] text-[#EDE6D6]">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#111827] text-[#F8FAFC]">
                             {item.temperatura || 'Frio'}
                           </span>
                         </div>
@@ -471,11 +471,11 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#2B3D63]">
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#25334A]">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057] transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -484,7 +484,7 @@ export const AddContactForm: React.FC<AddContactProps> = ({
                   type="button"
                   onClick={handleConfirmBatch}
                   disabled={parsedBatch.length === 0}
-                  className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Cadastrar Todos ({parsedBatch.length})</span>

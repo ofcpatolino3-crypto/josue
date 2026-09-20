@@ -171,63 +171,63 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
     switch (cat) {
       case 'roteiro_audio':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#38BDF8] border border-[#38BDF8]/50 text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-sm">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#38BDF8] border border-[#38BDF8]/50 text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-sm">
             <Mic className="w-3 h-3 text-[#38BDF8]" />
             🎙️ Roteiro de Áudio (20-35s)
           </span>
         );
       case 'pos_prova':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#C9A227] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
-            <Check className="w-3 h-3 text-[#C9A227]" />
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#D4AF37] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <Check className="w-3 h-3 text-[#D4AF37]" />
             Pós-Prova
           </span>
         );
       case 'pre_prova':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#5C7A9E] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#5C7A9E] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Clock className="w-3 h-3 text-[#5C7A9E]" />
             Pré-Prova / Rotina
           </span>
         );
       case 'migracao':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#D97C3A] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#D97C3A] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <ArrowRightLeft className="w-3 h-3 text-[#D97C3A]" />
             Migração p/ Assinatura 1.0
           </span>
         );
       case 'fechamento_pix':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#16A34A] border border-[#16A34A]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#16A34A] border border-[#16A34A]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Sparkles className="w-3 h-3 text-[#16A34A]" />
             Fechamento & PIX
           </span>
         );
       case 'recuperacao_sumidos':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#E11D48] border border-[#E11D48]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#E11D48] border border-[#E11D48]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <RotateCcw className="w-3 h-3 text-[#E11D48]" />
             Resgate / Sumidos
           </span>
         );
       case 'renovacao':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#6E8F5C] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#6E8F5C] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <RefreshCw className="w-3 h-3 text-[#6E8F5C]" />
             Renovação
           </span>
         );
       case 'boas_vindas':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#38BDF8] border border-[#38BDF8]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#38BDF8] border border-[#38BDF8]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Sparkles className="w-3 h-3 text-[#38BDF8]" />
             Boas-Vindas & Diagnóstico
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#8C98B4] border border-[#2B3D63] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#94A3B8] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             Geral
           </span>
         );
@@ -239,14 +239,14 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#C9A227] mb-1 flex items-center gap-1.5">
+          <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#D4AF37] mb-1 flex items-center gap-1.5">
             <MessageSquare className="w-3.5 h-3.5" />
             Comunicação & Abordagens
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
+          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC]">
             Mensagens Prontas & Roteiros de Áudio
           </h2>
-          <p className="text-xs sm:text-sm text-[#8C98B4] mt-0.5">
+          <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
             Scripts de alta conversão para gravação de áudios de 20-35 segundos e mensagens de texto focadas em migração do Curso Isolado para a Assinatura 1.0.
           </p>
         </div>
@@ -263,7 +263,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 onResetTemplates();
               }
             }}
-            className="flex items-center gap-1.5 bg-[#172644] hover:bg-[#1F3057] text-[#8C98B4] hover:text-[#EDE6D6] border border-[#2B3D63] px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 bg-[#111827] hover:bg-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#25334A] px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             title="Restaurar modelos de fábrica"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -273,7 +273,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
           <button
             type="button"
             onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             Novo Script / Roteiro
@@ -282,19 +282,19 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       </div>
 
       {/* Audio Scripts Highlight Promo Banner */}
-      <div className="bg-gradient-to-r from-[#172644] via-[#1A2E56] to-[#172644] border border-[#38BDF8]/40 rounded-xl p-3.5 sm:p-4 text-xs text-[#EDE6D6] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+      <div className="bg-gradient-to-r from-[#111827] via-[#1A2E56] to-[#111827] border border-[#38BDF8]/40 rounded-xl p-3.5 sm:p-4 text-xs text-[#F8FAFC] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-[#38BDF8]/20 border border-[#38BDF8]/40 flex items-center justify-center shrink-0">
             <Mic className="w-5 h-5 text-[#38BDF8] animate-pulse" />
           </div>
           <div>
-            <div className="font-bold text-sm text-[#EDE6D6] flex items-center gap-1.5">
+            <div className="font-bold text-sm text-[#F8FAFC] flex items-center gap-1.5">
               <span>🎙️ Roteiros de Áudio para Gravar no WhatsApp (20 a 35s)</span>
-              <span className="bg-[#38BDF8] text-[#101B2D] text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase">
+              <span className="bg-[#38BDF8] text-[#0A0E17] text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase">
                 3x Mais Conversão
               </span>
             </div>
-            <p className="text-xs text-[#8C98B4] mt-0.5">
+            <p className="text-xs text-[#94A3B8] mt-0.5">
               Áudios gravados com fala natural e conexão amiga quebram objeções e fecham matrículas muito mais rápido que textos longos.
             </p>
           </div>
@@ -303,7 +303,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveCategory('roteiro_audio')}
-          className="bg-[#38BDF8] hover:bg-[#2fb0ea] text-[#101B2D] text-xs font-bold px-3.5 py-1.5 rounded-lg shrink-0 transition-colors cursor-pointer flex items-center gap-1.5"
+          className="bg-[#38BDF8] hover:bg-[#2fb0ea] text-[#0A0E17] text-xs font-bold px-3.5 py-1.5 rounded-lg shrink-0 transition-colors cursor-pointer flex items-center gap-1.5"
         >
           <Headphones className="w-3.5 h-3.5" />
           Ver Só Roteiros de Áudio
@@ -311,22 +311,22 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       </div>
 
       {/* Dynamic Tags Legend Box */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-3 text-xs text-[#8C98B4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2 text-[#EDE6D6] font-semibold">
-          <Sparkles className="w-4 h-4 text-[#C9A227]" />
+      <div className="bg-[#111827] border border-[#25334A] rounded-xl p-3 text-xs text-[#94A3B8] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 text-[#F8FAFC] font-semibold">
+          <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>Variáveis automáticas aceitas nos roteiros:</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          <code className="bg-[#101B2D] border border-[#2B3D63] text-[#C9A227] px-2 py-0.5 rounded text-[11px] font-mono">
+          <code className="bg-[#0A0E17] border border-[#25334A] text-[#D4AF37] px-2 py-0.5 rounded text-[11px] font-mono">
             {'{nome}'} (1º Nome)
           </code>
-          <code className="bg-[#101B2D] border border-[#2B3D63] text-[#C9A227] px-2 py-0.5 rounded text-[11px] font-mono">
+          <code className="bg-[#0A0E17] border border-[#25334A] text-[#D4AF37] px-2 py-0.5 rounded text-[11px] font-mono">
             {'{nome_completo}'}
           </code>
-          <code className="bg-[#101B2D] border border-[#2B3D63] text-[#C9A227] px-2 py-0.5 rounded text-[11px] font-mono">
+          <code className="bg-[#0A0E17] border border-[#25334A] text-[#D4AF37] px-2 py-0.5 rounded text-[11px] font-mono">
             {'{curso}'} (Concurso)
           </code>
-          <code className="bg-[#101B2D] border border-[#2B3D63] text-[#C9A227] px-2 py-0.5 rounded text-[11px] font-mono">
+          <code className="bg-[#0A0E17] border border-[#25334A] text-[#D4AF37] px-2 py-0.5 rounded text-[11px] font-mono">
             {'{whatsapp}'}
           </code>
         </div>
@@ -336,17 +336,17 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       {showAddForm && (
         <form
           onSubmit={handleCreateNew}
-          className="bg-[#172644] border border-[#C9A227] rounded-xl p-4 sm:p-5 space-y-4 shadow-md"
+          className="bg-[#111827] border border-[#D4AF37] rounded-xl p-4 sm:p-5 space-y-4 shadow-md"
         >
-          <div className="flex items-center justify-between border-b border-[#2B3D63] pb-2">
-            <h3 className="font-bold text-sm text-[#C9A227] flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-[#25334A] pb-2">
+            <h3 className="font-bold text-sm text-[#D4AF37] flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Criar Novo Roteiro ou Modelo de Mensagem
             </h3>
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="text-xs text-[#8C98B4] hover:text-[#EDE6D6] cursor-pointer"
+              className="text-xs text-[#94A3B8] hover:text-[#F8FAFC] cursor-pointer"
             >
               Fechar
             </button>
@@ -354,7 +354,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2">
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
                 Título do Script *
               </label>
               <input
@@ -363,12 +363,12 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Ex: 🎙️ Áudio: Fechamento com Condição Autorizada"
-                className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
+                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
                 Categoria *
               </label>
               <select
@@ -376,7 +376,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 onChange={(e) =>
                   setNewCategory(e.target.value as MessageTemplate['categoria'])
                 }
-                className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227] cursor-pointer"
+                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37] cursor-pointer"
               >
                 <option value="roteiro_audio">🎙️ Roteiro para Áudio (Voice Script)</option>
                 <option value="pos_prova">Pós-Prova</option>
@@ -392,7 +392,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
           </div>
 
           {newCategory === 'roteiro_audio' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#101B2D] p-3 rounded-lg border border-[#38BDF8]/30">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0A0E17] p-3 rounded-lg border border-[#38BDF8]/30">
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#38BDF8] mb-1 flex items-center gap-1">
                   <Timer className="w-3 h-3" />
@@ -403,7 +403,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                   value={newDuracao}
                   onChange={(e) => setNewDuracao(e.target.value)}
                   placeholder="Ex: 25 a 30 segundos"
-                  className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8]"
+                  className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8]"
                 />
               </div>
               <div>
@@ -416,7 +416,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                   value={newTomDeVoz}
                   onChange={(e) => setNewTomDeVoz(e.target.value)}
                   placeholder="Ex: Acolhedor, seguro e com energia positiva"
-                  className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8]"
+                  className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8]"
                 />
               </div>
             </div>
@@ -424,7 +424,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#C9A227] mb-1">
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#D4AF37] mb-1">
                 ⚡ Gatilho Mental
               </label>
               <input
@@ -432,7 +432,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 value={newGatilho}
                 onChange={(e) => setNewGatilho(e.target.value)}
                 placeholder="Ex: 💡 Abatimento 100% + Reciprocidade"
-                className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
+                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
             <div>
@@ -444,7 +444,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 value={newEmocao}
                 onChange={(e) => setNewEmocao(e.target.value)}
                 placeholder="Ex: Tira o peso da reprovação"
-                className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
+                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
             <div>
@@ -456,13 +456,13 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                 value={newLogica}
                 onChange={(e) => setNewLogica(e.target.value)}
                 placeholder="Ex: Abatimento de 100% na assinatura"
-                className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
+                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
               Descrição Curta (Instrução para o Atendente)
             </label>
             <input
@@ -470,12 +470,12 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
               placeholder="Ex: Usar quando o aluno disser que achou caro..."
-              className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227]"
+              className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
               Roteiro de Fala / Texto da Mensagem *
             </label>
             <textarea
@@ -484,21 +484,21 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
               placeholder="Oi, {nome}! Tudo bem? Gravando esse áudio rapidinho só pra te avisar sobre o abatimento de {curso}..."
-              className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A227] resize-y font-sans"
+              className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37] resize-y font-sans"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2B3D63]">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#25334A]">
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="px-3 py-1.5 text-xs text-[#8C98B4] hover:text-[#EDE6D6] cursor-pointer"
+              className="px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#F8FAFC] cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer shadow-sm"
+              className="bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer shadow-sm"
             >
               Salvar Modelo
             </button>
@@ -527,9 +527,9 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeCategory === cat.id
                   ? cat.id === 'roteiro_audio'
-                    ? 'bg-[#38BDF8] text-[#101B2D] font-bold shadow-sm'
-                    : 'bg-[#C9A227] text-[#101B2D] font-bold shadow-sm'
-                  : 'bg-[#172644] text-[#8C98B4] hover:text-[#EDE6D6] border border-[#2B3D63]'
+                    ? 'bg-[#38BDF8] text-[#0A0E17] font-bold shadow-sm'
+                    : 'bg-[#D4AF37] text-[#0A0E17] font-bold shadow-sm'
+                  : 'bg-[#111827] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#25334A]'
               }`}
             >
               {cat.label}
@@ -538,13 +538,13 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
         </div>
 
         <div className="relative min-w-[220px]">
-          <Search className="w-4 h-4 text-[#8C98B4] absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-2.5" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar nos scripts..."
-            className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:border-[#C9A227]"
+            className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:border-[#D4AF37]"
           />
         </div>
       </div>
@@ -552,7 +552,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
       {/* List of Templates */}
       <div className="flex flex-col gap-4">
         {filtered.length === 0 ? (
-          <div className="text-center py-12 px-4 border border-dashed border-[#2B3D63] rounded-xl text-[#8C98B4] text-sm">
+          <div className="text-center py-12 px-4 border border-dashed border-[#25334A] rounded-xl text-[#94A3B8] text-sm">
             Nenhum modelo de mensagem encontrado para esta categoria.
           </div>
         ) : (
@@ -564,21 +564,21 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
             return (
               <div
                 key={tmpl.id}
-                className={`bg-[#172644] border rounded-xl p-4 sm:p-5 transition-all shadow-sm flex flex-col gap-3 ${
-                  isAudio ? 'border-[#38BDF8]/40 bg-gradient-to-br from-[#172644] to-[#121F38]' : 'border-[#2B3D63]'
+                className={`bg-[#111827] border rounded-xl p-4 sm:p-5 transition-all shadow-sm flex flex-col gap-3 ${
+                  isAudio ? 'border-[#38BDF8]/40 bg-gradient-to-br from-[#111827] to-[#121F38]' : 'border-[#25334A]'
                 }`}
               >
                 {isEditing ? (
                   /* Edit Form Mode */
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-[#2B3D63] pb-2">
-                      <span className="text-xs font-semibold text-[#C9A227]">
+                    <div className="flex items-center justify-between border-b border-[#25334A] pb-2">
+                      <span className="text-xs font-semibold text-[#D4AF37]">
                         Editando Modelo
                       </span>
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="text-xs text-[#8C98B4] hover:text-[#EDE6D6]"
+                        className="text-xs text-[#94A3B8] hover:text-[#F8FAFC]"
                       >
                         Cancelar
                       </button>
@@ -586,18 +586,18 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="sm:col-span-2">
-                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
                           Título
                         </label>
                         <input
                           type="text"
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
-                          className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227]"
+                          className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#D4AF37]"
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
                           Categoria
                         </label>
                         <select
@@ -605,7 +605,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                           onChange={(e) =>
                             setEditCategory(e.target.value as MessageTemplate['categoria'])
                           }
-                          className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227] cursor-pointer"
+                          className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#D4AF37] cursor-pointer"
                         >
                           <option value="roteiro_audio">🎙️ Roteiro para Áudio (Voice Script)</option>
                           <option value="pos_prova">Pós-Prova</option>
@@ -621,7 +621,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                     </div>
 
                     {editCategory === 'roteiro_audio' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#101B2D] p-2.5 rounded-lg border border-[#38BDF8]/30">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0A0E17] p-2.5 rounded-lg border border-[#38BDF8]/30">
                         <div>
                           <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#38BDF8] mb-1">
                             ⏱️ Duração Estimada do Áudio
@@ -631,7 +631,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                             value={editDuracao}
                             onChange={(e) => setEditDuracao(e.target.value)}
                             placeholder="Ex: 25 a 30 segundos"
-                            className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-[#38BDF8]"
+                            className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-[#38BDF8]"
                           />
                         </div>
                         <div>
@@ -643,7 +643,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                             value={editTomDeVoz}
                             onChange={(e) => setEditTomDeVoz(e.target.value)}
                             placeholder="Ex: Acolhedor, seguro e com energia"
-                            className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-[#38BDF8]"
+                            className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-[#38BDF8]"
                           />
                         </div>
                       </div>
@@ -651,7 +651,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#C9A227] mb-1">
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#D4AF37] mb-1">
                           ⚡ Gatilho Mental & Estratégia
                         </label>
                         <input
@@ -659,7 +659,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                           value={editGatilho}
                           onChange={(e) => setEditGatilho(e.target.value)}
                           placeholder="Ex: ❤️ Empatia + 🧠 Matemática dos 80%"
-                          className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227]"
+                          className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#D4AF37]"
                         />
                       </div>
                       <div>
@@ -671,7 +671,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                           value={editEmocao}
                           onChange={(e) => setEditEmocao(e.target.value)}
                           placeholder="Ex: Acolhimento do cansaço e validação"
-                          className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227]"
+                          className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#D4AF37]"
                         />
                       </div>
                       <div>
@@ -683,32 +683,32 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                           value={editLogica}
                           onChange={(e) => setEditLogica(e.target.value)}
                           placeholder="Ex: Curva de retenção e matemática"
-                          className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227]"
+                          className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#D4AF37]"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
                         Descrição
                       </label>
                       <input
                         type="text"
                         value={editDesc}
                         onChange={(e) => setEditDesc(e.target.value)}
-                        className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#C9A227]"
+                        className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#D4AF37]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#8C98B4] mb-1">
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] mb-1">
                         Texto / Roteiro da Mensagem
                       </label>
                       <textarea
                         rows={6}
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
-                        className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-lg p-3 text-sm focus:outline-none focus:border-[#C9A227] resize-y font-sans"
+                        className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-lg p-3 text-sm focus:outline-none focus:border-[#D4AF37] resize-y font-sans"
                       />
                     </div>
 
@@ -716,14 +716,14 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="px-3 py-1.5 text-xs text-[#8C98B4] hover:text-[#EDE6D6]"
+                        className="px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#F8FAFC]"
                       >
                         Cancelar
                       </button>
                       <button
                         type="button"
                         onClick={() => handleSaveEdit(tmpl.id)}
-                        className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer"
+                        className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer"
                       >
                         <Save className="w-3.5 h-3.5" />
                         Salvar Alterações
@@ -738,7 +738,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           {getCategoryBadge(tmpl.categoria)}
                           {tmpl.gatilho && (
-                            <span className="inline-flex items-center gap-1 bg-[#101B2D] text-[#EDE6D6] border border-[#C9A227]/50 text-[11px] font-semibold px-2.5 py-0.5 rounded-md shadow-xs">
+                            <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#F8FAFC] border border-[#D4AF37]/50 text-[11px] font-semibold px-2.5 py-0.5 rounded-md shadow-xs">
                               ⚡ {tmpl.gatilho}
                             </span>
                           )}
@@ -749,11 +749,11 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                             </span>
                           )}
                         </div>
-                        <h3 className="font-serif font-bold text-base sm:text-lg text-[#EDE6D6] mt-1 flex items-center gap-2">
+                        <h3 className="font-serif font-bold text-base sm:text-lg text-[#F8FAFC] mt-1 flex items-center gap-2">
                           <span>{tmpl.titulo}</span>
                         </h3>
                         {tmpl.descricao && (
-                          <p className="text-xs text-[#8C98B4] mt-0.5">{tmpl.descricao}</p>
+                          <p className="text-xs text-[#94A3B8] mt-0.5">{tmpl.descricao}</p>
                         )}
                       </div>
 
@@ -761,7 +761,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleStartEdit(tmpl)}
-                          className="flex items-center gap-1 text-xs text-[#8C98B4] hover:text-[#C9A227] bg-[#101B2D] border border-[#2B3D63] px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                          className="flex items-center gap-1 text-xs text-[#94A3B8] hover:text-[#D4AF37] bg-[#0A0E17] border border-[#25334A] px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                           title="Editar este modelo"
                         >
                           <Edit2 className="w-3 h-3" />
@@ -775,7 +775,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                               onDeleteTemplate(tmpl.id);
                             }
                           }}
-                          className="text-[#8C98B4] hover:text-[#B14432] p-1.5 rounded hover:bg-[#101B2D] transition-colors cursor-pointer"
+                          className="text-[#94A3B8] hover:text-[#B14432] p-1.5 rounded hover:bg-[#0A0E17] transition-colors cursor-pointer"
                           title="Excluir modelo"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -785,32 +785,32 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
 
                     {/* Audio Specific Guidelines Box if Audio */}
                     {isAudio && (
-                      <div className="bg-[#101B2D] border border-[#38BDF8]/30 rounded-xl p-3 text-xs space-y-2">
+                      <div className="bg-[#0A0E17] border border-[#38BDF8]/30 rounded-xl p-3 text-xs space-y-2">
                         <div className="flex flex-wrap items-center gap-3 text-[11px]">
                           {tmpl.tomDeVoz && (
-                            <div className="flex items-center gap-1 text-[#EDE6D6]">
+                            <div className="flex items-center gap-1 text-[#F8FAFC]">
                               <Volume2 className="w-3.5 h-3.5 text-[#38BDF8]" />
-                              <span className="text-[#8C98B4]">Tom de Voz:</span>
+                              <span className="text-[#94A3B8]">Tom de Voz:</span>
                               <span className="font-semibold">{tmpl.tomDeVoz}</span>
                             </div>
                           )}
                           {tmpl.duracaoEstimada && (
-                            <div className="flex items-center gap-1 text-[#EDE6D6]">
+                            <div className="flex items-center gap-1 text-[#F8FAFC]">
                               <Timer className="w-3.5 h-3.5 text-[#38BDF8]" />
-                              <span className="text-[#8C98B4]">Duração Ideal:</span>
+                              <span className="text-[#94A3B8]">Duração Ideal:</span>
                               <span className="font-semibold">{tmpl.duracaoEstimada}</span>
                             </div>
                           )}
                         </div>
 
                         {tmpl.dicasGravacao && tmpl.dicasGravacao.length > 0 && (
-                          <div className="pt-2 border-t border-[#2B3D63] space-y-1">
+                          <div className="pt-2 border-t border-[#25334A] space-y-1">
                             <div className="text-[10px] font-bold uppercase tracking-wider text-[#38BDF8] flex items-center gap-1">
                               <span>💡 Dicas de Gravação para Alta Conversão:</span>
                             </div>
-                            <ul className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[11px] text-[#EDE6D6]/90">
+                            <ul className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[11px] text-[#F8FAFC]/90">
                               {tmpl.dicasGravacao.map((dica, idx) => (
-                                <li key={idx} className="flex items-start gap-1.5 bg-[#172644]/70 p-1.5 rounded">
+                                <li key={idx} className="flex items-start gap-1.5 bg-[#111827]/70 p-1.5 rounded">
                                   <span className="text-[#38BDF8] font-bold">•</span>
                                   <span>{dica}</span>
                                 </li>
@@ -825,19 +825,19 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                     {(tmpl.emocao || tmpl.logica) && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                         {tmpl.emocao && (
-                          <div className="bg-[#101B2D]/70 border border-[#B14432]/30 rounded-lg p-2.5">
+                          <div className="bg-[#0A0E17]/70 border border-[#B14432]/30 rounded-lg p-2.5">
                             <div className="text-[10px] font-bold uppercase tracking-wider text-[#B14432] flex items-center gap-1 mb-1">
                               <span>❤️ Conexão Emocional (Dor / Alívio / Desejo):</span>
                             </div>
-                            <p className="text-[#EDE6D6]/90 leading-snug">{tmpl.emocao}</p>
+                            <p className="text-[#F8FAFC]/90 leading-snug">{tmpl.emocao}</p>
                           </div>
                         )}
                         {tmpl.logica && (
-                          <div className="bg-[#101B2D]/70 border border-[#5C7A9E]/40 rounded-lg p-2.5">
+                          <div className="bg-[#0A0E17]/70 border border-[#5C7A9E]/40 rounded-lg p-2.5">
                             <div className="text-[10px] font-bold uppercase tracking-wider text-[#5C7A9E] flex items-center gap-1 mb-1">
                               <span>🧠 Fundamento Lógico (Cálculo / Racional):</span>
                             </div>
-                            <p className="text-[#EDE6D6]/90 leading-snug">{tmpl.logica}</p>
+                            <p className="text-[#F8FAFC]/90 leading-snug">{tmpl.logica}</p>
                           </div>
                         )}
                       </div>
@@ -847,8 +847,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                     <div
                       className={`rounded-lg p-4 text-xs sm:text-[14px] leading-relaxed whitespace-pre-wrap font-sans ${
                         isAudio
-                          ? 'bg-[#0E1726] border-2 border-[#38BDF8]/40 text-[#EDE6D6] shadow-inner font-medium tracking-wide'
-                          : 'bg-[#101B2D]/90 border border-[#2B3D63] text-[#EDE6D6]'
+                          ? 'bg-[#0E1726] border-2 border-[#38BDF8]/40 text-[#F8FAFC] shadow-inner font-medium tracking-wide'
+                          : 'bg-[#0A0E17]/90 border border-[#25334A] text-[#F8FAFC]'
                       }`}
                     >
                       {isAudio && (
@@ -861,8 +861,8 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1 border-t border-[#2B3D63]/50">
-                      <div className="text-[11px] text-[#8C98B4]">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1 border-t border-[#25334A]/50">
+                      <div className="text-[11px] text-[#94A3B8]">
                         Disponível diretamente no botão <b>"💬 Mensagem Rápida"</b> de cada contato.
                       </div>
 
@@ -871,10 +871,10 @@ export const MessagesView: React.FC<MessagesViewProps> = ({
                         onClick={() => handleCopyPreview(tmpl)}
                         className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           isCopied
-                            ? 'bg-[#6E8F5C] text-[#EDE6D6]'
+                            ? 'bg-[#6E8F5C] text-[#F8FAFC]'
                             : isAudio
-                            ? 'bg-[#38BDF8] hover:bg-[#2fb0ea] text-[#101B2D]'
-                            : 'bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D]'
+                            ? 'bg-[#38BDF8] hover:bg-[#2fb0ea] text-[#0A0E17]'
+                            : 'bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17]'
                         }`}
                         title="Copiar texto substituindo variáveis pelo exemplo"
                       >

@@ -88,21 +88,21 @@ export const ContactCard: React.FC<CardProps> = ({
   return (
     <div
       id={`card-${contact.id}`}
-      className={`bg-[#172644] border rounded-xl p-4 sm:p-5 transition-all duration-150 shadow-sm relative group ${
+      className={`bg-[#111827] border rounded-xl p-4 sm:p-5 transition-all duration-150 shadow-sm relative group ${
         is3DaysInactive
           ? 'border-[#DC2626]/70 shadow-[0_0_14px_rgba(220,38,38,0.18)] ring-1 ring-[#DC2626]/30'
           : overdue
           ? 'border-[#B14432] shadow-[0_0_12px_rgba(177,68,50,0.15)]'
           : isNewLead && !contact.ultimoContato
           ? 'border-emerald-500/70 shadow-[0_0_14px_rgba(16,185,129,0.18)] ring-1 ring-emerald-500/30'
-          : 'border-[#2B3D63] hover:border-[#2B3D63]'
+          : 'border-[#25334A] hover:border-[#25334A]'
       }`}
     >
       {/* Top Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3.5">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-base sm:text-[17px] text-[#EDE6D6] tracking-tight">
+            <h3 className="font-semibold text-base sm:text-[17px] text-[#F8FAFC] tracking-tight">
               {contact.nome || 'Sem Nome'}
             </h3>
 
@@ -124,7 +124,7 @@ export const ContactCard: React.FC<CardProps> = ({
                 Pagou: { label: '🟢 Pagou', cls: 'bg-[#16A34A]/20 text-[#4ADE80] border-[#16A34A]/40' },
                 Potencial: { label: '🔵 Potencial', cls: 'bg-[#2563EB]/20 text-[#60A5FA] border-[#2563EB]/40' },
                 Quente: { label: '🔥 Quente', cls: 'bg-[#EA580C]/20 text-[#FB923C] border-[#EA580C]/40' },
-                Morno: { label: '🟡 Morno', cls: 'bg-[#C9A227]/20 text-[#FCD34D] border-[#C9A227]/40' },
+                Morno: { label: '🟡 Morno', cls: 'bg-[#D4AF37]/20 text-[#FCD34D] border-[#D4AF37]/40' },
                 Frio: { label: '🔴 Frio', cls: 'bg-[#DC2626]/20 text-[#F87171] border-[#DC2626]/40' },
               };
               const b = badges[temp] || badges.Frio;
@@ -160,10 +160,10 @@ export const ContactCard: React.FC<CardProps> = ({
             {/* Admin Sent / Transferred Badge */}
             {contact.transferredFromAdmin && (
               <span
-                className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#C9A227]/20 text-[#FCD34D] border border-[#C9A227]/40 shadow-xs"
+                className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#D4AF37]/20 text-[#FCD34D] border border-[#D4AF37]/40 shadow-xs"
                 title={`Lead enviado pelo Administrador${contact.assignedToName ? ` e transferido para ${contact.assignedToName}` : ''}`}
               >
-                <Zap className="w-3 h-3 text-[#C9A227]" />
+                <Zap className="w-3 h-3 text-[#D4AF37]" />
                 <span>Enviado pelo Admin {contact.assignedToName ? `→ ${contact.assignedToName}` : ''}</span>
               </span>
             )}
@@ -180,7 +180,7 @@ export const ContactCard: React.FC<CardProps> = ({
             )}
 
             {overdue && (
-              <span className="inline-flex items-center gap-1 bg-[#B14432] text-[#EDE6D6] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm">
+              <span className="inline-flex items-center gap-1 bg-[#B14432] text-[#F8FAFC] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm">
                 <AlertCircle className="w-3 h-3" />
                 Atrasado
               </span>
@@ -188,17 +188,17 @@ export const ContactCard: React.FC<CardProps> = ({
           </div>
 
           {contact.curso && (
-            <div className="text-xs sm:text-[13px] font-medium text-[#C9A227] mt-0.5 truncate">
+            <div className="text-xs sm:text-[13px] font-medium text-[#D4AF37] mt-0.5 truncate">
               {contact.curso}
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-[#8C98B4]">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-[#94A3B8]">
             {contact.whatsapp && (
               <div className="flex items-center gap-1.5">
                 <span
                   onClick={handleOpenWhatsApp}
-                  className="cursor-pointer hover:text-[#EDE6D6] border-b border-dotted border-[#8C98B4] transition-colors"
+                  className="cursor-pointer hover:text-[#F8FAFC] border-b border-dotted border-[#94A3B8] transition-colors"
                   title="Abrir no Aplicativo WhatsApp"
                 >
                   {contact.whatsapp}
@@ -206,7 +206,7 @@ export const ContactCard: React.FC<CardProps> = ({
                 <button
                   type="button"
                   onClick={handleCopyPhone}
-                  className="text-[11px] text-[#8C98B4] hover:text-[#C9A227] cursor-pointer"
+                  className="text-[11px] text-[#94A3B8] hover:text-[#D4AF37] cursor-pointer"
                   title="Copiar número"
                 >
                   {copiedWA ? 'Copiado!' : 'Copiar'}
@@ -216,10 +216,10 @@ export const ContactCard: React.FC<CardProps> = ({
 
             {contact.email && (
               <div className="flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-[#C9A227]/80 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-[#D4AF37]/80 shrink-0" />
                 <a
                   href={`mailto:${contact.email}`}
-                  className="hover:text-[#EDE6D6] border-b border-dotted border-[#8C98B4] transition-colors truncate max-w-[200px] sm:max-w-none"
+                  className="hover:text-[#F8FAFC] border-b border-dotted border-[#94A3B8] transition-colors truncate max-w-[200px] sm:max-w-none"
                   title="Enviar e-mail"
                 >
                   {contact.email}
@@ -235,7 +235,7 @@ export const ContactCard: React.FC<CardProps> = ({
                 <button
                   type="button"
                   onClick={handleCopyEmail}
-                  className="text-[11px] text-[#8C98B4] hover:text-[#C9A227] cursor-pointer shrink-0"
+                  className="text-[11px] text-[#94A3B8] hover:text-[#D4AF37] cursor-pointer shrink-0"
                   title="Copiar e-mail"
                 >
                   {copiedEmail ? 'Copiado!' : 'Copiar'}
@@ -252,7 +252,7 @@ export const ContactCard: React.FC<CardProps> = ({
             <button
               type="button"
               onClick={() => onOpenSalesAssistant(contact)}
-              className="flex items-center gap-1.5 bg-[#C9A227]/15 hover:bg-[#C9A227]/25 text-[#C9A227] hover:text-[#EDE6D6] border border-[#C9A227]/50 hover:border-[#C9A227] rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+              className="flex items-center gap-1.5 bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] hover:text-[#F8FAFC] border border-[#D4AF37]/50 hover:border-[#D4AF37] rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
               title="Abrir Assistente de Vendas IA com sugestão de objeções e planos recomendados"
             >
               <Bot className="w-3.5 h-3.5" />
@@ -266,7 +266,7 @@ export const ContactCard: React.FC<CardProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenMessageModal(contact)}
-                className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold rounded-lg px-3 py-1.5 text-xs transition-all cursor-pointer shadow-sm active:scale-95"
+                className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold rounded-lg px-3 py-1.5 text-xs transition-all cursor-pointer shadow-sm active:scale-95"
                 title="Abrir envio de mensagem WhatsApp com desconto imediato da conta Admin para atendente"
               >
                 <Zap className="w-3.5 h-3.5 fill-current" />
@@ -276,10 +276,10 @@ export const ContactCard: React.FC<CardProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenMessageModal(contact)}
-                className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] hover:border-[#C9A227] rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] hover:text-[#D4AF37] border border-[#25334A] hover:border-[#D4AF37] rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                 title="Abrir mensagem pronta e roteiro para atendimento"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-[#C9A227]" />
+                <MessageSquare className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>Mensagem Pronta</span>
               </button>
             )
@@ -289,7 +289,7 @@ export const ContactCard: React.FC<CardProps> = ({
             <button
               type="button"
               onClick={handleOpenWhatsApp}
-              className="flex items-center gap-1.5 bg-[#101B2D] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#25D366] border border-[#2B3D63] hover:border-[#25D366]/60 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 bg-[#0A0E17] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#25D366] border border-[#25334A] hover:border-[#25D366]/60 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
               title="Abrir conversa no WhatsApp"
             >
               <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
@@ -301,7 +301,7 @@ export const ContactCard: React.FC<CardProps> = ({
             <button
               type="button"
               onClick={() => onMarkToday(contact.id)}
-              className="flex items-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold rounded-lg px-3.5 py-1.5 text-xs shadow-sm transition-transform active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold rounded-lg px-3.5 py-1.5 text-xs shadow-sm transition-transform active:scale-95 cursor-pointer"
             >
               <Check className="w-3.5 h-3.5 stroke-[3]" />
               Marcar contato hoje
@@ -315,7 +315,7 @@ export const ContactCard: React.FC<CardProps> = ({
               <button
                 type="button"
                 onClick={() => onUndoContact(contact.id)}
-                className="text-xs text-[#8C98B4] hover:text-[#EDE6D6] flex items-center gap-1 px-2 py-1 rounded hover:bg-[#101B2D] transition-colors cursor-pointer"
+                className="text-xs text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1 px-2 py-1 rounded hover:bg-[#0A0E17] transition-colors cursor-pointer"
                 title="Desfazer marcação de contato"
               >
                 <RotateCcw className="w-3 h-3" />
@@ -331,7 +331,7 @@ export const ContactCard: React.FC<CardProps> = ({
                 onDeleteContact(contact.id);
               }
             }}
-            className="text-[#8C98B4] hover:text-[#B14432] p-1.5 rounded hover:bg-[#101B2D] transition-colors cursor-pointer opacity-70 hover:opacity-100"
+            className="text-[#94A3B8] hover:text-[#B14432] p-1.5 rounded hover:bg-[#0A0E17] transition-colors cursor-pointer opacity-70 hover:opacity-100"
             title="Excluir contato"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -340,20 +340,20 @@ export const ContactCard: React.FC<CardProps> = ({
       </div>
 
       {/* Meta Grid Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 bg-[#101B2D]/60 p-3 rounded-lg border border-[#2B3D63]/60 mb-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 bg-[#0A0E17]/60 p-3 rounded-lg border border-[#25334A]/60 mb-3">
         {/* Temperatura */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1">
+          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1">
             Temperatura
           </label>
           <div className="relative">
             <select
               value={contact.temperatura}
               onChange={(e) => onUpdateField(contact.id, 'temperatura', e.target.value as Temperature)}
-              className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-2 py-1.5 text-xs font-medium focus:outline-none focus:border-[#C9A227] cursor-pointer"
+              className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-2 py-1.5 text-xs font-medium focus:outline-none focus:border-[#D4AF37] cursor-pointer"
             >
               {TEMP_ORDER.map((t) => (
-                <option key={t} value={t} className="bg-[#101B2D] text-[#EDE6D6]">
+                <option key={t} value={t} className="bg-[#0A0E17] text-[#F8FAFC]">
                   {t === 'Pagou' ? '💰 Pagou (venda)' : t}
                 </option>
               ))}
@@ -363,46 +363,46 @@ export const ContactCard: React.FC<CardProps> = ({
 
         {/* Data do contato */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1">
+          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1">
             Data do Contato
           </label>
-          <div className="text-xs text-[#EDE6D6] py-1.5 font-medium flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-[#8C98B4]" />
+          <div className="text-xs text-[#F8FAFC] py-1.5 font-medium flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-[#94A3B8]" />
             {formatDateBR(contact.dataContato) || '—'}
           </div>
         </div>
 
         {/* Último contato */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1">
+          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1">
             Último Contato
           </label>
-          <div className="text-xs text-[#EDE6D6] py-1.5 font-medium flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-[#8C98B4]" />
+          <div className="text-xs text-[#F8FAFC] py-1.5 font-medium flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-[#94A3B8]" />
             {formatDateBR(contact.ultimoContato) || '—'}
           </div>
         </div>
 
         {/* Próximo contato */}
         <div>
-          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1">
+          <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1">
             Próximo Contato
           </label>
           <input
             type="date"
             value={contact.proximoContato || ''}
             onChange={(e) => onUpdateField(contact.id, 'proximoContato', e.target.value)}
-            className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-2 py-1 text-xs focus:outline-none focus:border-[#C9A227] cursor-pointer"
+            className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-2 py-1 text-xs focus:outline-none focus:border-[#D4AF37] cursor-pointer"
           />
         </div>
       </div>
 
       {/* Observações Field */}
       <div>
-        <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1 flex items-center justify-between">
+        <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1 flex items-center justify-between">
           <span>Observação</span>
           {contact.status && (
-            <span className="text-[11px] text-[#C9A227] lowercase font-normal">
+            <span className="text-[11px] text-[#D4AF37] lowercase font-normal">
               status: {contact.status}
             </span>
           )}
@@ -413,7 +413,7 @@ export const ContactCard: React.FC<CardProps> = ({
           onBlur={() => onUpdateField(contact.id, 'observacao', obsValue)}
           placeholder="Adicionar notas sobre o contato, dúvidas levantadas, propostas enviadas..."
           rows={2}
-          className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/50 rounded-lg px-3 py-2 text-xs sm:text-[13px] focus:outline-none focus:border-[#C9A227] transition-colors resize-y min-h-[44px]"
+          className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/50 rounded-lg px-3 py-2 text-xs sm:text-[13px] focus:outline-none focus:border-[#D4AF37] transition-colors resize-y min-h-[44px]"
         />
       </div>
     </div>

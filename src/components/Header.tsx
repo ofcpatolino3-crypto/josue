@@ -53,20 +53,20 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="mb-5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2B3D63] pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#25334A] pb-4">
         <div className="flex items-center gap-3.5">
-          <div className="p-1 bg-[#172644] border border-[#2B3D63] rounded-xl shadow-md shrink-0 flex items-center justify-center">
+          <div className="p-1 bg-[#111827] border border-[#25334A] rounded-xl shadow-md shrink-0 flex items-center justify-center">
             <PortalLogo size={44} />
           </div>
           <div>
-            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[#C9A227] mb-0.5 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#C9A227]" />
+            <div className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[#D4AF37] mb-0.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span>Portal Concursos e OAB · Vendas & Atendimento</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black font-sans text-[#EDE6D6] tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black font-sans text-[#F8FAFC] tracking-tight">
               Painel Operacional
             </h1>
-            <p className="text-xs text-[#8C98B4] mt-0.5">
+            <p className="text-xs text-[#94A3B8] mt-0.5">
               Gestão de contatos, disparos no WhatsApp, controle de equipe e fechamento de matrículas.
             </p>
           </div>
@@ -75,10 +75,10 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2 self-start md:self-center flex-wrap">
           {/* WhatsApp Mode Selector */}
           <div
-            className="flex items-center bg-[#101B2D] border border-[#2B3D63] rounded-lg p-1 text-xs gap-1"
+            className="flex items-center bg-[#0A0E17] border border-[#25334A] rounded-lg p-1 text-xs gap-1"
             title="Escolha como o WhatsApp será aberto ao clicar em um contato"
           >
-            <div className="flex items-center gap-1 px-1.5 text-[#8C98B4] font-medium text-[11px]">
+            <div className="flex items-center gap-1 px-1.5 text-[#94A3B8] font-medium text-[11px]">
               <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
               <span className="hidden xl:inline">Zap:</span>
             </div>
@@ -88,8 +88,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => handleSwitchWaMode('desktop_app')}
               className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
                 waMode === 'desktop_app'
-                  ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'bg-[#25D366] text-[#0A0E17] shadow-sm'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
               title="Abre direto no Aplicativo WhatsApp do Computador / Celular (ZERO abas no navegador!)"
             >
@@ -102,8 +102,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => handleSwitchWaMode('same_tab')}
               className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                 waMode === 'same_tab'
-                  ? 'bg-[#25D366] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'bg-[#25D366] text-[#0A0E17] shadow-sm'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
               title="Abre e atualiza na MESMA aba do WhatsApp Web"
             >
@@ -116,8 +116,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => handleSwitchWaMode('new_tab')}
               className={`flex items-center gap-1 px-1.5 py-1 rounded text-[11px] transition-all cursor-pointer ${
                 waMode === 'new_tab'
-                  ? 'bg-[#2B3D63] text-white'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'bg-[#25334A] text-white'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
               title="Abre em nova aba a cada contato"
             >
@@ -129,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="quick-paste-header-btn"
               onClick={onOpenQuickPaste}
-              className="flex items-center gap-2 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#4ADE80] border border-[#22C55E]/40 font-bold rounded-lg px-3 py-2 text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#4ADE80] border border-[#22C55E]/40 font-bold rounded-lg px-3 py-2 text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
               title="Colar contatos diretamente do WhatsApp, Excel ou Bloco de Notas (Ctrl+V)"
             >
               <Clipboard className="w-4 h-4 text-[#4ADE80]" />
@@ -140,12 +140,12 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="ai-assistant-btn"
             onClick={onOpenAIAssistant}
-            className="flex items-center gap-2 bg-[#172644] hover:bg-[#1F3057] text-[#C9A227] hover:text-[#EDE6D6] border border-[#C9A227]/40 font-bold rounded-lg px-3 py-2 text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 bg-[#111827] hover:bg-[#1E293B] text-[#D4AF37] hover:text-[#F8FAFC] border border-[#D4AF37]/40 font-bold rounded-lg px-3 py-2 text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
             title="Abrir Assistente Inteligente com IA (Google Gemini)"
           >
-            <Bot className="w-4 h-4 text-[#C9A227]" />
+            <Bot className="w-4 h-4 text-[#D4AF37]" />
             <span>Assistente IA</span>
-            <span className="bg-[#C9A227]/20 text-[#C9A227] text-[10px] px-1.5 py-0.2 rounded font-sans uppercase">
+            <span className="bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] px-1.5 py-0.2 rounded font-sans uppercase">
               Gemini
             </span>
           </button>
@@ -154,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
             id="export-btn"
             onClick={onOpenDailyExport}
             disabled={contactsCount === 0}
-            className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold rounded-lg px-3.5 py-2 text-xs transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold rounded-lg px-3.5 py-2 text-xs transition-all shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             title="Abrir painel de fechamento do dia e exportar lista atualizada com status"
           >
             <FileSpreadsheet className="w-4 h-4" />
@@ -164,14 +164,14 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Navigation tabs */}
-      <nav className="flex items-center gap-1.5 sm:gap-2 border-b border-[#2B3D63] mt-3 pb-1 overflow-x-auto">
+      <nav className="flex items-center gap-1.5 sm:gap-2 border-b border-[#25334A] mt-3 pb-1 overflow-x-auto">
         <button
           id="nav-btn-contatos"
           onClick={() => onSelectView('contatos')}
           className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'contatos'
-              ? 'bg-[#C9A227] text-[#101B2D] shadow-sm font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+              ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm font-bold'
+              : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827]'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -179,8 +179,8 @@ export const Header: React.FC<HeaderProps> = ({
           <span
             className={`text-[11px] px-1.5 py-0.2 rounded-full ${
               activeView === 'contatos'
-                ? 'bg-[#101B2D]/20 text-[#101B2D]'
-                : 'bg-[#172644] text-[#8C98B4]'
+                ? 'bg-[#0A0E17]/20 text-[#0A0E17]'
+                : 'bg-[#111827] text-[#94A3B8]'
             }`}
           >
             {contactsCount}
@@ -194,7 +194,7 @@ export const Header: React.FC<HeaderProps> = ({
             className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
               activeView === 'disparos'
                 ? 'bg-[#16A34A] text-white shadow-sm font-bold'
-                : 'text-[#8C98B4] hover:text-[#4ADE80] hover:bg-[#172644]'
+                : 'text-[#94A3B8] hover:text-[#4ADE80] hover:bg-[#111827]'
             }`}
             title="Disparador rápido WhatsApp & E-mail exclusivo do Administrador"
           >
@@ -211,11 +211,11 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onSelectView('mensagens')}
           className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'mensagens'
-              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+              ? 'bg-[#1E293B] text-[#F8FAFC] border border-[#D4AF37]/50 shadow-sm font-bold'
+              : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827]'
           }`}
         >
-          <MessageSquare className="w-4 h-4 text-[#C9A227]" />
+          <MessageSquare className="w-4 h-4 text-[#D4AF37]" />
           <span>Mensagens Prontas</span>
         </button>
 
@@ -224,11 +224,11 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onSelectView('objecoes')}
           className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'objecoes'
-              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+              ? 'bg-[#1E293B] text-[#F8FAFC] border border-[#D4AF37]/50 shadow-sm font-bold'
+              : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827]'
           }`}
         >
-          <ShieldAlert className="w-4 h-4 text-[#C9A227]" />
+          <ShieldAlert className="w-4 h-4 text-[#D4AF37]" />
           <span>Objeções</span>
         </button>
 
@@ -237,11 +237,11 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onSelectView('planos')}
           className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'planos'
-              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+              ? 'bg-[#1E293B] text-[#F8FAFC] border border-[#D4AF37]/50 shadow-sm font-bold'
+              : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827]'
           }`}
         >
-          <BookOpen className="w-4 h-4 text-[#C9A227]" />
+          <BookOpen className="w-4 h-4 text-[#D4AF37]" />
           <span>Planos & Valores</span>
         </button>
 
@@ -250,11 +250,11 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onSelectView('dashboard')}
           className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
             activeView === 'dashboard'
-              ? 'bg-[#1F3057] text-[#EDE6D6] border border-[#C9A227]/50 shadow-sm font-bold'
-              : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644]'
+              ? 'bg-[#1E293B] text-[#F8FAFC] border border-[#D4AF37]/50 shadow-sm font-bold'
+              : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827]'
           }`}
         >
-          <TrendingUp className="w-4 h-4 text-[#C9A227]" />
+          <TrendingUp className="w-4 h-4 text-[#D4AF37]" />
           <span>Métricas</span>
         </button>
 
@@ -264,8 +264,8 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onSelectView('admin')}
             className={`flex items-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold cursor-pointer transition-all whitespace-nowrap ml-auto ${
               activeView === 'admin'
-                ? 'bg-[#C9A227] text-[#101B2D] shadow-sm font-extrabold'
-                : 'text-[#C9A227] bg-[#172644] hover:bg-[#1F3057] border border-[#C9A227]/50'
+                ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm font-extrabold'
+                : 'text-[#D4AF37] bg-[#111827] hover:bg-[#1E293B] border border-[#D4AF37]/50'
             }`}
           >
             <Shield className="w-4 h-4" />

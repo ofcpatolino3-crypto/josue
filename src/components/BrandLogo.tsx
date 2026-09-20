@@ -18,7 +18,7 @@ export const PortalLogo: React.FC<PortalLogoProps> = ({
   size = 'md',
   className = '',
   withText = false,
-  textColor = '#EDE6D6',
+  textColor = '#F8FAFC',
   variant = 'dark',
 }) => {
   let dimension = 40;
@@ -107,7 +107,7 @@ export const PortalLogo: React.FC<PortalLogoProps> = ({
           </span>
         </div>
         <span
-          className="text-[9px] sm:text-[10px] font-bold tracking-widest uppercase text-[#C9A227]"
+          className="text-[9px] sm:text-[10px] font-bold tracking-widest uppercase text-[#D4AF37]"
           style={{ letterSpacing: '0.18em' }}
         >
           CONCURSOS E OAB
@@ -128,10 +128,10 @@ export const PortalFullLogo: React.FC<{ className?: string; height?: number }> =
     <div className={`flex items-center gap-3 ${className}`}>
       <PortalLogo size={height} />
       <div className="flex flex-col leading-none">
-        <span className="text-xl sm:text-2xl font-black tracking-wider text-[#EDE6D6] font-sans">
+        <span className="text-xl sm:text-2xl font-black tracking-wider text-[#F8FAFC] font-sans">
           PORTAL
         </span>
-        <span className="text-[10px] sm:text-[11px] font-extrabold tracking-widest text-[#C9A227] mt-0.5">
+        <span className="text-[10px] sm:text-[11px] font-extrabold tracking-widest text-[#D4AF37] mt-0.5">
           CONCURSOS E OAB
         </span>
       </div>
@@ -160,8 +160,8 @@ export const PortalWatermarkBackground: React.FC<{ opacity?: number }> = ({ opac
           className="w-full h-full"
         >
           {/* Giant Background Embossed Portal Ring */}
-          <circle cx="250" cy="250" r="230" stroke="#EDE6D6" strokeWidth="36" />
-          <circle cx="250" cy="250" r="140" stroke="#EDE6D6" strokeWidth="12" strokeDasharray="16 16" />
+          <circle cx="250" cy="250" r="230" stroke="#F8FAFC" strokeWidth="36" />
+          <circle cx="250" cy="250" r="140" stroke="#F8FAFC" strokeWidth="12" strokeDasharray="16 16" />
 
           {/* Left Book Page */}
           <path d="M170 190L235 220V335L170 305V190Z" fill="#3B82F6" opacity="0.8" />
@@ -175,14 +175,14 @@ export const PortalWatermarkBackground: React.FC<{ opacity?: number }> = ({ opac
       <div
         className="absolute bottom-10 left-10 lg:bottom-16 lg:left-16 flex items-center gap-6 opacity-[0.03] -rotate-6 pointer-events-none"
       >
-        <div className="w-28 h-28 border-[10px] border-[#EDE6D6] rounded-full flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-[#C9A227] rounded-sm rotate-45" />
+        <div className="w-28 h-28 border-[10px] border-[#F8FAFC] rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-[#D4AF37] rounded-sm rotate-45" />
         </div>
         <div className="flex flex-col">
-          <span className="text-6xl lg:text-8xl font-black tracking-widest text-[#EDE6D6] uppercase font-sans">
+          <span className="text-6xl lg:text-8xl font-black tracking-widest text-[#F8FAFC] uppercase font-sans">
             PORTAL
           </span>
-          <span className="text-xl lg:text-3xl font-bold tracking-[0.3em] text-[#C9A227] uppercase">
+          <span className="text-xl lg:text-3xl font-bold tracking-[0.3em] text-[#D4AF37] uppercase">
             CONCURSOS E OAB
           </span>
         </div>

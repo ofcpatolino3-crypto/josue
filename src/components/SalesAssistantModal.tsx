@@ -102,7 +102,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
       case 'Pagou':
         score = 100;
         strategyTitle = 'Boas-Vindas, Onboarding & Upsell de Elite';
-        strategyColor = 'from-[#16A34A]/20 to-[#101B2D] border-[#16A34A]/40 text-[#4ADE80]';
+        strategyColor = 'from-[#16A34A]/20 to-[#0A0E17] border-[#16A34A]/40 text-[#4ADE80]';
         strategySummary = 'O aluno já comprou! O objetivo agora é garantir o acesso imediato, acolher e apresentar os benefícios da Mentoria VIP / Premium 2.0 no futuro.';
         strategyTips = [
           'Confirme se ele conseguiu acessar a plataforma e baixar o cronograma.',
@@ -113,7 +113,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
       case 'Quente':
         score = 90;
         strategyTitle = 'Fechamento Direto com Escassez & Abatimento';
-        strategyColor = 'from-[#EA580C]/20 to-[#101B2D] border-[#EA580C]/40 text-[#FB923C]';
+        strategyColor = 'from-[#EA580C]/20 to-[#0A0E17] border-[#EA580C]/40 text-[#FB923C]';
         strategySummary = 'O aluno está na iminência de assinar! Evite excesso de rodeios e envie a condição final com o valor do curso isolado já abatido e link para pagamento.';
         strategyTips = [
           'Mostre a facilidade de parcelar em até 12x (menos de R$ 3/dia).',
@@ -124,7 +124,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
       case 'Potencial':
         score = 70;
         strategyTitle = 'Demonstração de Vantagem Econômica & Apoio à Decisão';
-        strategyColor = 'from-[#2563EB]/20 to-[#101B2D] border-[#2563EB]/40 text-[#60A5FA]';
+        strategyColor = 'from-[#2563EB]/20 to-[#0A0E17] border-[#2563EB]/40 text-[#60A5FA]';
         strategySummary = 'O aluno demonstrou forte interesse, mas está calculando ou conversando com a família. O foco é provar que a Assinatura 1.0 é um investimento que se paga no primeiro salário público.';
         strategyTips = [
           'Frise que 100% do valor do curso isolado entra como desconto na Assinatura 1.0.',
@@ -135,7 +135,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
       case 'Morno':
         score = 50;
         strategyTitle = 'Acolhimento de Rotina & Diagnóstico de Dificuldades';
-        strategyColor = 'from-[#C9A227]/20 to-[#101B2D] border-[#C9A227]/40 text-[#FCD34D]';
+        strategyColor = 'from-[#D4AF37]/20 to-[#0A0E17] border-[#D4AF37]/40 text-[#FCD34D]';
         strategySummary = 'O aluno está em ritmo lento ou tímido. Não faça venda agressiva: faça perguntas sinceras sobre como está a rotina de estudos para identificar sua maior dor.';
         strategyTips = [
           'Pergunte qual disciplina ele está achando mais pesada no curso isolado.',
@@ -147,7 +147,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
       default:
         score = 25;
         strategyTitle = 'Resgate do Sonho & Reconexão com Baixa Fricção';
-        strategyColor = 'from-[#DC2626]/20 to-[#101B2D] border-[#DC2626]/40 text-[#F87171]';
+        strategyColor = 'from-[#DC2626]/20 to-[#0A0E17] border-[#DC2626]/40 text-[#F87171]';
         strategySummary = 'O aluno desanimou ou pausou os estudos. O foco é reavivar o motivo principal da busca pela estabilidade e oferecer um recomeço acessível.';
         strategyTips = [
           'Relembre o propósito da posse (estabilidade, salário digno, família).',
@@ -437,41 +437,41 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div className="bg-[#172644] border border-[#C9A227]/40 rounded-2xl w-full max-w-4xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-[#111827] border border-[#D4AF37]/40 rounded-2xl w-full max-w-4xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden">
         
         {/* Top Queue Bar & Contact Switcher */}
-        <div className="bg-[#101B2D] px-4 py-2.5 border-b border-[#2B3D63] flex items-center justify-between gap-3 text-xs flex-wrap">
+        <div className="bg-[#0A0E17] px-4 py-2.5 border-b border-[#25334A] flex items-center justify-between gap-3 text-xs flex-wrap">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <span className="flex items-center gap-1.5 bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/50 font-bold px-2.5 py-1 rounded-md text-[11px] uppercase tracking-wider">
+            <span className="flex items-center gap-1.5 bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/50 font-bold px-2.5 py-1 rounded-md text-[11px] uppercase tracking-wider">
               <Bot className="w-3.5 h-3.5" />
               Assistente de Vendas IA
             </span>
-            <span className="text-[#EDE6D6] font-serif font-bold text-sm truncate">
+            <span className="text-[#F8FAFC] font-serif font-bold text-sm truncate">
               {contact.nome}
             </span>
-            <span className="text-[#8C98B4] text-xs">
+            <span className="text-[#94A3B8] text-xs">
               ({currentCourse}) {sameCourseContacts.length > 1 && `• ${indexInCourse + 1} de ${sameCourseContacts.length}`}
             </span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             {contactsQueue.length > 1 && (
-              <div className="flex items-center gap-1 bg-[#172644] border border-[#2B3D63] rounded-lg p-0.5">
+              <div className="flex items-center gap-1 bg-[#111827] border border-[#25334A] rounded-lg p-0.5">
                 <button
                   type="button"
                   disabled={!hasPrevious}
                   onClick={() => handleNavigate(currentIndex - 1)}
                   className={`p-1.5 rounded text-xs flex items-center gap-1 transition-all ${
                     hasPrevious
-                      ? 'text-[#EDE6D6] hover:bg-[#1F3057] cursor-pointer'
-                      : 'text-[#8C98B4]/40 cursor-not-allowed'
+                      ? 'text-[#F8FAFC] hover:bg-[#1E293B] cursor-pointer'
+                      : 'text-[#94A3B8]/40 cursor-not-allowed'
                   }`}
                   title="Aluno anterior na fila"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
 
-                <span className="text-[11px] font-mono text-[#8C98B4] px-1">
+                <span className="text-[11px] font-mono text-[#94A3B8] px-1">
                   {currentIndex + 1}/{contactsQueue.length}
                 </span>
 
@@ -481,8 +481,8 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                   onClick={() => handleNavigate(currentIndex + 1)}
                   className={`p-1.5 rounded text-xs flex items-center gap-1 transition-all ${
                     hasNext
-                      ? 'text-[#EDE6D6] hover:bg-[#1F3057] cursor-pointer'
-                      : 'text-[#8C98B4]/40 cursor-not-allowed'
+                      ? 'text-[#F8FAFC] hover:bg-[#1E293B] cursor-pointer'
+                      : 'text-[#94A3B8]/40 cursor-not-allowed'
                   }`}
                   title="Próximo aluno na fila"
                 >
@@ -494,7 +494,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="text-[#8C98B4] hover:text-[#EDE6D6] p-1.5 hover:bg-[#172644] rounded-lg transition-colors cursor-pointer"
+              className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 hover:bg-[#111827] rounded-lg transition-colors cursor-pointer"
               title="Fechar Assistente"
             >
               <X className="w-5 h-5" />
@@ -509,19 +509,19 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
           <div className={`p-4 sm:p-5 rounded-xl border bg-gradient-to-r ${analysis.strategyColor} shadow-md`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-[#101B2D]/80 px-3 py-1 rounded-md border border-[#2B3D63]">
+                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-[#0A0E17]/80 px-3 py-1 rounded-md border border-[#25334A]">
                   <Flame className="w-4 h-4 text-[#EA580C]" />
                   <span>Temperatura: <b>{contact.temperatura}</b></span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#EDE6D6] bg-[#101B2D]/80 px-3 py-1 rounded-md border border-[#2B3D63]">
-                  <Target className="w-3.5 h-3.5 text-[#C9A227]" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#F8FAFC] bg-[#0A0E17]/80 px-3 py-1 rounded-md border border-[#25334A]">
+                  <Target className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span>Potencial de Conversão: <b>{analysis.score}%</b></span>
                 </div>
               </div>
 
               {/* Quick Temperature Selector */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] font-semibold text-[#8C98B4]">Mudar Temperatura:</span>
+                <span className="text-[11px] font-semibold text-[#94A3B8]">Mudar Temperatura:</span>
                 {(['Frio', 'Morno', 'Potencial', 'Quente', 'Pagou'] as Temperature[]).map((t) => (
                   <button
                     key={t}
@@ -529,8 +529,8 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                     onClick={() => handleUpdateTemperature(t)}
                     className={`px-2 py-0.5 rounded text-[11px] font-bold border transition-all cursor-pointer ${
                       contact.temperatura === t
-                        ? 'bg-[#C9A227] text-[#101B2D] border-[#C9A227] shadow-sm'
-                        : 'bg-[#101B2D] text-[#8C98B4] border-[#2B3D63] hover:text-[#EDE6D6] hover:border-[#8C98B4]'
+                        ? 'bg-[#D4AF37] text-[#0A0E17] border-[#D4AF37] shadow-sm'
+                        : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-[#F8FAFC] hover:border-[#94A3B8]'
                     }`}
                   >
                     {t === 'Pagou' ? '💰 Pagou' : t}
@@ -541,20 +541,20 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#C9A227]" />
-                <h3 className="font-serif font-bold text-base sm:text-lg text-[#EDE6D6]">
+                <Zap className="w-4 h-4 text-[#D4AF37]" />
+                <h3 className="font-serif font-bold text-base sm:text-lg text-[#F8FAFC]">
                   Estratégia Recomendada: {analysis.strategyTitle}
                 </h3>
               </div>
-              <p className="text-xs sm:text-sm text-[#EDE6D6]/90 leading-relaxed font-sans">
+              <p className="text-xs sm:text-sm text-[#F8FAFC]/90 leading-relaxed font-sans">
                 {analysis.strategySummary}
               </p>
 
               {/* Strategy Action Tips */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
                 {analysis.strategyTips.map((tip, idx) => (
-                  <div key={idx} className="bg-[#101B2D]/60 border border-[#2B3D63]/70 rounded-lg p-2.5 text-xs text-[#EDE6D6] flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#C9A227] shrink-0 mt-0.5" />
+                  <div key={idx} className="bg-[#0A0E17]/60 border border-[#25334A]/70 rounded-lg p-2.5 text-xs text-[#F8FAFC] flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
                     <span>{tip}</span>
                   </div>
                 ))}
@@ -563,25 +563,25 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
 
             {/* Context from Notes & History */}
             {contact.observacao && (
-              <div className="mt-3 pt-3 border-t border-[#2B3D63]/60 flex items-start gap-2 text-xs text-[#8C98B4]">
-                <Edit3 className="w-3.5 h-3.5 text-[#C9A227] shrink-0 mt-0.5" />
+              <div className="mt-3 pt-3 border-t border-[#25334A]/60 flex items-start gap-2 text-xs text-[#94A3B8]">
+                <Edit3 className="w-3.5 h-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-[#EDE6D6]">Histórico Anotado do Aluno: </span>
-                  <span className="text-[#EDE6D6]/90">{contact.observacao}</span>
+                  <span className="font-semibold text-[#F8FAFC]">Histórico Anotado do Aluno: </span>
+                  <span className="text-[#F8FAFC]/90">{contact.observacao}</span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Sub Navigation Tabs */}
-          <div className="flex items-center gap-2 border-b border-[#2B3D63] overflow-x-auto">
+          <div className="flex items-center gap-2 border-b border-[#25334A] overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('pitch')}
               className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'pitch'
-                  ? 'border-[#C9A227] text-[#C9A227]'
-                  : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'border-[#D4AF37] text-[#D4AF37]'
+                  : 'border-transparent text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Sparkles className="w-4 h-4" />
@@ -594,7 +594,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
               className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'audio'
                   ? 'border-[#38BDF8] text-[#38BDF8]'
-                  : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+                  : 'border-transparent text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Mic className="w-4 h-4" />
@@ -606,8 +606,8 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
               onClick={() => setActiveTab('objecoes')}
               className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'objecoes'
-                  ? 'border-[#C9A227] text-[#C9A227]'
-                  : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'border-[#D4AF37] text-[#D4AF37]'
+                  : 'border-transparent text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <ShieldAlert className="w-4 h-4" />
@@ -619,8 +619,8 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
               onClick={() => setActiveTab('planos')}
               className={`flex items-center gap-2 pb-2.5 px-3 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'planos'
-                  ? 'border-[#C9A227] text-[#C9A227]'
-                  : 'border-transparent text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'border-[#D4AF37] text-[#D4AF37]'
+                  : 'border-transparent text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <BookOpen className="w-4 h-4" />
@@ -632,16 +632,16 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
           {activeTab === 'pitch' && (
             <div className="space-y-4 animate-fadeIn">
               {/* Configuration selectors for the pitch */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#101B2D] p-3.5 rounded-xl border border-[#2B3D63]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0A0E17] p-3.5 rounded-xl border border-[#25334A]">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1 flex items-center justify-between">
+                  <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1 flex items-center justify-between">
                     <span>Plano Vinculado à Proposta:</span>
-                    <span className="text-[#C9A227] text-[10px] font-normal">{analysis.planPitchReason}</span>
+                    <span className="text-[#D4AF37] text-[10px] font-normal">{analysis.planPitchReason}</span>
                   </label>
                   <select
                     value={selectedPlanId}
                     onChange={(e) => setSelectedPlanId(e.target.value)}
-                    className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] text-xs rounded-lg p-2 focus:outline-none focus:border-[#C9A227] cursor-pointer"
+                    className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] text-xs rounded-lg p-2 focus:outline-none focus:border-[#D4AF37] cursor-pointer"
                   >
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
@@ -652,13 +652,13 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C98B4] mb-1">
+                  <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1">
                     Objeção a Destravar no Texto:
                   </label>
                   <select
                     value={selectedObjectionId}
                     onChange={(e) => setSelectedObjectionId(e.target.value)}
-                    className="w-full bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] text-xs rounded-lg p-2 focus:outline-none focus:border-[#C9A227] cursor-pointer"
+                    className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] text-xs rounded-lg p-2 focus:outline-none focus:border-[#D4AF37] cursor-pointer"
                   >
                     <option value="">Nenhuma objeção específica (Foco direto no plano)</option>
                     {analysis.objectionMatches.map((m) => (
@@ -674,8 +674,8 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
               {/* Live Editable Pitch Box */}
               <div>
                 <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#8C98B4] flex items-center gap-1.5">
-                    <Edit3 className="w-3.5 h-3.5 text-[#C9A227]" />
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                    <Edit3 className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Script de Abordagem Pronto para {contact.nome}:</span>
                   </label>
                   
@@ -684,7 +684,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                       type="button"
                       disabled={isGeneratingAI}
                       onClick={handleGenerateAIPitch}
-                      className="flex items-center gap-1.5 bg-[#C9A227]/15 hover:bg-[#C9A227]/25 text-[#C9A227] hover:text-[#EDE6D6] border border-[#C9A227]/50 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-1.5 bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] hover:text-[#F8FAFC] border border-[#D4AF37]/50 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
                       title="Gerar uma versão inédita e hiper personalizada com a inteligência do Gemini"
                     >
                       {isGeneratingAI ? (
@@ -730,14 +730,14 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                           onAddTemplate(newTmpl);
                           onToast('Pitch salvo como Novo Script no sistema!', 'success');
                         }}
-                        className="flex items-center gap-1 text-[11px] bg-[#101B2D] hover:bg-[#1F3057] text-[#C9A227] border border-[#2B3D63] rounded-lg px-2.5 py-1 font-semibold cursor-pointer transition-colors"
+                        className="flex items-center gap-1 text-[11px] bg-[#0A0E17] hover:bg-[#1E293B] text-[#D4AF37] border border-[#25334A] rounded-lg px-2.5 py-1 font-semibold cursor-pointer transition-colors"
                         title="Salvar este pitch como um Script reutilizável"
                       >
                         <BookmarkPlus className="w-3 h-3" />
                         <span>Salvar como Script</span>
                       </button>
                     )}
-                    <span className="text-[11px] text-[#8C98B4] hidden sm:inline">Você pode editar livremente</span>
+                    <span className="text-[11px] text-[#94A3B8] hidden sm:inline">Você pode editar livremente</span>
                   </div>
                 </div>
 
@@ -746,31 +746,31 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                   value={customPitch}
                   onChange={(e) => setCustomPitch(e.target.value)}
                   placeholder="Gerando pitch personalizado..."
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] text-xs sm:text-sm font-sans p-3.5 rounded-xl leading-relaxed resize-y focus:outline-none shadow-inner"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] text-xs sm:text-sm font-sans p-3.5 rounded-xl leading-relaxed resize-y focus:outline-none shadow-inner"
                 />
               </div>
 
               {/* Quick CRM stamp buttons */}
-              <div className="flex items-center gap-2 flex-wrap text-xs bg-[#101B2D]/50 p-2.5 rounded-lg border border-[#2B3D63]/50">
-                <span className="text-[11px] font-semibold text-[#8C98B4]">Carimbo Rápido de Histórico:</span>
+              <div className="flex items-center gap-2 flex-wrap text-xs bg-[#0A0E17]/50 p-2.5 rounded-lg border border-[#25334A]/50">
+                <span className="text-[11px] font-semibold text-[#94A3B8]">Carimbo Rápido de Histórico:</span>
                 <button
                   type="button"
                   onClick={() => handleAddQuickNote('Oferecido plano 1.0 com abatimento integral')}
-                  className="px-2 py-1 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] rounded text-[11px] cursor-pointer transition-colors"
+                  className="px-2 py-1 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] rounded text-[11px] cursor-pointer transition-colors"
                 >
                   + Oferecida Migração 1.0
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddQuickNote('Aluno pediu prazo até amanhã')}
-                  className="px-2 py-1 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] rounded text-[11px] cursor-pointer transition-colors"
+                  className="px-2 py-1 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] rounded text-[11px] cursor-pointer transition-colors"
                 >
                   + Pediu prazo
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddQuickNote('Enviado link com garantia de 7 dias')}
-                  className="px-2 py-1 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] rounded text-[11px] cursor-pointer transition-colors"
+                  className="px-2 py-1 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] rounded text-[11px] cursor-pointer transition-colors"
                 >
                   + Enviada Garantia 7 dias
                 </button>
@@ -792,8 +792,8 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
           {activeTab === 'audio' && (
             <div className="space-y-4 animate-fadeIn">
               {/* Teleprompter Banner & Voice Tips */}
-              <div className="bg-gradient-to-r from-[#101B2D] via-[#142640] to-[#101B2D] border border-[#38BDF8]/40 rounded-xl p-4 space-y-3 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#2B3D63] pb-2.5">
+              <div className="bg-gradient-to-r from-[#0A0E17] via-[#142640] to-[#0A0E17] border border-[#38BDF8]/40 rounded-xl p-4 space-y-3 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#25334A] pb-2.5">
                   <div className="flex items-center gap-2 text-sm font-bold text-[#38BDF8]">
                     <Mic className="w-4 h-4 text-[#38BDF8] animate-pulse" />
                     <span>Teleprompter de Fala para WhatsApp ({contact.nome})</span>
@@ -803,7 +803,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                       <Timer className="w-3.5 h-3.5" />
                       ⏱️ Duração: 25 a 30s
                     </span>
-                    <span className="inline-flex items-center gap-1 bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] text-xs px-2.5 py-0.5 rounded">
+                    <span className="inline-flex items-center gap-1 bg-[#111827] border border-[#25334A] text-[#F8FAFC] text-xs px-2.5 py-0.5 rounded">
                       <Volume2 className="w-3.5 h-3.5 text-[#38BDF8]" />
                       Tom Seguro & Amigável
                     </span>
@@ -811,17 +811,17 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                  <div className="bg-[#172644]/70 p-2 rounded-lg border border-[#2B3D63] flex items-start gap-1.5">
+                  <div className="bg-[#111827]/70 p-2 rounded-lg border border-[#25334A] flex items-start gap-1.5">
                     <span className="text-[#38BDF8] font-bold">1.</span>
-                    <span className="text-[#EDE6D6]">Fale o 1º nome nos 3 primeiros segundos para gerar atenção imediata.</span>
+                    <span className="text-[#F8FAFC]">Fale o 1º nome nos 3 primeiros segundos para gerar atenção imediata.</span>
                   </div>
-                  <div className="bg-[#172644]/70 p-2 rounded-lg border border-[#2B3D63] flex items-start gap-1.5">
+                  <div className="bg-[#111827]/70 p-2 rounded-lg border border-[#25334A] flex items-start gap-1.5">
                     <span className="text-[#38BDF8] font-bold">2.</span>
-                    <span className="text-[#EDE6D6]">Destaque a garantia de abater 100% do curso isolado sem rodeios.</span>
+                    <span className="text-[#F8FAFC]">Destaque a garantia de abater 100% do curso isolado sem rodeios.</span>
                   </div>
-                  <div className="bg-[#172644]/70 p-2 rounded-lg border border-[#2B3D63] flex items-start gap-1.5">
+                  <div className="bg-[#111827]/70 p-2 rounded-lg border border-[#25334A] flex items-start gap-1.5">
                     <span className="text-[#38BDF8] font-bold">3.</span>
-                    <span className="text-[#EDE6D6]">Finalize com uma pergunta simples que exija apenas um "sim".</span>
+                    <span className="text-[#F8FAFC]">Finalize com uma pergunta simples que exija apenas um "sim".</span>
                   </div>
                 </div>
               </div>
@@ -892,14 +892,14 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                   rows={5}
                   value={customAudioScript}
                   onChange={(e) => setCustomAudioScript(e.target.value)}
-                  className="w-full bg-[#0E1726] border-2 border-[#38BDF8]/50 focus:border-[#38BDF8] text-[#EDE6D6] rounded-xl p-4 text-sm sm:text-base leading-relaxed resize-y font-sans font-medium tracking-wide shadow-inner"
+                  className="w-full bg-[#0E1726] border-2 border-[#38BDF8]/50 focus:border-[#38BDF8] text-[#F8FAFC] rounded-xl p-4 text-sm sm:text-base leading-relaxed resize-y font-sans font-medium tracking-wide shadow-inner"
                   placeholder="Roteiro de fala..."
                 />
               </div>
 
               {/* Action buttons specifically for Audio */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-[#2B3D63]">
-                <div className="text-xs text-[#8C98B4]">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-[#25334A]">
+                <div className="text-xs text-[#94A3B8]">
                   💡 <i>Dica: Clique no botão abaixo para abrir o WhatsApp do aluno e segure o microfone para gravar enquanto lê a tela acima!</i>
                 </div>
 
@@ -907,7 +907,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleCopyText(customAudioScript, 'audio_script', 'Roteiro de Áudio')}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] border border-[#2B3D63] rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] rounded-lg text-xs font-semibold cursor-pointer transition-colors"
                   >
                     {copiedKey === 'audio_script' ? <Check className="w-3.5 h-3.5 text-[#4ADE80]" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedKey === 'audio_script' ? 'Copiado!' : 'Copiar Roteiro'}</span>
@@ -926,7 +926,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                       }
                       onToast(`WhatsApp aberto para gravação com ${contact.nome}!`, 'success');
                     }}
-                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#38BDF8] hover:bg-[#2cb2ed] text-[#101B2D] font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors shadow-sm"
+                    className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#38BDF8] hover:bg-[#2cb2ed] text-[#0A0E17] font-bold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors shadow-sm"
                   >
                     <Mic className="w-4 h-4" />
                     <span>Abrir WhatsApp para Gravar</span>
@@ -939,7 +939,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
           {/* TAB 2: OBJEÇÕES DETECTADAS & SCRIPTS */}
           {activeTab === 'objecoes' && (
             <div className="space-y-4 animate-fadeIn">
-              <div className="text-xs text-[#8C98B4] flex items-center justify-between">
+              <div className="text-xs text-[#94A3B8] flex items-center justify-between">
                 <span>
                   Objeções ranqueadas por relevância com base na temperatura e nas anotações de <b>{contact.nome}</b>:
                 </span>
@@ -955,42 +955,42 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                   return (
                     <div
                       key={obj.id}
-                      className={`bg-[#101B2D] border rounded-xl p-4 sm:p-5 transition-all shadow-sm ${
+                      className={`bg-[#0A0E17] border rounded-xl p-4 sm:p-5 transition-all shadow-sm ${
                         isTopMatch
-                          ? 'border-[#C9A227]/70 shadow-[0_0_12px_rgba(201,162,39,0.12)]'
-                          : 'border-[#2B3D63]'
+                          ? 'border-[#D4AF37]/70 shadow-[0_0_12px_rgba(201,162,39,0.12)]'
+                          : 'border-[#25334A]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div>
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             {isTopMatch && (
-                              <span className="bg-[#C9A227] text-[#101B2D] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="bg-[#D4AF37] text-[#0A0E17] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <Sparkles className="w-3 h-3" />
                                 Alta Sugestão ({m.score}%)
                               </span>
                             )}
                             {obj.categoria && (
-                              <span className="bg-[#172644] text-[#8C98B4] border border-[#2B3D63] text-[10px] font-semibold uppercase px-2 py-0.5 rounded">
+                              <span className="bg-[#111827] text-[#94A3B8] border border-[#25334A] text-[10px] font-semibold uppercase px-2 py-0.5 rounded">
                                 {obj.categoria}
                               </span>
                             )}
-                            <span className="text-[11px] text-[#C9A227]/90 font-medium">
+                            <span className="text-[11px] text-[#D4AF37]/90 font-medium">
                               💡 Motivo: {m.reason}
                             </span>
                           </div>
-                          <h4 className="font-serif font-bold text-base sm:text-lg text-[#EDE6D6]">
+                          <h4 className="font-serif font-bold text-base sm:text-lg text-[#F8FAFC]">
                             "{fillTemplate(obj.objecao, contact)}"
                           </h4>
                         </div>
                       </div>
 
                       {/* Answer Display */}
-                      <div className="bg-[#172644]/70 p-3.5 rounded-lg border border-[#2B3D63] text-xs sm:text-sm text-[#EDE6D6] leading-relaxed space-y-2 whitespace-pre-wrap font-sans my-2.5">
+                      <div className="bg-[#111827]/70 p-3.5 rounded-lg border border-[#25334A] text-xs sm:text-sm text-[#F8FAFC] leading-relaxed space-y-2 whitespace-pre-wrap font-sans my-2.5">
                         {formattedResponse.split('\n\n').map((para, pIdx) => {
                           if (para.startsWith('❤️ [EMOÇÃO]:')) {
                             return (
-                              <div key={pIdx} className="bg-[#B14432]/10 border-l-2 border-[#B14432] pl-3 py-1 text-[#EDE6D6]">
+                              <div key={pIdx} className="bg-[#B14432]/10 border-l-2 border-[#B14432] pl-3 py-1 text-[#F8FAFC]">
                                 <span className="font-bold text-[#B14432] mr-1.5">❤️ Emoção (Acolhimento):</span>
                                 {para.replace('❤️ [EMOÇÃO]:', '').trim()}
                               </div>
@@ -998,7 +998,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                           }
                           if (para.startsWith('🧠 [LÓGICA]:')) {
                             return (
-                              <div key={pIdx} className="bg-[#5C7A9E]/10 border-l-2 border-[#5C7A9E] pl-3 py-1 text-[#EDE6D6]">
+                              <div key={pIdx} className="bg-[#5C7A9E]/10 border-l-2 border-[#5C7A9E] pl-3 py-1 text-[#F8FAFC]">
                                 <span className="font-bold text-[#5C7A9E] mr-1.5">🧠 Lógica (Racional/Cálculo):</span>
                                 {para.replace('🧠 [LÓGICA]:', '').trim()}
                               </div>
@@ -1009,7 +1009,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                       </div>
 
                       {/* Action buttons for this objection */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#2B3D63]/60 flex-wrap">
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#25334A]/60 flex-wrap">
                         <button
                           type="button"
                           onClick={() => {
@@ -1017,7 +1017,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                             setActiveTab('pitch');
                             onToast('Objeção adicionada ao Pitch de Vendas!', 'info');
                           }}
-                          className="text-xs text-[#C9A227] hover:underline flex items-center gap-1 cursor-pointer"
+                          className="text-xs text-[#D4AF37] hover:underline flex items-center gap-1 cursor-pointer"
                         >
                           <Zap className="w-3.5 h-3.5" />
                           <span>Usar no Pitch Personalizado</span>
@@ -1030,7 +1030,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                               isCopied
                                 ? 'bg-[#6E8F5C]/20 border-[#6E8F5C] text-[#6E8F5C]'
-                                : 'border-[#2B3D63] hover:border-[#EDE6D6] text-[#EDE6D6] hover:bg-[#1F3057]'
+                                : 'border-[#25334A] hover:border-[#F8FAFC] text-[#F8FAFC] hover:bg-[#1E293B]'
                             }`}
                           >
                             {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1040,7 +1040,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleSendWhatsApp(formattedResponse)}
-                            className="flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-[#101B2D] font-bold text-xs px-3.5 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm"
+                            className="flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-[#0A0E17] font-bold text-xs px-3.5 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>Enviar no WhatsApp</span>
@@ -1057,7 +1057,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
           {/* TAB 3: PLANOS & PROPOSTA SUGERIDA */}
           {activeTab === 'planos' && (
             <div className="space-y-4 animate-fadeIn">
-              <div className="text-xs text-[#8C98B4] flex items-center justify-between">
+              <div className="text-xs text-[#94A3B8] flex items-center justify-between">
                 <span>
                   Planos cadastrados com proposta personalizada para o curso de <b>{currentCourse}</b>:
                 </span>
@@ -1081,42 +1081,42 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                   return (
                     <div
                       key={plan.id}
-                      className={`bg-[#101B2D] border rounded-xl p-5 flex flex-col justify-between shadow-sm transition-all ${
+                      className={`bg-[#0A0E17] border rounded-xl p-5 flex flex-col justify-between shadow-sm transition-all ${
                         isSuggested
-                          ? 'border-[#C9A227] shadow-[0_0_16px_rgba(201,162,39,0.15)] bg-gradient-to-b from-[#172644] to-[#101B2D]'
-                          : 'border-[#2B3D63]'
+                          ? 'border-[#D4AF37] shadow-[0_0_16px_rgba(201,162,39,0.15)] bg-gradient-to-b from-[#111827] to-[#0A0E17]'
+                          : 'border-[#25334A]'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <h4 className="font-serif font-bold text-base sm:text-lg text-[#EDE6D6]">
+                          <h4 className="font-serif font-bold text-base sm:text-lg text-[#F8FAFC]">
                             {plan.nome}
                           </h4>
                           {isSuggested && (
-                            <span className="bg-[#C9A227] text-[#101B2D] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span className="bg-[#D4AF37] text-[#0A0E17] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1">
                               <Sparkles className="w-3 h-3" />
                               Recomendado para {contact.nome}
                             </span>
                           )}
                         </div>
 
-                        <div className="bg-[#172644] border border-dashed border-[#2B3D63] p-2.5 rounded-lg mb-3">
-                          <span className="block text-[10px] uppercase font-semibold text-[#8C98B4] tracking-wider mb-0.5">
+                        <div className="bg-[#111827] border border-dashed border-[#25334A] p-2.5 rounded-lg mb-3">
+                          <span className="block text-[10px] uppercase font-semibold text-[#94A3B8] tracking-wider mb-0.5">
                             Condição Comercial
                           </span>
-                          <span className="font-serif font-semibold text-[#C9A227] text-sm">
+                          <span className="font-serif font-semibold text-[#D4AF37] text-sm">
                             {plan.preco}
                           </span>
                         </div>
 
                         <div className="space-y-1.5 mb-4">
-                          <span className="block text-[10px] uppercase font-semibold text-[#8C98B4] tracking-wider">
+                          <span className="block text-[10px] uppercase font-semibold text-[#94A3B8] tracking-wider">
                             O que está incluso ({plan.beneficios.length} benefícios)
                           </span>
-                          <ul className="space-y-1 text-xs text-[#EDE6D6]">
+                          <ul className="space-y-1 text-xs text-[#F8FAFC]">
                             {plan.beneficios.map((b, bIdx) => (
                               <li key={bIdx} className="flex items-start gap-1.5">
-                                <Check className="w-3.5 h-3.5 text-[#C9A227] shrink-0 mt-0.5" />
+                                <Check className="w-3.5 h-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
                                 <span>{b}</span>
                               </li>
                             ))}
@@ -1124,14 +1124,14 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-[#2B3D63] flex flex-col sm:flex-row gap-2">
+                      <div className="pt-3 border-t border-[#25334A] flex flex-col sm:flex-row gap-2">
                         <button
                           type="button"
                           onClick={() => handleCopyText(formattedPlanText, `plan_${plan.id}`, 'Proposta de Plano')}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                             isCopied
                               ? 'bg-[#6E8F5C]/20 border-[#6E8F5C] text-[#6E8F5C]'
-                              : 'border-[#2B3D63] hover:border-[#EDE6D6] text-[#EDE6D6] hover:bg-[#1F3057]'
+                              : 'border-[#25334A] hover:border-[#F8FAFC] text-[#F8FAFC] hover:bg-[#1E293B]'
                           }`}
                         >
                           {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1141,7 +1141,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
                         <button
                           type="button"
                           onClick={() => handleSendWhatsApp(formattedPlanText)}
-                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-[#101B2D] font-bold text-xs py-2 rounded-lg transition-all cursor-pointer shadow-sm"
+                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-[#0A0E17] font-bold text-xs py-2 rounded-lg transition-all cursor-pointer shadow-sm"
                         >
                           <Send className="w-3.5 h-3.5" />
                           <span>Enviar no WhatsApp</span>
@@ -1156,7 +1156,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
         </div>
 
         {/* Modal Footer: Action Bar */}
-        <div className="p-4 sm:p-5 border-t border-[#2B3D63] bg-[#101B2D] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-[#25334A] bg-[#0A0E17] flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
@@ -1164,7 +1164,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
               className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 copiedKey === 'main_pitch'
                   ? 'bg-[#6E8F5C]/20 border-[#6E8F5C] text-[#6E8F5C]'
-                  : 'border-[#2B3D63] hover:border-[#EDE6D6] text-[#EDE6D6] hover:bg-[#1F3057]'
+                  : 'border-[#25334A] hover:border-[#F8FAFC] text-[#F8FAFC] hover:bg-[#1E293B]'
               }`}
             >
               {copiedKey === 'main_pitch' ? (
@@ -1183,7 +1183,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644] rounded-lg transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827] rounded-lg transition-colors cursor-pointer"
             >
               Fechar
             </button>
@@ -1194,7 +1194,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleSendWhatsApp(customPitch)}
-                className="w-full sm:w-auto px-3.5 py-2.5 text-xs font-semibold text-[#EDE6D6] border border-[#2B3D63] hover:bg-[#1F3057] rounded-lg transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-3.5 py-2.5 text-xs font-semibold text-[#F8FAFC] border border-[#25334A] hover:bg-[#1E293B] rounded-lg transition-colors cursor-pointer"
                 title="Apenas envia para este aluno sem avançar"
               >
                 Enviar Apenas Este
@@ -1204,7 +1204,7 @@ export const SalesAssistantModal: React.FC<SalesAssistantModalProps> = ({
             <button
               type="button"
               onClick={() => handleSendAndNext(customPitch)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] active:scale-[0.98] text-[#101B2D] font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-md transition-all cursor-pointer whitespace-nowrap"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] active:scale-[0.98] text-[#0A0E17] font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-md transition-all cursor-pointer whitespace-nowrap"
             >
               <Send className="w-4 h-4 fill-current" />
               <span>{hasNext ? 'Enviar no WhatsApp & Próximo Aluno' : 'Enviar no WhatsApp'}</span>

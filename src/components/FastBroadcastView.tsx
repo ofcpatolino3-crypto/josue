@@ -79,14 +79,14 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   // If not admin, block view with informative banner
   if (!isAdmin) {
     return (
-      <div className="max-w-2xl mx-auto my-12 bg-[#172644] border border-[#2B3D63] rounded-2xl p-8 text-center space-y-4 shadow-xl">
-        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#C9A227] flex items-center justify-center mx-auto text-2xl font-bold">
+      <div className="max-w-2xl mx-auto my-12 bg-[#111827] border border-[#25334A] rounded-2xl p-8 text-center space-y-4 shadow-xl">
+        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#D4AF37] flex items-center justify-center mx-auto text-2xl font-bold">
           🔒
         </div>
-        <h2 className="text-xl font-bold text-[#EDE6D6]">
+        <h2 className="text-xl font-bold text-[#F8FAFC]">
           Acesso Restrito ao Administrador
         </h2>
-        <p className="text-sm text-[#8C98B4] leading-relaxed">
+        <p className="text-sm text-[#94A3B8] leading-relaxed">
           O envio de contatos e disparos em massa é restrito exclusivamente ao Administrador.
           Conforme o Administrador realiza os envios, os leads são descontados imediatamente da conta admin e creditados na sua fila de atendimento em <strong>"Meus Contatos"</strong>.
         </p>
@@ -742,8 +742,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   const delaySeconds = ${massDelaySeconds};
 
   console.clear();
-  console.log("%c🚀 PORTAL CONCURSOS | INICIANDO DISPARO EM MASSA (" + contacts.length + " CONTATOS)", "background: #101B2D; color: #C9A227; font-size: 15px; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 1px solid #C9A227;");
-  console.log("%cIntervalo de segurança anti-bloqueio: " + delaySeconds + " segundos por envio", "color: #8C98B4; font-size: 12px;");
+  console.log("%c🚀 PORTAL CONCURSOS | INICIANDO DISPARO EM MASSA (" + contacts.length + " CONTATOS)", "background: #0A0E17; color: #D4AF37; font-size: 15px; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 1px solid #D4AF37;");
+  console.log("%cIntervalo de segurança anti-bloqueio: " + delaySeconds + " segundos por envio", "color: #94A3B8; font-size: 12px;");
 
   for (let i = 0; i < contacts.length; i++) {
     const item = contacts[i];
@@ -791,30 +791,30 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header Banner */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-lg">
+      <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
-              <Zap className="w-4 h-4 text-[#C9A227]" />
+            <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-1">
+              <Zap className="w-4 h-4 text-[#D4AF37]" />
               Central de Disparos Rápidos
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
+            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC]">
               Disparador de WhatsApp & E-mail
             </h2>
-            <p className="text-xs sm:text-sm text-[#8C98B4] mt-1">
+            <p className="text-xs sm:text-sm text-[#94A3B8] mt-1">
               Preencha nome, número, e-mail, foto e mensagem para disparar instantaneamente com 1 clique.
             </p>
           </div>
 
           {/* Tab navigation */}
-          <div className="flex items-center gap-1.5 bg-[#101B2D] p-1 rounded-lg border border-[#2B3D63] self-start md:self-auto">
+          <div className="flex items-center gap-1.5 bg-[#0A0E17] p-1 rounded-lg border border-[#25334A] self-start md:self-auto">
             <button
               type="button"
               onClick={() => setActiveTab('auto_mass')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'auto_mass'
                   ? 'bg-[#10B981] text-white shadow-sm ring-1 ring-[#34D399]'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Bot className="w-3.5 h-3.5 text-[#34D399]" />
@@ -830,7 +830,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'email_mass'
                   ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Mail className="w-3.5 h-3.5 text-blue-400" />
@@ -845,8 +845,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               onClick={() => setActiveTab('single')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'single'
-                  ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
@@ -858,13 +858,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               onClick={() => setActiveTab('batch')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'batch'
-                  ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Users className="w-3.5 h-3.5" />
               <span>Disparo em Lote / Fila</span>
-              <span className="text-[10px] bg-[#1F3057] text-[#C9A227] px-1.5 py-0.2 rounded-full">
+              <span className="text-[10px] bg-[#1E293B] text-[#D4AF37] px-1.5 py-0.2 rounded-full">
                 {filteredBatchQueue.length}
               </span>
             </button>
@@ -874,8 +874,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               onClick={() => setActiveTab('history')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'history'
-                  ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                  ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC]'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -885,24 +885,24 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
         </div>
 
         {/* WhatsApp Window / Tab Mode Bar */}
-        <div className="mt-4 pt-4 border-t border-[#2B3D63]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-[#8C98B4]">
-            <span className="font-semibold text-[#EDE6D6] flex items-center gap-1.5">
+        <div className="mt-4 pt-4 border-t border-[#25334A]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-[#94A3B8]">
+            <span className="font-semibold text-[#F8FAFC] flex items-center gap-1.5">
               <span>📱</span> Comportamento do WhatsApp:
             </span>
-            <span className="hidden md:inline text-[11px] text-[#8C98B4]">
+            <span className="hidden md:inline text-[11px] text-[#94A3B8]">
               (evita abrir abas repetidas no navegador)
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#101B2D] p-1 rounded-lg border border-[#2B3D63] flex-wrap">
+          <div className="flex items-center gap-1.5 bg-[#0A0E17] p-1 rounded-lg border border-[#25334A] flex-wrap">
             <button
               type="button"
               onClick={() => handleUpdateWaTargetMode('same_tab')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
                 waTargetMode === 'same_tab'
                   ? 'bg-[#16A34A] text-white shadow-sm ring-1 ring-[#4ADE80]/50'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057]'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]'
               }`}
               title="Abre o WhatsApp Web e reaproveita sempre a mesma aba a cada disparo"
             >
@@ -917,7 +917,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
                 waTargetMode === 'desktop_app'
                   ? 'bg-[#2563EB] text-white shadow-sm ring-1 ring-[#60A5FA]/50'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057]'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]'
               }`}
               title="Abre direto no Aplicativo WhatsApp instalado no computador / celular"
             >
@@ -930,8 +930,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               onClick={() => handleUpdateWaTargetMode('new_tab')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
                 waTargetMode === 'new_tab'
-                  ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
-                  : 'text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#1F3057]'
+                  ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                  : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]'
               }`}
               title="Abre uma nova aba no navegador para cada mensagem"
             >
@@ -943,23 +943,23 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
         {/* Admin Lead Transfer Setting */}
         {attendants.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-[#2B3D63]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#101B2D]/60 p-2.5 rounded-lg">
+          <div className="mt-3 pt-3 border-t border-[#25334A]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#0A0E17]/60 p-2.5 rounded-lg">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-              <span className="font-bold text-[#EDE6D6]">
+              <span className="font-bold text-[#F8FAFC]">
                 ⚡ Desconto & Transferência Imediata Pós-Disparo:
               </span>
-              <span className="text-[#8C98B4] text-[11px] hidden md:inline">
+              <span className="text-[#94A3B8] text-[11px] hidden md:inline">
                 (O lead sai imediatamente da conta Admin e vai para o atendente)
               </span>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <label className="text-[#8C98B4] text-[11px]">Destino:</label>
+              <label className="text-[#94A3B8] text-[11px]">Destino:</label>
               <select
                 value={broadcastTransferMode}
                 onChange={(e) => setBroadcastTransferMode(e.target.value)}
-                className="bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#C9A227]"
+                className="bg-[#111827] border border-[#25334A] text-[#F8FAFC] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#D4AF37]"
               >
                 <option value="roleta">🎲 Roleta Automática (Revezar entre os {attendants.length} atendentes)</option>
                 {attendants.map((a) => (
@@ -974,9 +974,9 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   type="checkbox"
                   checked={enableAutoTransferOnBroadcast}
                   onChange={(e) => setEnableAutoTransferOnBroadcast(e.target.checked)}
-                  className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-0 cursor-pointer"
+                  className="rounded border-[#25334A] text-[#D4AF37] focus:ring-0 cursor-pointer"
                 />
-                <span className="text-[11px] text-[#EDE6D6] font-semibold">Ativo</span>
+                <span className="text-[11px] text-[#F8FAFC] font-semibold">Ativo</span>
               </label>
             </div>
           </div>
@@ -987,12 +987,12 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
       {activeTab === 'single' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LEFT: FORM INPUTS (Col 7) */}
-          <div className="lg:col-span-7 bg-[#172644] border border-[#2B3D63] rounded-xl p-5 sm:p-6 space-y-5 shadow-md">
+          <div className="lg:col-span-7 bg-[#111827] border border-[#25334A] rounded-xl p-5 sm:p-6 space-y-5 shadow-md">
             {/* Quick Load Existing Contact */}
-            <div className="bg-[#101B2D] p-3.5 rounded-lg border border-[#2B3D63] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="bg-[#0A0E17] p-3.5 rounded-lg border border-[#25334A] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#C9A227]" />
-                <span className="text-xs font-semibold text-[#EDE6D6]">
+                <Users className="w-4 h-4 text-[#D4AF37]" />
+                <span className="text-xs font-semibold text-[#F8FAFC]">
                   Carregar de um contato salvo (opcional):
                 </span>
               </div>
@@ -1000,7 +1000,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 <select
                   value={selectedContactId}
                   onChange={(e) => handleSelectExistingContact(e.target.value)}
-                  className="w-full sm:w-64 bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-md px-2.5 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                  className="w-full sm:w-64 bg-[#111827] border border-[#25334A] text-xs text-[#F8FAFC] rounded-md px-2.5 py-1.5 focus:outline-none focus:border-[#D4AF37]"
                 >
                   <option value="">-- Digitar manualmente ou escolher aluno --</option>
                   {contacts.slice(0, 200).map((c) => (
@@ -1014,7 +1014,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   <button
                     type="button"
                     onClick={handleClearForm}
-                    className="text-xs text-[#8C98B4] hover:text-[#B14432] p-1.5 rounded hover:bg-[#1F3057] transition-colors"
+                    className="text-xs text-[#94A3B8] hover:text-[#B14432] p-1.5 rounded hover:bg-[#1E293B] transition-colors"
                     title="Limpar campos"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1026,8 +1026,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             {/* Inputs: Nome & Telefone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#EDE6D6] mb-1 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-[#C9A227]" />
+                <label className="block text-xs font-semibold text-[#F8FAFC] mb-1 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-[#D4AF37]" />
                   Nome do Aluno / Destinatário:
                 </label>
                 <input
@@ -1035,12 +1035,12 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="Ex: Carlos Alberto da Silva"
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-sm text-[#EDE6D6] placeholder-[#5A688A] focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-sm text-[#F8FAFC] placeholder-[#5A688A] focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#EDE6D6] mb-1 flex items-center gap-1.5">
+                <label className="block text-xs font-semibold text-[#F8FAFC] mb-1 flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-[#4ADE80]" />
                   Número do WhatsApp / Celular:
                 </label>
@@ -1050,7 +1050,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     value={formatPhoneDisplay(whatsapp)}
                     onChange={handlePhoneChange}
                     placeholder="Ex: (91) 98765-4321"
-                    className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-sm text-[#EDE6D6] placeholder-[#5A688A] focus:outline-none focus:border-[#4ADE80]"
+                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-sm text-[#F8FAFC] placeholder-[#5A688A] focus:outline-none focus:border-[#4ADE80]"
                   />
                   {whatsapp && (
                     <span className="absolute right-2.5 top-2.5 text-[10px] bg-[#6E8F5C]/20 text-[#4ADE80] px-1.5 py-0.5 rounded font-mono">
@@ -1064,7 +1064,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             {/* Inputs: E-mail & Curso */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#EDE6D6] mb-1 flex items-center gap-1.5">
+                <label className="block text-xs font-semibold text-[#F8FAFC] mb-1 flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-[#60A5FA]" />
                   E-mail do Destinatário:
                 </label>
@@ -1073,13 +1073,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Ex: carlos.alberto@gmail.com"
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-sm text-[#EDE6D6] placeholder-[#5A688A] focus:outline-none focus:border-[#60A5FA]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-sm text-[#F8FAFC] placeholder-[#5A688A] focus:outline-none focus:border-[#60A5FA]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#EDE6D6] mb-1 flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-[#C9A227]" />
+                <label className="block text-xs font-semibold text-[#F8FAFC] mb-1 flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-[#D4AF37]" />
                   Curso / Concurso de Interesse:
                 </label>
                 <input
@@ -1087,14 +1087,14 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   value={curso}
                   onChange={(e) => setCurso(e.target.value)}
                   placeholder="Ex: Polícia Militar do Pará - PMPA"
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-sm text-[#EDE6D6] placeholder-[#5A688A] focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-sm text-[#F8FAFC] placeholder-[#5A688A] focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
             </div>
 
             {/* Assunto do E-mail (quando for disparar por e-mail) */}
             <div>
-              <label className="block text-xs font-semibold text-[#EDE6D6] mb-1 flex items-center gap-1.5">
+              <label className="block text-xs font-semibold text-[#F8FAFC] mb-1 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-[#60A5FA]" />
                 Assunto do E-mail:
               </label>
@@ -1103,25 +1103,25 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 value={assuntoEmail}
                 onChange={(e) => setAssuntoEmail(e.target.value)}
                 placeholder="Assunto do e-mail..."
-                className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg px-3 py-2 text-xs sm:text-sm text-[#EDE6D6] placeholder-[#5A688A] focus:outline-none focus:border-[#60A5FA]"
+                className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg px-3 py-2 text-xs sm:text-sm text-[#F8FAFC] placeholder-[#5A688A] focus:outline-none focus:border-[#60A5FA]"
               />
             </div>
 
             {/* Modelos Prontos & Tags Rápidas */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#8C98B4] flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#C9A227]" />
+                <span className="text-xs font-semibold text-[#94A3B8] flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                   Modelos Rápidos de Mensagem:
                 </span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[11px] text-[#8C98B4]">Inserir Tag:</span>
+                  <span className="text-[11px] text-[#94A3B8]">Inserir Tag:</span>
                   {['nome', 'curso', 'whatsapp', 'email'].map((tag) => (
                     <button
                       key={tag}
                       type="button"
                       onClick={() => handleInsertTag(tag)}
-                      className="text-[10px] bg-[#101B2D] text-[#C9A227] hover:bg-[#1F3057] border border-[#2B3D63] px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                      className="text-[10px] bg-[#0A0E17] text-[#D4AF37] hover:bg-[#1E293B] border border-[#25334A] px-1.5 py-0.5 rounded cursor-pointer transition-colors"
                     >
                       {`{${tag}}`}
                     </button>
@@ -1136,7 +1136,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     key={tmpl.id}
                     type="button"
                     onClick={() => handleApplyTemplate(tmpl)}
-                    className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] px-2.5 py-1 rounded-md whitespace-nowrap cursor-pointer transition-colors"
+                    className="text-xs bg-[#0A0E17] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#D4AF37] border border-[#25334A] px-2.5 py-1 rounded-md whitespace-nowrap cursor-pointer transition-colors"
                     title={tmpl.texto}
                   >
                     {tmpl.titulo}
@@ -1148,7 +1148,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             {/* Mensagem Principal */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-[#EDE6D6]">
+                <label className="text-xs font-semibold text-[#F8FAFC]">
                   Mensagem do Disparo:
                 </label>
                 <div className="flex items-center gap-1">
@@ -1169,14 +1169,14 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 value={mensagem}
                 onChange={(e) => setMensagem(e.target.value)}
                 placeholder="Escreva sua mensagem aqui... Use {nome} e {curso} para personalizar automaticamente."
-                className="w-full bg-[#101B2D] border border-[#2B3D63] rounded-lg p-3 text-sm text-[#EDE6D6] placeholder-[#5A688A] focus:outline-none focus:border-[#C9A227] leading-relaxed font-sans"
+                className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-3 text-sm text-[#F8FAFC] placeholder-[#5A688A] focus:outline-none focus:border-[#D4AF37] leading-relaxed font-sans"
               />
-              <div className="flex items-center justify-between text-[11px] text-[#8C98B4] mt-1">
+              <div className="flex items-center justify-between text-[11px] text-[#94A3B8] mt-1">
                 <span>{mensagem.length} caracteres · {mensagem.split(/\s+/).filter(Boolean).length} palavras</span>
                 <button
                   type="button"
                   onClick={handleCopyText}
-                  className="flex items-center gap-1 text-[#C9A227] hover:underline cursor-pointer"
+                  className="flex items-center gap-1 text-[#D4AF37] hover:underline cursor-pointer"
                 >
                   {copiedText ? <Check className="w-3 h-3 text-[#4ADE80]" /> : <Copy className="w-3 h-3" />}
                   <span>{copiedText ? 'Copiado!' : 'Copiar Texto'}</span>
@@ -1185,10 +1185,10 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             </div>
 
             {/* Foto / Imagem do Disparo */}
-            <div className="bg-[#101B2D] border border-[#2B3D63] rounded-lg p-4 space-y-3">
+            <div className="bg-[#0A0E17] border border-[#25334A] rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[#EDE6D6] flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-[#C9A227]" />
+                <label className="text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-[#D4AF37]" />
                   Foto / Imagem Anexo para o Disparo:
                 </label>
                 {imageUrl && (
@@ -1209,31 +1209,31 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               {!imageUrl ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-[#2B3D63] hover:border-[#C9A227] rounded-lg p-5 text-center cursor-pointer transition-colors bg-[#172644]/50 hover:bg-[#172644]"
+                  className="border-2 border-dashed border-[#25334A] hover:border-[#D4AF37] rounded-lg p-5 text-center cursor-pointer transition-colors bg-[#111827]/50 hover:bg-[#111827]"
                 >
-                  <Upload className="w-7 h-7 text-[#C9A227] mx-auto mb-2 opacity-80" />
-                  <p className="text-xs font-semibold text-[#EDE6D6]">
+                  <Upload className="w-7 h-7 text-[#D4AF37] mx-auto mb-2 opacity-80" />
+                  <p className="text-xs font-semibold text-[#F8FAFC]">
                     Clique para selecionar uma foto ou arraste o arquivo aqui
                   </p>
-                  <p className="text-[11px] text-[#8C98B4] mt-1">
+                  <p className="text-[11px] text-[#94A3B8] mt-1">
                     PNG, JPG, WebP até 5MB (Banners, tabela de planos, comprovantes, avisos)
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#172644] p-3 rounded-lg border border-[#2B3D63]">
+                <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#111827] p-3 rounded-lg border border-[#25334A]">
                   <div className="relative group shrink-0">
                     <img
                       src={imageUrl}
                       alt="Anexo de disparo"
-                      className="w-24 h-24 object-cover rounded-md border border-[#2B3D63] shadow-md"
+                      className="w-24 h-24 object-cover rounded-md border border-[#25334A] shadow-md"
                     />
                   </div>
 
                   <div className="flex-1 min-w-0 text-center sm:text-left space-y-2">
-                    <p className="text-xs font-semibold text-[#EDE6D6] truncate">
+                    <p className="text-xs font-semibold text-[#F8FAFC] truncate">
                       {imageFileName || 'Imagem carregada pronta para envio'}
                     </p>
-                    <p className="text-[11px] text-[#8C98B4]">
+                    <p className="text-[11px] text-[#94A3B8]">
                       A foto está pronta! Clique em <b>"Copiar Foto"</b> para colar direto na conversa do WhatsApp Web (Ctrl+V) ou anexar no e-mail.
                     </p>
 
@@ -1243,8 +1243,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                         onClick={handleCopyImageToClipboard}
                         className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-md transition-all cursor-pointer ${
                           copiedImage
-                            ? 'bg-[#4ADE80] text-[#101B2D]'
-                            : 'bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D]'
+                            ? 'bg-[#4ADE80] text-[#0A0E17]'
+                            : 'bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17]'
                         }`}
                       >
                         {copiedImage ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1266,23 +1266,23 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             </div>
 
             {/* Checkboxes: Save contact & Mark today */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1 border-t border-[#2B3D63]/70">
-              <label className="flex items-center gap-2 text-xs text-[#EDE6D6] cursor-pointer">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1 border-t border-[#25334A]/70">
+              <label className="flex items-center gap-2 text-xs text-[#F8FAFC] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={autoSaveContact}
                   onChange={(e) => setAutoSaveContact(e.target.checked)}
-                  className="rounded border-[#2B3D63] text-[#C9A227] focus:ring-[#C9A227]"
+                  className="rounded border-[#25334A] text-[#D4AF37] focus:ring-[#D4AF37]"
                 />
                 <span>Salvar novo contato na base de dados se não existir</span>
               </label>
 
-              <label className="flex items-center gap-2 text-xs text-[#EDE6D6] cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-[#F8FAFC] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={autoMarkToday}
                   onChange={(e) => setAutoMarkToday(e.target.checked)}
-                  className="rounded border-[#2B3D63] text-[#4ADE80] focus:ring-[#4ADE80]"
+                  className="rounded border-[#25334A] text-[#4ADE80] focus:ring-[#4ADE80]"
                 />
                 <span>Marcar contato como contatado hoje ({todayStr()})</span>
               </label>
@@ -1290,7 +1290,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
             {/* BOTOES DE DISPARO RÁPIDO (E PRONTO!) */}
             <div className="pt-2 space-y-2.5">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#C9A227]">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#D4AF37]">
                 Ações de Disparo Imediato:
               </div>
 
@@ -1301,7 +1301,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   id="fast-send-whatsapp-btn"
                   onClick={handleSendWhatsApp}
                   disabled={!whatsapp}
-                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-[#101B2D] font-bold text-sm sm:text-base py-3 px-4 rounded-xl shadow-lg transition-all transform active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-[#0A0E17] font-bold text-sm sm:text-base py-3 px-4 rounded-xl shadow-lg transition-all transform active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Send className="w-5 h-5" />
                   <span>Disparar via WhatsApp</span>
@@ -1326,9 +1326,9 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   type="button"
                   onClick={handleSendBoth}
                   disabled={!whatsapp && !email}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] font-semibold text-xs sm:text-sm py-2.5 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] hover:text-[#D4AF37] border border-[#25334A] font-semibold text-xs sm:text-sm py-2.5 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
                 >
-                  <Zap className="w-4 h-4 text-[#C9A227]" />
+                  <Zap className="w-4 h-4 text-[#D4AF37]" />
                   <span>Disparo Duplo (WhatsApp + E-mail)</span>
                 </button>
 
@@ -1336,7 +1336,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   type="button"
                   onClick={() => handleSendEmail('mailto')}
                   disabled={!email}
-                  className="flex items-center justify-center gap-1.5 bg-[#101B2D] hover:bg-[#1F3057] text-[#8C98B4] hover:text-[#EDE6D6] border border-[#2B3D63] text-xs py-2.5 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                  className="flex items-center justify-center gap-1.5 bg-[#0A0E17] hover:bg-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#25334A] text-xs py-2.5 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
                   title="Abrir no Outlook, Thunderbird ou App de E-mail Padrão"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -1348,23 +1348,23 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
           {/* RIGHT: LIVE PREVIEW (Col 5) */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md">
-              <div className="flex items-center justify-between border-b border-[#2B3D63] pb-3 mb-4">
+            <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-md">
+              <div className="flex items-center justify-between border-b border-[#25334A] pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-[#C9A227]" />
-                  <h3 className="text-sm font-bold font-serif text-[#EDE6D6]">
+                  <Eye className="w-4 h-4 text-[#D4AF37]" />
+                  <h3 className="text-sm font-bold font-serif text-[#F8FAFC]">
                     Pré-visualização do Disparo
                   </h3>
                 </div>
-                <span className="text-[10px] uppercase font-bold bg-[#101B2D] text-[#4ADE80] px-2 py-0.5 rounded border border-[#6E8F5C]/40">
+                <span className="text-[10px] uppercase font-bold bg-[#0A0E17] text-[#4ADE80] px-2 py-0.5 rounded border border-[#6E8F5C]/40">
                   Visualização Real
                 </span>
               </div>
 
               {/* WhatsApp Balloon Preview */}
-              <div className="bg-[#0B141A] rounded-xl p-4 border border-[#2B3D63] shadow-inner space-y-3">
-                <div className="flex items-center justify-between text-[11px] text-[#8C98B4] border-b border-[#1F3057] pb-2">
-                  <span className="font-semibold text-[#EDE6D6]">
+              <div className="bg-[#0B141A] rounded-xl p-4 border border-[#25334A] shadow-inner space-y-3">
+                <div className="flex items-center justify-between text-[11px] text-[#94A3B8] border-b border-[#1E293B] pb-2">
+                  <span className="font-semibold text-[#F8FAFC]">
                     Para: {nome.trim() || 'Nome do Aluno'}
                   </span>
                   <span className="font-mono text-[#4ADE80]">
@@ -1374,7 +1374,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
                 {/* Attached Image Preview */}
                 {imageUrl && (
-                  <div className="relative rounded-lg overflow-hidden border border-[#2B3D63] bg-[#172644]">
+                  <div className="relative rounded-lg overflow-hidden border border-[#25334A] bg-[#111827]">
                     <img
                       src={imageUrl}
                       alt="Preview do Anexo"
@@ -1387,7 +1387,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 )}
 
                 {/* Message Bubble */}
-                <div className="bg-[#005C4B] text-[#EDE6D6] p-3.5 rounded-lg rounded-tr-none text-xs sm:text-sm leading-relaxed whitespace-pre-wrap shadow-md">
+                <div className="bg-[#005C4B] text-[#F8FAFC] p-3.5 rounded-lg rounded-tr-none text-xs sm:text-sm leading-relaxed whitespace-pre-wrap shadow-md">
                   {getProcessedText()}
                   <div className="text-[10px] text-right text-[#A0D2C8] mt-1.5">
                     {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ✓✓
@@ -1396,16 +1396,16 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               </div>
 
               {/* Email Subject Preview */}
-              <div className="mt-4 p-3 bg-[#101B2D] rounded-lg border border-[#2B3D63] text-xs space-y-1">
-                <div className="text-[11px] text-[#8C98B4] font-semibold">Assunto do E-mail formatado:</div>
-                <div className="text-[#EDE6D6] font-medium">{getProcessedSubject()}</div>
+              <div className="mt-4 p-3 bg-[#0A0E17] rounded-lg border border-[#25334A] text-xs space-y-1">
+                <div className="text-[11px] text-[#94A3B8] font-semibold">Assunto do E-mail formatado:</div>
+                <div className="text-[#F8FAFC] font-medium">{getProcessedSubject()}</div>
                 <div className="text-[10px] text-[#60A5FA] mt-1">Destinatário: {email || '(Nenhum e-mail informado)'}</div>
               </div>
             </div>
 
             {/* Quick tips */}
-            <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-4 space-y-2 text-xs text-[#8C98B4]">
-              <div className="flex items-center gap-1.5 font-bold text-[#C9A227]">
+            <div className="bg-[#111827] border border-[#25334A] rounded-xl p-4 space-y-2 text-xs text-[#94A3B8]">
+              <div className="flex items-center gap-1.5 font-bold text-[#D4AF37]">
                 <Sparkles className="w-3.5 h-3.5" />
                 Dica de Disparo com Foto:
               </div>
@@ -1422,13 +1422,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
       {/* TAB 2: BATCH / QUEUE DISPATCH */}
       {activeTab === 'batch' && (
-        <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 sm:p-6 space-y-6 shadow-md">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2B3D63] pb-4">
+        <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 sm:p-6 space-y-6 shadow-md">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#25334A] pb-4">
             <div>
-              <h3 className="text-base sm:text-lg font-bold font-serif text-[#EDE6D6]">
+              <h3 className="text-base sm:text-lg font-bold font-serif text-[#F8FAFC]">
                 Fila de Disparos em Sequência ({filteredBatchQueue.length} contatos)
               </h3>
-              <p className="text-xs text-[#8C98B4] mt-0.5">
+              <p className="text-xs text-[#94A3B8] mt-0.5">
                 Dispare para a lista inteira um por um com 1 clique por aluno, sem travar o WhatsApp e com marcação automática.
               </p>
             </div>
@@ -1441,7 +1441,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   setBatchCourseFilter(e.target.value);
                   setBatchQueueIndex(0);
                 }}
-                className="bg-[#101B2D] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-md px-2.5 py-1.5 focus:outline-none"
+                className="bg-[#0A0E17] border border-[#25334A] text-xs text-[#F8FAFC] rounded-md px-2.5 py-1.5 focus:outline-none"
               >
                 <option value="">Todos os Cursos</option>
                 {uniqueCourses.map((c) => (
@@ -1457,7 +1457,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   setBatchTempFilter(e.target.value);
                   setBatchQueueIndex(0);
                 }}
-                className="bg-[#101B2D] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded-md px-2.5 py-1.5 focus:outline-none"
+                className="bg-[#0A0E17] border border-[#25334A] text-xs text-[#F8FAFC] rounded-md px-2.5 py-1.5 focus:outline-none"
               >
                 <option value="">Todas Temperaturas</option>
                 <option value="Quente">🔥 Quente</option>
@@ -1466,7 +1466,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 <option value="Frio">❄️ Frio</option>
               </select>
 
-              <label className="flex items-center gap-1.5 text-xs text-[#8C98B4] bg-[#101B2D] px-2.5 py-1.5 rounded border border-[#2B3D63] cursor-pointer">
+              <label className="flex items-center gap-1.5 text-xs text-[#94A3B8] bg-[#0A0E17] px-2.5 py-1.5 rounded border border-[#25334A] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={batchOnlyPending}
@@ -1474,7 +1474,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     setBatchOnlyPending(e.target.checked);
                     setBatchQueueIndex(0);
                   }}
-                  className="rounded border-[#2B3D63] text-[#C9A227]"
+                  className="rounded border-[#25334A] text-[#D4AF37]"
                 />
                 <span>Apenas não contatados hoje</span>
               </label>
@@ -1482,21 +1482,21 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
           </div>
 
           {filteredBatchQueue.length === 0 ? (
-            <div className="py-12 text-center text-[#8C98B4]">
-              <AlertCircle className="w-8 h-8 mx-auto mb-2 text-[#C9A227] opacity-60" />
-              <p className="text-sm font-semibold text-[#EDE6D6]">Nenhum contato encontrado com esses filtros.</p>
+            <div className="py-12 text-center text-[#94A3B8]">
+              <AlertCircle className="w-8 h-8 mx-auto mb-2 text-[#D4AF37] opacity-60" />
+              <p className="text-sm font-semibold text-[#F8FAFC]">Nenhum contato encontrado com esses filtros.</p>
               <p className="text-xs mt-1">Altere os filtros acima para listar contatos para disparo.</p>
             </div>
           ) : currentBatchContact ? (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Active Item Card (Col 7) */}
-              <div className="lg:col-span-7 bg-[#101B2D] border border-[#2B3D63] rounded-xl p-5 space-y-4">
+              <div className="lg:col-span-7 bg-[#0A0E17] border border-[#25334A] rounded-xl p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase bg-[#C9A227] text-[#101B2D] px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs font-bold uppercase bg-[#D4AF37] text-[#0A0E17] px-2.5 py-0.5 rounded-full">
                       Item {batchQueueIndex + 1} de {filteredBatchQueue.length}
                     </span>
-                    <span className="text-xs text-[#8C98B4]">
+                    <span className="text-xs text-[#94A3B8]">
                       {Math.round(((batchQueueIndex + 1) / filteredBatchQueue.length) * 100)}% concluído
                     </span>
                   </div>
@@ -1506,7 +1506,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                       type="button"
                       onClick={() => handleNextBatchContact(-1)}
                       disabled={batchQueueIndex === 0}
-                      className="text-xs bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] px-2.5 py-1 rounded border border-[#2B3D63] disabled:opacity-30 cursor-pointer"
+                      className="text-xs bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] px-2.5 py-1 rounded border border-[#25334A] disabled:opacity-30 cursor-pointer"
                     >
                       ← Anterior
                     </button>
@@ -1514,7 +1514,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                       type="button"
                       onClick={() => handleNextBatchContact(1)}
                       disabled={batchQueueIndex >= filteredBatchQueue.length - 1}
-                      className="text-xs bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] px-2.5 py-1 rounded border border-[#2B3D63] disabled:opacity-30 cursor-pointer"
+                      className="text-xs bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] px-2.5 py-1 rounded border border-[#25334A] disabled:opacity-30 cursor-pointer"
                     >
                       Próximo →
                     </button>
@@ -1522,9 +1522,9 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full bg-[#172644] h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-[#111827] h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-[#C9A227] h-full transition-all duration-300"
+                    className="bg-[#D4AF37] h-full transition-all duration-300"
                     style={{
                       width: `${((batchQueueIndex + 1) / filteredBatchQueue.length) * 100}%`,
                     }}
@@ -1532,26 +1532,26 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 </div>
 
                 {/* Contact Data */}
-                <div className="bg-[#172644] p-4 rounded-lg border border-[#2B3D63] space-y-2">
-                  <h4 className="text-lg font-bold font-serif text-[#EDE6D6]">
+                <div className="bg-[#111827] p-4 rounded-lg border border-[#25334A] space-y-2">
+                  <h4 className="text-lg font-bold font-serif text-[#F8FAFC]">
                     {currentBatchContact.nome}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                     <div>
-                      <span className="text-[#8C98B4]">WhatsApp:</span>{' '}
+                      <span className="text-[#94A3B8]">WhatsApp:</span>{' '}
                       <span className="font-mono text-[#4ADE80] font-bold">
                         {currentBatchContact.whatsapp || 'Não informado'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[#8C98B4]">E-mail:</span>{' '}
+                      <span className="text-[#94A3B8]">E-mail:</span>{' '}
                       <span className="text-[#60A5FA] truncate block">
                         {currentBatchContact.email || 'Não informado'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[#8C98B4]">Curso:</span>{' '}
-                      <span className="text-[#EDE6D6] font-semibold">
+                      <span className="text-[#94A3B8]">Curso:</span>{' '}
+                      <span className="text-[#F8FAFC] font-semibold">
                         {currentBatchContact.curso || 'Geral'}
                       </span>
                     </div>
@@ -1563,7 +1563,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   <button
                     type="button"
                     onClick={handleBatchSendWhatsAppCurrent}
-                    className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-[#101B2D] font-bold py-3 px-4 rounded-xl shadow transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-[#0A0E17] font-bold py-3 px-4 rounded-xl shadow transition-all cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                     <span>Disparar WhatsApp ({batchQueueIndex + 1})</span>
@@ -1582,18 +1582,18 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               </div>
 
               {/* Message Live Preview (Col 5) */}
-              <div className="lg:col-span-5 bg-[#0B141A] rounded-xl p-4 border border-[#2B3D63] space-y-3">
-                <div className="text-xs font-semibold text-[#8C98B4] border-b border-[#1F3057] pb-2">
+              <div className="lg:col-span-5 bg-[#0B141A] rounded-xl p-4 border border-[#25334A] space-y-3">
+                <div className="text-xs font-semibold text-[#94A3B8] border-b border-[#1E293B] pb-2">
                   Mensagem que será enviada para {currentBatchContact.nome}:
                 </div>
 
                 {imageUrl && (
-                  <div className="rounded-lg overflow-hidden border border-[#2B3D63] max-h-36">
+                  <div className="rounded-lg overflow-hidden border border-[#25334A] max-h-36">
                     <img src={imageUrl} alt="Foto" className="w-full h-full object-cover" />
                   </div>
                 )}
 
-                <div className="bg-[#005C4B] text-[#EDE6D6] p-3 rounded-lg text-xs leading-relaxed whitespace-pre-wrap">
+                <div className="bg-[#005C4B] text-[#F8FAFC] p-3 rounded-lg text-xs leading-relaxed whitespace-pre-wrap">
                   {fillTemplate(mensagem, currentBatchContact)}
                 </div>
               </div>
@@ -1606,14 +1606,14 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
       {activeTab === 'auto_mass' && (
         <div className="space-y-6">
           {/* Hero Feature Banner */}
-          <div className="bg-gradient-to-r from-[#0F291E] via-[#10243E] to-[#172644] border border-[#10B981]/40 rounded-xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+          <div className="bg-gradient-to-r from-[#0F291E] via-[#10243E] to-[#111827] border border-[#10B981]/40 rounded-xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 bg-[#10B981]/20 border border-[#10B981]/50 px-3 py-1 rounded-full text-xs font-bold text-[#34D399] uppercase tracking-wider">
                   <Bot className="w-4 h-4 text-[#34D399]" />
                   Disparo em Massa 100% Automático · Zero Abas
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
+                <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC]">
                   Dispare para centenas de alunos sem abrir abas manuais
                 </h3>
                 <p className="text-xs sm:text-sm text-[#A7B3CC] max-w-2xl leading-relaxed">
@@ -1636,7 +1636,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   type="button"
                   onClick={handleGenerateAndCopyMassScript}
                   disabled={targetMassContacts.length === 0}
-                  className="flex items-center justify-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 disabled:opacity-40 cursor-pointer"
+                  className="flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 disabled:opacity-40 cursor-pointer"
                 >
                   {copiedMassScript ? <Check className="w-4 h-4 text-emerald-950" /> : <Terminal className="w-4 h-4" />}
                   <span>{copiedMassScript ? 'Robô Copiado!' : 'Copiar Robô (F12)'}</span>
@@ -1646,22 +1646,22 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
           </div>
 
           {/* Sub-Navigation for Mode Selection */}
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-4 shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2B3D63] pb-3 mb-4">
+          <div className="bg-[#111827] border border-[#25334A] rounded-xl p-4 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#25334A] pb-3 mb-4">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#C9A227]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
                   Escolha o Método de Disparo:
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-[#101B2D] p-1 rounded-lg border border-[#2B3D63] flex-wrap">
+              <div className="flex items-center gap-1.5 bg-[#0A0E17] p-1 rounded-lg border border-[#25334A] flex-wrap">
                 <button
                   type="button"
                   onClick={() => setMassSubTab('exporter')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                     massSubTab === 'exporter'
                       ? 'bg-[#10B981] text-white shadow-sm'
-                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                      : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                   }`}
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -1673,8 +1673,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   onClick={() => setMassSubTab('script')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                     massSubTab === 'script'
-                      ? 'bg-[#C9A227] text-[#101B2D] shadow-sm'
-                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                      ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                      : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                   }`}
                 >
                   <Terminal className="w-3.5 h-3.5" />
@@ -1687,7 +1687,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                     massSubTab === 'guide'
                       ? 'bg-[#2563EB] text-white shadow-sm'
-                      : 'text-[#8C98B4] hover:text-[#EDE6D6]'
+                      : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                   }`}
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
@@ -1700,7 +1700,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             {massSubTab === 'exporter' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2">
+                  <div className="bg-[#0A0E17] p-4 rounded-xl border border-[#25334A] space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
                         <FileSpreadsheet className="w-4 h-4" />
@@ -1710,7 +1710,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                         Mais Usado
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#8C98B4]">
+                    <p className="text-[11px] text-[#94A3B8]">
                       Arquivo com colunas <code>Phone</code>, <code>Name</code> e <code>Message</code> formatadas para importar em qualquer disparador.
                     </p>
                     <button
@@ -1724,7 +1724,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     </button>
                   </div>
 
-                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2">
+                  <div className="bg-[#0A0E17] p-4 rounded-xl border border-[#25334A] space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[#60A5FA] font-bold text-xs">
                         <Download className="w-4 h-4" />
@@ -1734,7 +1734,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                         Universal
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#8C98B4]">
+                    <p className="text-[11px] text-[#94A3B8]">
                       Arquivo CSV com separador padrão aceito por WhatsBulk, W-Sender e robôs do Chrome.
                     </p>
                     <button
@@ -1748,24 +1748,24 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     </button>
                   </div>
 
-                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2">
+                  <div className="bg-[#0A0E17] p-4 rounded-xl border border-[#25334A] space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[#C9A227] font-bold text-xs">
+                      <div className="flex items-center gap-2 text-[#D4AF37] font-bold text-xs">
                         <Copy className="w-4 h-4" />
                         Copiar Lista de Contatos
                       </div>
-                      <span className="text-[10px] bg-amber-950 text-[#C9A227] px-1.5 py-0.5 rounded font-mono">
+                      <span className="text-[10px] bg-amber-950 text-[#D4AF37] px-1.5 py-0.5 rounded font-mono">
                         1 Clique
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#8C98B4]">
+                    <p className="text-[11px] text-[#94A3B8]">
                       Copia todos os números e mensagens para colar diretamente na caixa de texto da extensão.
                     </p>
                     <button
                       type="button"
                       onClick={handleCopyMassTextList}
                       disabled={targetMassContacts.length === 0}
-                      className="w-full flex items-center justify-center gap-1.5 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] text-xs font-bold py-2 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] text-xs font-bold py-2 px-3 rounded-lg transition-colors cursor-pointer disabled:opacity-40"
                     >
                       {copiedMassLines ? <Check className="w-3.5 h-3.5 text-emerald-950" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{copiedMassLines ? 'Lista Copiada!' : 'Copiar Texto para Colar'}</span>
@@ -1774,8 +1774,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 </div>
 
                 {/* Batch Mark Button */}
-                <div className="bg-[#101B2D]/60 border border-[#2B3D63] p-3 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-xs text-[#8C98B4]">
+                <div className="bg-[#0A0E17]/60 border border-[#25334A] p-3 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
                     <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
                     <span>
                       Já realizou ou iniciou o disparo externo? Atualize os status no sistema:
@@ -1785,7 +1785,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     type="button"
                     onClick={handleMarkSelectedMassContactedToday}
                     disabled={targetMassContacts.length === 0}
-                    className="flex items-center gap-1.5 bg-[#1F3057] hover:bg-[#2B3D63] text-[#4ADE80] border border-[#4ADE80]/40 text-xs font-bold px-3 py-1.5 rounded-md transition-colors cursor-pointer disabled:opacity-40"
+                    className="flex items-center gap-1.5 bg-[#1E293B] hover:bg-[#25334A] text-[#4ADE80] border border-[#4ADE80]/40 text-xs font-bold px-3 py-1.5 rounded-md transition-colors cursor-pointer disabled:opacity-40"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Marcar {targetMassContacts.length} como Contatados Hoje</span>
@@ -1797,24 +1797,24 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             {/* Sub-Tab 2: WhatsApp Web Console Script */}
             {massSubTab === 'script' && (
               <div className="space-y-4">
-                <div className="bg-[#0B141A] border border-[#2B3D63] p-4 rounded-xl space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1F3057] pb-3">
+                <div className="bg-[#0B141A] border border-[#25334A] p-4 rounded-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1E293B] pb-3">
                     <div>
-                      <div className="flex items-center gap-2 text-[#C9A227] font-bold text-sm">
+                      <div className="flex items-center gap-2 text-[#D4AF37] font-bold text-sm">
                         <Terminal className="w-4 h-4" />
                         Robô de Disparo na Mesma Janela do WhatsApp Web
                       </div>
-                      <p className="text-xs text-[#8C98B4] mt-0.5">
+                      <p className="text-xs text-[#94A3B8] mt-0.5">
                         Esse script automatiza o envio na mesma aba do WhatsApp Web sem abrir nenhuma nova janela.
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-[#8C98B4]">Delay entre envios:</span>
+                      <span className="text-xs text-[#94A3B8]">Delay entre envios:</span>
                       <select
                         value={massDelaySeconds}
                         onChange={(e) => setMassDelaySeconds(Number(e.target.value))}
-                        className="bg-[#172644] border border-[#2B3D63] text-xs text-[#EDE6D6] rounded px-2 py-1 focus:outline-none"
+                        className="bg-[#111827] border border-[#25334A] text-xs text-[#F8FAFC] rounded px-2 py-1 focus:outline-none"
                       >
                         <option value={4}>4 seg (Rápido)</option>
                         <option value={6}>6 seg (Recomendado)</option>
@@ -1826,32 +1826,32 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
                   {/* 3 Step Instructions */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63]/70 space-y-1">
-                      <div className="font-bold text-[#EDE6D6] flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-full bg-[#C9A227] text-[#101B2D] flex items-center justify-center font-mono text-xs">1</span>
+                    <div className="bg-[#0A0E17] p-3 rounded-lg border border-[#25334A]/70 space-y-1">
+                      <div className="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-[#D4AF37] text-[#0A0E17] flex items-center justify-center font-mono text-xs">1</span>
                         Abra o WhatsApp Web
                       </div>
-                      <p className="text-[#8C98B4] text-[11px]">
+                      <p className="text-[#94A3B8] text-[11px]">
                         Acesse <a href="https://web.whatsapp.com" target="_blank" rel="noreferrer" className="text-[#60A5FA] underline">web.whatsapp.com</a> e verifique se seu QR Code já está conectado.
                       </p>
                     </div>
 
-                    <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63]/70 space-y-1">
-                      <div className="font-bold text-[#EDE6D6] flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-full bg-[#C9A227] text-[#101B2D] flex items-center justify-center font-mono text-xs">2</span>
+                    <div className="bg-[#0A0E17] p-3 rounded-lg border border-[#25334A]/70 space-y-1">
+                      <div className="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-[#D4AF37] text-[#0A0E17] flex items-center justify-center font-mono text-xs">2</span>
                         Abra o Console (F12)
                       </div>
-                      <p className="text-[#8C98B4] text-[11px]">
+                      <p className="text-[#94A3B8] text-[11px]">
                         Pressione a tecla <b>F12</b> no teclado (ou clique com botão direito &gt; Inspecionar) e clique na aba <b>Console</b>.
                       </p>
                     </div>
 
-                    <div className="bg-[#101B2D] p-3 rounded-lg border border-[#2B3D63]/70 space-y-1">
-                      <div className="font-bold text-[#EDE6D6] flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-full bg-[#C9A227] text-[#101B2D] flex items-center justify-center font-mono text-xs">3</span>
+                    <div className="bg-[#0A0E17] p-3 rounded-lg border border-[#25334A]/70 space-y-1">
+                      <div className="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-[#D4AF37] text-[#0A0E17] flex items-center justify-center font-mono text-xs">3</span>
                         Cole o Robô e Enter
                       </div>
-                      <p className="text-[#8C98B4] text-[11px]">
+                      <p className="text-[#94A3B8] text-[11px]">
                         Clique no botão abaixo para copiar o código, cole no Console (Ctrl+V) e aperte <b>Enter</b>!
                       </p>
                     </div>
@@ -1862,13 +1862,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                       type="button"
                       onClick={handleGenerateAndCopyMassScript}
                       disabled={targetMassContacts.length === 0}
-                      className="flex items-center gap-2 bg-[#C9A227] hover:bg-[#d8b030] text-[#101B2D] font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow transition-all cursor-pointer disabled:opacity-40"
+                      className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow transition-all cursor-pointer disabled:opacity-40"
                     >
                       {copiedMassScript ? <Check className="w-4 h-4 text-emerald-950" /> : <Terminal className="w-4 h-4" />}
                       <span>{copiedMassScript ? 'Código Copiado! (Pronto para Colar)' : 'Copiar Código do Robô para o Console'}</span>
                     </button>
 
-                    <span className="text-xs text-[#8C98B4] font-mono">
+                    <span className="text-xs text-[#94A3B8] font-mono">
                       {targetMassContacts.length} contatos incluídos no script
                     </span>
                   </div>
@@ -1878,11 +1878,11 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
             {/* Sub-Tab 3: Step-by-Step Guide with Chrome Extensions */}
             {massSubTab === 'guide' && (
-              <div className="space-y-4 text-xs text-[#8C98B4]">
+              <div className="space-y-4 text-xs text-[#94A3B8]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2.5">
+                  <div className="bg-[#0A0E17] p-4 rounded-xl border border-[#25334A] space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-[#EDE6D6] text-sm flex items-center gap-2">
+                      <h4 className="font-bold text-[#F8FAFC] text-sm flex items-center gap-2">
                         <span>🧩</span> Extensão 1: WA Web Plus para WhatsApp™
                       </h4>
                       <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded">
@@ -1900,9 +1900,9 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     </ol>
                   </div>
 
-                  <div className="bg-[#101B2D] p-4 rounded-xl border border-[#2B3D63] space-y-2.5">
+                  <div className="bg-[#0A0E17] p-4 rounded-xl border border-[#25334A] space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-[#EDE6D6] text-sm flex items-center gap-2">
+                      <h4 className="font-bold text-[#F8FAFC] text-sm flex items-center gap-2">
                         <span>⚡</span> Extensão 2: WA Sender / WhatsBulk
                       </h4>
                       <span className="text-[10px] bg-blue-950 text-blue-400 px-1.5 py-0.5 rounded">
@@ -1921,7 +1921,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   </div>
                 </div>
 
-                <div className="bg-[#101B2D] p-3.5 rounded-lg border border-[#2B3D63] flex items-center gap-3">
+                <div className="bg-[#0A0E17] p-3.5 rounded-lg border border-[#25334A] flex items-center gap-3">
                   <ShieldCheck className="w-5 h-5 text-[#4ADE80] shrink-0" />
                   <p className="text-[11px] text-[#A7B3CC]">
                     <b>Dica de Segurança Anti-Bloqueio:</b> Nossas planilhas e scripts já utilizam personalização com o primeiro nome do aluno e curso de interesse. Recomendamos manter um intervalo mínimo de <b>5 a 8 segundos</b> entre envios para preservar a saúde do seu número.
@@ -1932,14 +1932,14 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
           </div>
 
           {/* Contact Filtering & Interactive Table */}
-          <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2B3D63] pb-3">
+          <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-md space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#25334A] pb-3">
               <div>
-                <h4 className="text-base font-bold font-serif text-[#EDE6D6] flex items-center gap-2">
-                  <Users className="w-4 h-4 text-[#C9A227]" />
+                <h4 className="text-base font-bold font-serif text-[#F8FAFC] flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#D4AF37]" />
                   Lista de Leads Selecionados ({targetMassContacts.length} de {filteredMassContacts.length})
                 </h4>
-                <p className="text-xs text-[#8C98B4]">
+                <p className="text-xs text-[#94A3B8]">
                   Filtre os contatos que deseja incluir no disparo em massa.
                 </p>
               </div>
@@ -1949,7 +1949,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleToggleSelectAllMass(true)}
-                  className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#EDE6D6] px-2.5 py-1.5 rounded-md border border-[#2B3D63] flex items-center gap-1.5 cursor-pointer"
+                  className="text-xs bg-[#0A0E17] hover:bg-[#1E293B] text-[#F8FAFC] px-2.5 py-1.5 rounded-md border border-[#25334A] flex items-center gap-1.5 cursor-pointer"
                 >
                   <CheckSquare className="w-3.5 h-3.5 text-[#4ADE80]" />
                   <span>Selecionar Todos</span>
@@ -1958,7 +1958,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleToggleSelectAllMass(false)}
-                  className="text-xs bg-[#101B2D] hover:bg-[#1F3057] text-[#8C98B4] hover:text-[#EDE6D6] px-2.5 py-1.5 rounded-md border border-[#2B3D63] flex items-center gap-1.5 cursor-pointer"
+                  className="text-xs bg-[#0A0E17] hover:bg-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] px-2.5 py-1.5 rounded-md border border-[#25334A] flex items-center gap-1.5 cursor-pointer"
                 >
                   <Square className="w-3.5 h-3.5" />
                   <span>Desmarcar Todos</span>
@@ -1969,22 +1969,22 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
             {/* Filters Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
               <div>
-                <label className="block text-[#8C98B4] mb-1 font-semibold">Buscar Aluno ou Telefone:</label>
+                <label className="block text-[#94A3B8] mb-1 font-semibold">Buscar Aluno ou Telefone:</label>
                 <input
                   type="text"
                   value={massSearch}
                   onChange={(e) => setMassSearch(e.target.value)}
                   placeholder="Nome, DDD, número ou curso..."
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
 
               <div>
-                <label className="block text-[#8C98B4] mb-1 font-semibold">Filtrar por Curso:</label>
+                <label className="block text-[#94A3B8] mb-1 font-semibold">Filtrar por Curso:</label>
                 <select
                   value={massCourseFilter}
                   onChange={(e) => setMassCourseFilter(e.target.value)}
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#D4AF37]"
                 >
                   <option value="">Todos os Cursos ({uniqueCourses.length})</option>
                   {uniqueCourses.map((c) => (
@@ -1996,11 +1996,11 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[#8C98B4] mb-1 font-semibold">Filtrar por Temperatura:</label>
+                <label className="block text-[#94A3B8] mb-1 font-semibold">Filtrar por Temperatura:</label>
                 <select
                   value={massTempFilter}
                   onChange={(e) => setMassTempFilter(e.target.value)}
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#D4AF37]"
                 >
                   <option value="">Todas Temperaturas</option>
                   <option value="Quente">🔥 Quente</option>
@@ -2011,11 +2011,11 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[#8C98B4] mb-1 font-semibold">Lote de Importação:</label>
+                <label className="block text-[#94A3B8] mb-1 font-semibold">Lote de Importação:</label>
                 <select
                   value={massBatchFilter}
                   onChange={(e) => setMassBatchFilter(e.target.value)}
-                  className="w-full bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#C9A227]"
+                  className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-3 py-1.5 focus:outline-none focus:border-[#D4AF37]"
                 >
                   <option value="">Todos os Lotes ({uniqueBatches.length})</option>
                   {uniqueBatches.map((b) => (
@@ -2029,31 +2029,31 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
             {/* Checkbox only pending today */}
             <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 text-[#8C98B4] hover:text-[#EDE6D6] cursor-pointer">
+              <label className="flex items-center gap-2 text-[#94A3B8] hover:text-[#F8FAFC] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={massOnlyPending}
                   onChange={(e) => setMassOnlyPending(e.target.checked)}
-                  className="rounded border-[#2B3D63] text-[#10B981]"
+                  className="rounded border-[#25334A] text-[#10B981]"
                 />
                 <span>Ocultar contatos que já foram contatados hoje ({todayStr()})</span>
               </label>
 
-              <span className="text-[11px] text-[#C9A227] font-semibold">
+              <span className="text-[11px] text-[#D4AF37] font-semibold">
                 Mensagem base atual: {mensagem.slice(0, 35)}...
               </span>
             </div>
 
             {/* Interactive Leads Table */}
             {filteredMassContacts.length === 0 ? (
-              <div className="py-10 text-center text-[#8C98B4] bg-[#101B2D] rounded-xl border border-[#2B3D63]">
-                <AlertCircle className="w-7 h-7 mx-auto mb-2 text-[#C9A227] opacity-60" />
-                <p className="text-sm font-semibold text-[#EDE6D6]">Nenhum contato com WhatsApp válido encontrado.</p>
+              <div className="py-10 text-center text-[#94A3B8] bg-[#0A0E17] rounded-xl border border-[#25334A]">
+                <AlertCircle className="w-7 h-7 mx-auto mb-2 text-[#D4AF37] opacity-60" />
+                <p className="text-sm font-semibold text-[#F8FAFC]">Nenhum contato com WhatsApp válido encontrado.</p>
                 <p className="text-xs mt-1">Ajuste os filtros acima para listar os contatos.</p>
               </div>
             ) : (
-              <div className="bg-[#101B2D] rounded-xl border border-[#2B3D63] overflow-hidden">
-                <div className="max-h-80 overflow-y-auto divide-y divide-[#2B3D63]/70">
+              <div className="bg-[#0A0E17] rounded-xl border border-[#25334A] overflow-hidden">
+                <div className="max-h-80 overflow-y-auto divide-y divide-[#25334A]/70">
                   {filteredMassContacts.map((contact) => {
                     const isSelected =
                       massSelectedIds.length === 0 || massSelectedIds.includes(contact.id);
@@ -2063,8 +2063,8 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                       <div
                         key={contact.id}
                         onClick={() => handleToggleMassContact(contact.id)}
-                        className={`p-3 flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer hover:bg-[#172644] ${
-                          isSelected ? 'bg-[#172644]/40' : 'opacity-50'
+                        className={`p-3 flex items-center justify-between gap-3 text-xs transition-colors cursor-pointer hover:bg-[#111827] ${
+                          isSelected ? 'bg-[#111827]/40' : 'opacity-50'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
@@ -2072,24 +2072,24 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}}
-                            className="rounded border-[#2B3D63] text-[#10B981] focus:ring-0 shrink-0"
+                            className="rounded border-[#25334A] text-[#10B981] focus:ring-0 shrink-0"
                           />
 
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-[#EDE6D6] truncate">
+                              <span className="font-bold text-[#F8FAFC] truncate">
                                 {contact.nome}
                               </span>
                               <span className="font-mono text-[11px] text-[#4ADE80]">
                                 +55 {cleanPhone(contact.whatsapp || '')}
                               </span>
                               {contact.curso && (
-                                <span className="text-[10px] bg-[#1F3057] text-[#C9A227] px-1.5 py-0.2 rounded truncate max-w-[150px]">
+                                <span className="text-[10px] bg-[#1E293B] text-[#D4AF37] px-1.5 py-0.2 rounded truncate max-w-[150px]">
                                   {contact.curso}
                                 </span>
                               )}
                             </div>
-                            <p className="text-[11px] text-[#8C98B4] truncate mt-0.5 max-w-xl">
+                            <p className="text-[11px] text-[#94A3B8] truncate mt-0.5 max-w-xl">
                               💬 {filledMsg}
                             </p>
                           </div>
@@ -2115,10 +2115,10 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                   })}
                 </div>
 
-                <div className="p-3 bg-[#0B141A] border-t border-[#2B3D63] flex items-center justify-between text-xs text-[#8C98B4]">
+                <div className="p-3 bg-[#0B141A] border-t border-[#25334A] flex items-center justify-between text-xs text-[#94A3B8]">
                   <span>Total na listagem: {filteredMassContacts.length} contatos</span>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#EDE6D6] font-semibold">
+                    <span className="text-[#F8FAFC] font-semibold">
                       {targetMassContacts.length} selecionados para envio
                     </span>
                     <button
@@ -2150,13 +2150,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
       {/* TAB 3: BROADCAST HISTORY */}
       {activeTab === 'history' && (
-        <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-5 shadow-md space-y-4">
-          <div className="flex items-center justify-between border-b border-[#2B3D63] pb-3">
+        <div className="bg-[#111827] border border-[#25334A] rounded-xl p-5 shadow-md space-y-4">
+          <div className="flex items-center justify-between border-b border-[#25334A] pb-3">
             <div>
-              <h3 className="text-base font-bold font-serif text-[#EDE6D6]">
+              <h3 className="text-base font-bold font-serif text-[#F8FAFC]">
                 Histórico de Disparos Realizados
               </h3>
-              <p className="text-xs text-[#8C98B4]">
+              <p className="text-xs text-[#94A3B8]">
                 Registro das últimas mensagens disparadas por WhatsApp e E-mail nesta sessão.
               </p>
             </div>
@@ -2171,7 +2171,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                     onToast('Histórico de disparos limpo.', 'info');
                   }
                 }}
-                className="text-xs text-[#8C98B4] hover:text-[#B14432] flex items-center gap-1 p-1.5 rounded hover:bg-[#101B2D] transition-colors"
+                className="text-xs text-[#94A3B8] hover:text-[#B14432] flex items-center gap-1 p-1.5 rounded hover:bg-[#0A0E17] transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Limpar Histórico</span>
@@ -2180,13 +2180,13 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
           </div>
 
           {broadcastLogs.length === 0 ? (
-            <div className="py-12 text-center text-[#8C98B4]">
-              <Clock className="w-8 h-8 mx-auto mb-2 text-[#C9A227] opacity-50" />
-              <p className="text-sm font-semibold text-[#EDE6D6]">Nenhum disparo registrado ainda.</p>
+            <div className="py-12 text-center text-[#94A3B8]">
+              <Clock className="w-8 h-8 mx-auto mb-2 text-[#D4AF37] opacity-50" />
+              <p className="text-sm font-semibold text-[#F8FAFC]">Nenhum disparo registrado ainda.</p>
               <p className="text-xs mt-1">Os disparos efetuados aparecerão listados aqui.</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#2B3D63] overflow-hidden">
+            <div className="divide-y divide-[#25334A] overflow-hidden">
               {broadcastLogs.map((log) => (
                 <div key={log.id} className="py-3 flex items-center justify-between gap-4 text-xs">
                   <div className="flex items-center gap-3 min-w-0">
@@ -2196,7 +2196,7 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
                           ? 'bg-[#25D366]/20 text-[#25D366]'
                           : log.channel === 'email'
                           ? 'bg-[#60A5FA]/20 text-[#60A5FA]'
-                          : 'bg-[#C9A227]/20 text-[#C9A227]'
+                          : 'bg-[#D4AF37]/20 text-[#D4AF37]'
                       }`}
                     >
                       {log.channel === 'whatsapp' ? (
@@ -2208,26 +2208,26 @@ export const FastBroadcastView: React.FC<FastBroadcastViewProps> = ({
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[#EDE6D6] truncate">
+                        <span className="font-bold text-[#F8FAFC] truncate">
                           {log.contactName}
                         </span>
-                        <span className="text-[10px] text-[#8C98B4] font-mono">
+                        <span className="text-[10px] text-[#94A3B8] font-mono">
                           {log.whatsapp || log.email}
                         </span>
                         {log.hasImage && (
-                          <span className="text-[10px] bg-[#101B2D] text-[#C9A227] px-1.5 py-0.2 rounded border border-[#2B3D63]">
+                          <span className="text-[10px] bg-[#0A0E17] text-[#D4AF37] px-1.5 py-0.2 rounded border border-[#25334A]">
                             📷 com foto
                           </span>
                         )}
                       </div>
-                      <p className="text-[#8C98B4] truncate text-[11px] mt-0.5">
+                      <p className="text-[#94A3B8] truncate text-[11px] mt-0.5">
                         {log.messagePreview}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-[11px] text-[#8C98B4]">
+                    <span className="text-[11px] text-[#94A3B8]">
                       {new Date(log.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',

@@ -49,14 +49,14 @@ export const PlansView: React.FC<PlansProps> = ({
     <div className="animate-fadeIn">
       {/* Header */}
       <div className="mb-6">
-        <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#C9A227] mb-1 flex items-center gap-1.5">
+        <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#D4AF37] mb-1 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" />
           Portal Concurso
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#EDE6D6]">
+        <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC]">
           Assinaturas Premium
         </h2>
-        <p className="text-xs sm:text-sm text-[#8C98B4] mt-0.5">
+        <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
           Edite valores e benefícios e copie a proposta personalizada pronta para enviar no WhatsApp.
         </p>
       </div>
@@ -70,20 +70,20 @@ export const PlansView: React.FC<PlansProps> = ({
           return (
             <div
               key={plan.id}
-              className={`bg-[#172644] border rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-md transition-all duration-200 ${
+              className={`bg-[#111827] border rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-md transition-all duration-200 ${
                 isHighlight
-                  ? 'border-[#C9A227] shadow-[0_0_16px_rgba(201,162,39,0.1)]'
-                  : 'border-[#2B3D63]'
+                  ? 'border-[#D4AF37] shadow-[0_0_16px_rgba(201,162,39,0.1)]'
+                  : 'border-[#25334A]'
               }`}
             >
               <div>
                 {/* Plan Header */}
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <h3 className="font-serif font-bold text-lg sm:text-xl text-[#EDE6D6]">
+                  <h3 className="font-serif font-bold text-lg sm:text-xl text-[#F8FAFC]">
                     {plan.nome}
                   </h3>
                   {isHighlight && (
-                    <span className="flex items-center gap-1 bg-[#C9A227]/15 text-[#C9A227] border border-[#C9A227]/40 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
                       <Star className="w-3 h-3 fill-current" />
                       Mais Completo
                     </span>
@@ -92,37 +92,37 @@ export const PlansView: React.FC<PlansProps> = ({
 
                 {/* Price editor input */}
                 <div className="mb-4">
-                  <label className="block text-[10px] uppercase font-semibold text-[#8C98B4] tracking-wider mb-1">
+                  <label className="block text-[10px] uppercase font-semibold text-[#94A3B8] tracking-wider mb-1">
                     Preço / Condições (editável)
                   </label>
                   <input
                     type="text"
                     defaultValue={plan.preco}
                     onBlur={(e) => onUpdatePlanPrice(plan.id, e.target.value.trim())}
-                    className="w-full bg-[#101B2D] border border-dashed border-[#2B3D63] focus:border-[#C9A227] text-[#C9A227] font-serif font-semibold text-sm sm:text-base px-3 py-2 rounded-lg transition-colors"
+                    className="w-full bg-[#0A0E17] border border-dashed border-[#25334A] focus:border-[#D4AF37] text-[#D4AF37] font-serif font-semibold text-sm sm:text-base px-3 py-2 rounded-lg transition-colors"
                     title="Clique para editar a condição comercial"
                   />
                 </div>
 
                 {/* Benefits checklist */}
                 <div className="mb-4">
-                  <label className="block text-[10px] uppercase font-semibold text-[#8C98B4] tracking-wider mb-2">
+                  <label className="block text-[10px] uppercase font-semibold text-[#94A3B8] tracking-wider mb-2">
                     Benefícios Inclusos ({plan.beneficios.length})
                   </label>
                   <ul className="space-y-2">
                     {plan.beneficios.map((benefit, index) => (
                       <li
                         key={index}
-                        className="flex items-start justify-between gap-2.5 text-xs sm:text-[13px] text-[#EDE6D6] leading-relaxed group"
+                        className="flex items-start justify-between gap-2.5 text-xs sm:text-[13px] text-[#F8FAFC] leading-relaxed group"
                       >
                         <div className="flex items-start gap-2 flex-1">
-                          <Check className="w-4 h-4 text-[#C9A227] shrink-0 mt-0.5 stroke-[2.5]" />
+                          <Check className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5 stroke-[2.5]" />
                           <span>{benefit}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => onRemoveBenefit(plan.id, index)}
-                          className="text-[#8C98B4] hover:text-[#B14432] opacity-50 group-hover:opacity-100 p-0.5 transition-opacity cursor-pointer shrink-0"
+                          className="text-[#94A3B8] hover:text-[#B14432] opacity-50 group-hover:opacity-100 p-0.5 transition-opacity cursor-pointer shrink-0"
                           title="Remover benefício"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ export const PlansView: React.FC<PlansProps> = ({
               </div>
 
               {/* Add Benefit Row & Copy Button */}
-              <div className="mt-3 pt-3 border-t border-[#2B3D63] space-y-3">
+              <div className="mt-3 pt-3 border-t border-[#25334A] space-y-3">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -147,12 +147,12 @@ export const PlansView: React.FC<PlansProps> = ({
                       }
                     }}
                     placeholder="Adicionar novo benefício..."
-                    className="flex-1 bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] placeholder-[#8C98B4]/60 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#C9A227]"
+                    className="flex-1 bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#D4AF37]"
                   />
                   <button
                     type="button"
                     onClick={() => handleAddBenefitSubmit(plan.id)}
-                    className="bg-[#1F3057] hover:bg-[#2B3D63] text-[#EDE6D6] border border-[#2B3D63] px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                    className="bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] border border-[#25334A] px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                   </button>
@@ -163,8 +163,8 @@ export const PlansView: React.FC<PlansProps> = ({
                   onClick={() => handleCopyFormatted(plan)}
                   className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-sm cursor-pointer ${
                     isCopied
-                      ? 'bg-[#6E8F5C] text-[#EDE6D6]'
-                      : 'bg-[#C9A227] hover:bg-[#d8b030] active:scale-[0.99] text-[#101B2D]'
+                      ? 'bg-[#6E8F5C] text-[#F8FAFC]'
+                      : 'bg-[#D4AF37] hover:bg-[#E5C04A] active:scale-[0.99] text-[#0A0E17]'
                   }`}
                 >
                   {isCopied ? (

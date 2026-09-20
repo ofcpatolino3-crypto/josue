@@ -228,24 +228,24 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-[#172644] border-l border-[#C9A227]/40 shadow-2xl flex flex-col animate-slideLeft">
+    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-[#111827] border-l border-[#D4AF37]/40 shadow-2xl flex flex-col animate-slideLeft">
       
       {/* Header */}
-      <div className="bg-[#101B2D] p-4 border-b border-[#2B3D63] flex items-center justify-between gap-3">
+      <div className="bg-[#0A0E17] p-4 border-b border-[#25334A] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C9A227] to-[#8C6D18] flex items-center justify-center text-[#101B2D] shadow-md">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#8C6D18] flex items-center justify-center text-[#0A0E17] shadow-md">
             <Bot className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-serif font-bold text-sm sm:text-base text-[#EDE6D6]">
+              <h3 className="font-serif font-bold text-sm sm:text-base text-[#F8FAFC]">
                 Assistente IA de Vendas
               </h3>
-              <span className="bg-[#C9A227]/20 text-[#C9A227] border border-[#C9A227]/40 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
+              <span className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
                 Gemini 3.7
               </span>
             </div>
-            <p className="text-[11px] text-[#8C98B4]">
+            <p className="text-[11px] text-[#94A3B8]">
               Consultor de estratégias, scripts & conversão
             </p>
           </div>
@@ -255,7 +255,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
           <button
             type="button"
             onClick={handleClearChat}
-            className="p-1.5 text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644] rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827] rounded-lg transition-colors cursor-pointer"
             title="Reiniciar Conversa"
           >
             <RotateCcw className="w-4 h-4" />
@@ -264,7 +264,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-[#8C98B4] hover:text-[#EDE6D6] hover:bg-[#172644] rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827] rounded-lg transition-colors cursor-pointer"
             title="Fechar Assistente"
           >
             <X className="w-5 h-5" />
@@ -273,9 +273,9 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
       </div>
 
       {/* Student Context Selector Bar */}
-      <div className="bg-[#121E33] px-4 py-2 border-b border-[#2B3D63] flex items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-1.5 text-[#8C98B4] shrink-0">
-          <User className="w-3.5 h-3.5 text-[#C9A227]" />
+      <div className="bg-[#121E33] px-4 py-2 border-b border-[#25334A] flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-[#94A3B8] shrink-0">
+          <User className="w-3.5 h-3.5 text-[#D4AF37]" />
           <span className="text-[11px] font-semibold">Contexto do Aluno:</span>
         </div>
 
@@ -288,7 +288,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
               onSelectContact(found);
             }
           }}
-          className="bg-[#172644] border border-[#2B3D63] text-[#EDE6D6] text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-[#C9A227] truncate max-w-[240px] cursor-pointer"
+          className="bg-[#111827] border border-[#25334A] text-[#F8FAFC] text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-[#D4AF37] truncate max-w-[240px] cursor-pointer"
         >
           <option value="">Geral (Sem aluno específico)</option>
           {contacts.map((c) => (
@@ -301,9 +301,9 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
 
       {/* Active Student Badge info if selected */}
       {currentContact && (
-        <div className="bg-[#101B2D]/80 px-4 py-2 border-b border-[#2B3D63]/70 flex items-center justify-between text-[11px] text-[#8C98B4]">
+        <div className="bg-[#0A0E17]/80 px-4 py-2 border-b border-[#25334A]/70 flex items-center justify-between text-[11px] text-[#94A3B8]">
           <div className="flex items-center gap-1.5 truncate">
-            <span className="font-semibold text-[#EDE6D6]">{currentContact.nome}</span>
+            <span className="font-semibold text-[#F8FAFC]">{currentContact.nome}</span>
             {currentContact.whatsapp && (
               <span className="text-[#25D366] font-mono text-[10px] bg-[#25D366]/10 px-1.5 py-0.5 rounded border border-[#25D366]/30">
                 {formatPhoneDisplay(currentContact.whatsapp)}
@@ -312,7 +312,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
             <span>•</span>
             <span className="truncate">{currentContact.curso || 'Sem curso'}</span>
           </div>
-          <span className="bg-[#172644] border border-[#2B3D63] text-[#C9A227] px-2 py-0.5 rounded font-bold uppercase text-[10px]">
+          <span className="bg-[#111827] border border-[#25334A] text-[#D4AF37] px-2 py-0.5 rounded font-bold uppercase text-[10px]">
             {currentContact.temperatura}
           </span>
         </div>
@@ -327,14 +327,14 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
               key={msg.id}
               className={`flex flex-col ${isModel ? 'items-start' : 'items-end'} space-y-1`}
             >
-              <div className="flex items-center gap-1.5 px-1 text-[10px] text-[#8C98B4]">
+              <div className="flex items-center gap-1.5 px-1 text-[10px] text-[#94A3B8]">
                 {isModel ? (
                   <>
-                    <Bot className="w-3 h-3 text-[#C9A227]" />
-                    <span className="font-semibold text-[#C9A227]">IA Portal Concurso</span>
+                    <Bot className="w-3 h-3 text-[#D4AF37]" />
+                    <span className="font-semibold text-[#D4AF37]">IA Portal Concurso</span>
                   </>
                 ) : (
-                  <span className="font-semibold text-[#EDE6D6]">Você</span>
+                  <span className="font-semibold text-[#F8FAFC]">Você</span>
                 )}
                 <span>• {msg.timestamp}</span>
               </div>
@@ -342,8 +342,8 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
               <div
                 className={`max-w-[92%] rounded-2xl p-3.5 leading-relaxed shadow-sm transition-all whitespace-pre-wrap ${
                   isModel
-                    ? 'bg-[#101B2D] border border-[#2B3D63] text-[#EDE6D6] rounded-tl-sm'
-                    : 'bg-[#C9A227] text-[#101B2D] font-medium rounded-tr-sm'
+                    ? 'bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-tl-sm'
+                    : 'bg-[#D4AF37] text-[#0A0E17] font-medium rounded-tr-sm'
                 }`}
               >
                 {msg.text}
@@ -355,7 +355,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
                   <button
                     type="button"
                     onClick={() => handleCopy(msg.text, msg.id)}
-                    className="text-[11px] text-[#8C98B4] hover:text-[#EDE6D6] bg-[#101B2D] hover:bg-[#1F3057] border border-[#2B3D63] px-2 py-1 rounded flex items-center gap-1 transition-colors cursor-pointer"
+                    className="text-[11px] text-[#94A3B8] hover:text-[#F8FAFC] bg-[#0A0E17] hover:bg-[#1E293B] border border-[#25334A] px-2 py-1 rounded flex items-center gap-1 transition-colors cursor-pointer"
                     title="Copiar texto"
                   >
                     {copiedId === msg.id ? (
@@ -375,7 +375,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
                     <button
                       type="button"
                       onClick={() => handleSendToWhatsApp(msg.text)}
-                      className="text-[11px] text-[#101B2D] font-bold bg-[#25D366] hover:bg-[#20ba5a] px-2.5 py-1 rounded flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+                      className="text-[11px] text-[#0A0E17] font-bold bg-[#25D366] hover:bg-[#20ba5a] px-2.5 py-1 rounded flex items-center gap-1 transition-all cursor-pointer shadow-sm"
                       title={`Enviar no WhatsApp para ${currentContact.nome}`}
                     >
                       <MessageCircle className="w-3 h-3 fill-current" />
@@ -389,8 +389,8 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
         })}
 
         {isLoading && (
-          <div className="flex items-center gap-2 text-xs text-[#C9A227] bg-[#101B2D] border border-[#2B3D63] p-3 rounded-xl max-w-[80%] animate-pulse">
-            <Loader2 className="w-4 h-4 animate-spin text-[#C9A227]" />
+          <div className="flex items-center gap-2 text-xs text-[#D4AF37] bg-[#0A0E17] border border-[#25334A] p-3 rounded-xl max-w-[80%] animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
             <span>Consultando inteligência do Portal Concurso...</span>
           </div>
         )}
@@ -399,10 +399,10 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
       </div>
 
       {/* Quick Prompt Chips */}
-      <div className="p-2.5 bg-[#101B2D] border-t border-[#2B3D63] overflow-x-auto">
+      <div className="p-2.5 bg-[#0A0E17] border-t border-[#25334A] overflow-x-auto">
         <div className="flex items-center gap-1.5 text-[11px] whitespace-nowrap">
-          <span className="text-[#8C98B4] text-[10px] uppercase font-semibold flex items-center gap-1 shrink-0 pl-1">
-            <Sparkles className="w-3 h-3 text-[#C9A227]" />
+          <span className="text-[#94A3B8] text-[10px] uppercase font-semibold flex items-center gap-1 shrink-0 pl-1">
+            <Sparkles className="w-3 h-3 text-[#D4AF37]" />
             Sugestões Rápidas:
           </span>
           {QUICK_PROMPT_CHIPS.map((chip, idx) => (
@@ -411,7 +411,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
               type="button"
               disabled={isLoading}
               onClick={() => handleSendMessage(chip.prompt)}
-              className="bg-[#172644] hover:bg-[#1F3057] text-[#EDE6D6] hover:text-[#C9A227] border border-[#2B3D63] hover:border-[#C9A227]/50 rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer shrink-0 disabled:opacity-50"
+              className="bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#D4AF37] border border-[#25334A] hover:border-[#D4AF37]/50 rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer shrink-0 disabled:opacity-50"
             >
               {chip.label}
             </button>
@@ -425,7 +425,7 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
           e.preventDefault();
           handleSendMessage();
         }}
-        className="p-3 bg-[#101B2D] border-t border-[#2B3D63] flex items-center gap-2"
+        className="p-3 bg-[#0A0E17] border-t border-[#25334A] flex items-center gap-2"
       >
         <input
           ref={inputRef}
@@ -437,13 +437,13 @@ export const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
               ? `Pergunte algo sobre ${currentContact.nome} ou peça um script...`
               : 'Pergunte como quebrar uma objeção ou criar um pitch...'
           }
-          className="flex-1 bg-[#172644] border border-[#2B3D63] focus:border-[#C9A227] text-[#EDE6D6] text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none placeholder-[#8C98B4]/70"
+          className="flex-1 bg-[#111827] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none placeholder-[#94A3B8]/70"
         />
 
         <button
           type="submit"
           disabled={!inputValue.trim() || isLoading}
-          className="bg-[#C9A227] hover:bg-[#d8b030] active:scale-95 text-[#101B2D] font-bold p-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-md shrink-0"
+          className="bg-[#D4AF37] hover:bg-[#E5C04A] active:scale-95 text-[#0A0E17] font-bold p-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-md shrink-0"
           title="Enviar mensagem"
         >
           {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
