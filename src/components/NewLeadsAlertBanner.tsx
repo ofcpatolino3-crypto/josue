@@ -101,18 +101,18 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
   return (
     <div
       id="new-leads-alert-banner"
-      className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#16294A] via-[#1A3464] to-[#122240] border-2 border-[#D4AF37] p-3.5 sm:p-4 shadow-xl text-[#F8FAFC] animate-bounce-subtle"
+      className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#16294A] via-[#1A3464] to-[#122240] border-2 border-[#2563EB] p-3.5 sm:p-4 shadow-xl text-[#FFFFFF] animate-bounce-subtle"
     >
       {/* Background visual elements */}
-      <div className="absolute -right-8 -bottom-8 w-36 h-36 bg-[#D4AF37]/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -right-8 -bottom-8 w-36 h-36 bg-[#2563EB]/10 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -left-8 -top-8 w-36 h-36 bg-[#2563EB]/10 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3.5">
         {/* Left Side: Alert Badge & Lead Count Info */}
         <div className="flex items-start gap-3">
           <div className="relative shrink-0 mt-0.5">
-            <div className="w-10 h-10 rounded-xl bg-[#D4AF37] text-[#0A0E17] flex items-center justify-center font-bold shadow-lg shadow-[#D4AF37]/30 animate-pulse">
-              <BellRing className="w-5 h-5 text-[#0A0E17]" />
+            <div className="w-10 h-10 rounded-xl bg-[#2563EB] text-[#0B132B] flex items-center justify-center font-bold shadow-lg shadow-[#2563EB]/30 animate-pulse">
+              <BellRing className="w-5 h-5 text-[#0B132B]" />
             </div>
             <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -124,7 +124,7 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
 
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-black uppercase tracking-wider bg-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded border border-[#D4AF37]/40 flex items-center gap-1">
+              <span className="text-[11px] font-black uppercase tracking-wider bg-[#2563EB]/20 text-[#2563EB] px-2 py-0.5 rounded border border-[#2563EB]/40 flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
                 Novos Leads na Sua Fila
               </span>
@@ -136,7 +136,7 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
             </div>
 
             <h3 className="text-base sm:text-lg font-bold text-white mt-1">
-              Você recebeu <span className="text-[#D4AF37] font-extrabold">{newLeads.length} novos contatos</span> para atender!
+              Você recebeu <span className="text-[#2563EB] font-extrabold">{newLeads.length} novos contatos</span> para atender!
             </h3>
 
             {/* Courses chips */}
@@ -145,11 +145,11 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
               {courseCounts.slice(0, 4).map(([course, count]) => (
                 <span
                   key={course}
-                  className="bg-[#0A0E17] border border-[#25334A] text-[11px] text-[#F8FAFC] px-2 py-0.5 rounded-md font-medium flex items-center gap-1"
+                  className="bg-[#0B132B] border border-[#263B6E] text-[11px] text-[#FFFFFF] px-2 py-0.5 rounded-md font-medium flex items-center gap-1"
                 >
-                  <Target className="w-3 h-3 text-[#D4AF37]" />
+                  <Target className="w-3 h-3 text-[#2563EB]" />
                   <span className="truncate max-w-[130px]">{course}</span>
-                  <span className="text-[#D4AF37] font-bold">({count})</span>
+                  <span className="text-[#2563EB] font-bold">({count})</span>
                 </span>
               ))}
               {courseCounts.length > 4 && (
@@ -169,8 +169,8 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
             onClick={toggleSound}
             className={`p-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
               soundEnabled
-                ? 'bg-[#0A0E17] border-[#25334A] text-[#D4AF37] hover:border-[#D4AF37]'
-                : 'bg-[#0A0E17] border-[#25334A] text-[#94A3B8] hover:text-white'
+                ? 'bg-[#0B132B] border-[#263B6E] text-[#2563EB] hover:border-[#2563EB]'
+                : 'bg-[#0B132B] border-[#263B6E] text-[#94A3B8] hover:text-white'
             }`}
             title={soundEnabled ? 'Avisos sonoros ativados (Clique para silenciar)' : 'Avisos sonoros desativados (Clique para ativar)'}
           >
@@ -181,7 +181,7 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
           <button
             type="button"
             onClick={onDismissAll}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0A0E17]/80 hover:bg-[#0A0E17] text-[#94A3B8] hover:text-white text-xs font-semibold border border-[#25334A] transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#0B132B]/80 hover:bg-[#0B132B] text-[#94A3B8] hover:text-white text-xs font-semibold border border-[#263B6E] transition-all cursor-pointer"
             title="Marcar todos os novos leads como vistos e limpar o alerta"
           >
             <CheckCheck className="w-3.5 h-3.5" />
@@ -192,7 +192,7 @@ export const NewLeadsAlertBanner: React.FC<NewLeadsAlertBannerProps> = ({
           <button
             type="button"
             onClick={onStartImmediateQueue}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-extrabold px-4 py-2 rounded-lg text-xs sm:text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] font-extrabold px-4 py-2 rounded-lg text-xs sm:text-sm transition-all shadow-md active:scale-95 cursor-pointer"
           >
             <Zap className="w-4 h-4 fill-current" />
             <span>Atender Novos Leads Agora</span>

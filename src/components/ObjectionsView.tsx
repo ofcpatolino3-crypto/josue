@@ -57,10 +57,10 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#D4AF37] mb-1">
+          <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#2563EB] mb-1">
             Apoio à Conversa no WhatsApp
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC]">
+          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#FFFFFF]">
             Contornar Objeções
           </h2>
           <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
@@ -72,7 +72,7 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
           id="obj-toggle"
           type="button"
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer self-start sm:self-auto"
+          className="flex items-center gap-1.5 bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           Nova Objeção
@@ -83,10 +83,10 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
       {showAdd && (
         <form
           onSubmit={handleSave}
-          className="bg-[#111827] border border-[#D4AF37]/40 rounded-xl p-4 sm:p-5 mb-5 shadow-lg space-y-3"
+          className="bg-[#111D3E] border border-[#2563EB]/40 rounded-xl p-4 sm:p-5 mb-5 shadow-lg space-y-3"
         >
-          <div className="text-sm font-semibold text-[#F8FAFC] flex items-center gap-2 mb-1">
-            <ShieldAlert className="w-4 h-4 text-[#D4AF37]" />
+          <div className="text-sm font-semibold text-[#FFFFFF] flex items-center gap-2 mb-1">
+            <ShieldAlert className="w-4 h-4 text-[#2563EB]" />
             Cadastrar Nova Resposta a Objeção
           </div>
 
@@ -102,7 +102,7 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
                 value={newQ}
                 onChange={(e) => setNewQ(e.target.value)}
                 placeholder="Ex: Achei a mensalidade alta..."
-                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]"
               />
             </div>
 
@@ -115,7 +115,7 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 placeholder="Ex: Preço, Tempo, etc."
-                className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB]"
               />
             </div>
           </div>
@@ -131,23 +131,23 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
               value={newA}
               onChange={(e) => setNewA(e.target.value)}
               placeholder="Digite o texto persuasivo que o atendente deve enviar..."
-              className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#D4AF37] resize-y"
+              className="w-full bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] placeholder-[#94A3B8]/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB] resize-y"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#25334A]">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#263B6E]">
             <button
               type="button"
               id="obj-cancel"
               onClick={() => setShowAdd(false)}
-              className="px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#F8FAFC] cursor-pointer"
+              className="px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#FFFFFF] cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               id="obj-save"
-              className="bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer shadow-sm"
+              className="bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer shadow-sm"
             >
               Salvar Objeção
             </button>
@@ -163,14 +163,14 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Filtrar scripts por palavra-chave..."
-          className="w-full bg-[#111827] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37]"
+          className="w-full bg-[#111D3E] border border-[#263B6E] text-[#FFFFFF] placeholder-[#94A3B8]/60 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-[#2563EB]"
         />
       </div>
 
       {/* List of objections */}
       <div className="flex flex-col gap-3" id="obj-list">
         {filtered.length === 0 ? (
-          <div className="text-center py-12 px-4 border border-dashed border-[#25334A] rounded-xl text-[#94A3B8] text-sm">
+          <div className="text-center py-12 px-4 border border-dashed border-[#263B6E] rounded-xl text-[#94A3B8] text-sm">
             Nenhuma objeção encontrada.
           </div>
         ) : (
@@ -180,16 +180,16 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
             return (
               <div
                 key={o.id}
-                className="bg-[#111827] border border-[#25334A] hover:border-[#25334A] rounded-xl p-4 sm:p-5 transition-all shadow-sm flex flex-col gap-2.5"
+                className="bg-[#111D3E] border border-[#263B6E] hover:border-[#263B6E] rounded-xl p-4 sm:p-5 transition-all shadow-sm flex flex-col gap-2.5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     {o.categoria && (
-                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] bg-[#0A0E17] px-2 py-0.5 rounded mb-1.5 border border-[#25334A]">
+                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] bg-[#0B132B] px-2 py-0.5 rounded mb-1.5 border border-[#263B6E]">
                         {o.categoria}
                       </span>
                     )}
-                    <h3 className="font-serif font-bold text-base sm:text-lg text-[#D4AF37] leading-snug">
+                    <h3 className="font-serif font-bold text-base sm:text-lg text-[#2563EB] leading-snug">
                       "{o.objecao}"
                     </h3>
                   </div>
@@ -201,21 +201,21 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
                         onDeleteObjection(o.id);
                       }
                     }}
-                    className="text-[#94A3B8] hover:text-[#B14432] p-1.5 rounded hover:bg-[#0A0E17] transition-colors cursor-pointer"
+                    className="text-[#94A3B8] hover:text-[#B14432] p-1.5 rounded hover:bg-[#0B132B] transition-colors cursor-pointer"
                     title="Excluir objeção"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <div className="text-xs sm:text-[13.5px] text-[#F8FAFC] leading-relaxed bg-[#0A0E17]/70 p-3.5 rounded-lg border border-[#25334A]/70 whitespace-pre-wrap font-sans space-y-2">
+                <div className="text-xs sm:text-[13.5px] text-[#FFFFFF] leading-relaxed bg-[#0B132B]/70 p-3.5 rounded-lg border border-[#263B6E]/70 whitespace-pre-wrap font-sans space-y-2">
                   {o.resposta.split('\n\n').map((paragraph, idx) => {
                     const isEmocao = paragraph.startsWith('❤️ [EMOÇÃO]:');
                     const isLogica = paragraph.startsWith('🧠 [LÓGICA]:');
 
                     if (isEmocao) {
                       return (
-                        <div key={idx} className="bg-[#B14432]/10 border-l-2 border-[#B14432] pl-3 py-1 text-[#F8FAFC]">
+                        <div key={idx} className="bg-[#B14432]/10 border-l-2 border-[#B14432] pl-3 py-1 text-[#FFFFFF]">
                           <span className="font-bold text-[#B14432] mr-1.5">❤️ Emoção (Acolhimento):</span>
                           {paragraph.replace('❤️ [EMOÇÃO]:', '').trim()}
                         </div>
@@ -223,7 +223,7 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
                     }
                     if (isLogica) {
                       return (
-                        <div key={idx} className="bg-[#5C7A9E]/10 border-l-2 border-[#5C7A9E] pl-3 py-1 text-[#F8FAFC]">
+                        <div key={idx} className="bg-[#5C7A9E]/10 border-l-2 border-[#5C7A9E] pl-3 py-1 text-[#FFFFFF]">
                           <span className="font-bold text-[#5C7A9E] mr-1.5">🧠 Lógica (Racional/Cálculo):</span>
                           {paragraph.replace('🧠 [LÓGICA]:', '').trim()}
                         </div>
@@ -239,8 +239,8 @@ export const ObjectionsView: React.FC<ObjectionsProps> = ({
                     onClick={() => handleCopy(o)}
                     className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer ${
                       isCopied
-                        ? 'bg-[#6E8F5C] text-[#F8FAFC]'
-                        : 'bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17]'
+                        ? 'bg-[#6E8F5C] text-[#FFFFFF]'
+                        : 'bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B]'
                     }`}
                   >
                     {isCopied ? (

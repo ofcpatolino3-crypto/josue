@@ -2023,7 +2023,7 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0E17] text-[#F8FAFC] font-sans antialiased p-3 sm:p-6 lg:p-8 flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#0B132B] text-[#FFFFFF] font-sans antialiased p-3 sm:p-6 lg:p-8 flex flex-col relative overflow-x-hidden">
       {/* Semi-transparent Portal Concursos e OAB background watermark (Foto 1) */}
       <PortalWatermarkBackground />
 
@@ -2065,18 +2065,18 @@ export default function App() {
 
             {/* Blocked state */}
             {currentProfile.status === 'blocked' && (
-              <div className="bg-[#111827] border border-[#B14432] rounded-2xl p-8 text-center max-w-xl mx-auto my-8 shadow-2xl animate-fadeIn">
+              <div className="bg-[#111D3E] border border-[#B14432] rounded-2xl p-8 text-center max-w-xl mx-auto my-8 shadow-2xl animate-fadeIn">
                 <div className="w-16 h-16 rounded-full bg-[#B14432]/20 border border-[#B14432] flex items-center justify-center text-[#B14432] mx-auto mb-4">
                   <AlertCircle className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-bold text-[#F8FAFC] mb-2">Acesso Desativado</h3>
+                <h3 className="text-lg font-bold text-[#FFFFFF] mb-2">Acesso Desativado</h3>
                 <p className="text-sm text-[#94A3B8] mb-6">
                   Seu usuário foi temporariamente bloqueado pela administração. Entre em contato com a gerência para regularizar seu acesso.
                 </p>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] px-6 py-2.5 rounded-lg text-sm font-semibold hover:border-[#D4AF37] transition-all cursor-pointer"
+                  className="bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] px-6 py-2.5 rounded-lg text-sm font-semibold hover:border-[#2563EB] transition-all cursor-pointer"
                 >
                   Sair do Sistema
                 </button>
@@ -2085,18 +2085,18 @@ export default function App() {
 
             {/* Pending approval state */}
             {currentProfile.status === 'pending' && (
-              <div className="bg-[#111827] border border-[#D4AF37] rounded-2xl p-8 text-center max-w-xl mx-auto my-8 shadow-2xl animate-fadeIn">
-                <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37] mx-auto mb-4 animate-pulse">
+              <div className="bg-[#111D3E] border border-[#2563EB] rounded-2xl p-8 text-center max-w-xl mx-auto my-8 shadow-2xl animate-fadeIn">
+                <div className="w-16 h-16 rounded-full bg-[#2563EB]/20 border border-[#2563EB] flex items-center justify-center text-[#2563EB] mx-auto mb-4 animate-pulse">
                   <Clock className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-bold text-[#F8FAFC] mb-2">Aguardando Liberação do Administrador</h3>
+                <h3 className="text-lg font-bold text-[#FFFFFF] mb-2">Aguardando Liberação do Administrador</h3>
                 <p className="text-sm text-[#94A3B8] mb-6 leading-relaxed">
-                  Olá, <strong className="text-[#F8FAFC]">{currentProfile.displayName || currentProfile.email}</strong>! Seu cadastro foi realizado com sucesso. Assim que o Administrador liberar seu acesso no painel, sua carteira individual de leads será sincronizada automaticamente.
+                  Olá, <strong className="text-[#FFFFFF]">{currentProfile.displayName || currentProfile.email}</strong>! Seu cadastro foi realizado com sucesso. Assim que o Administrador liberar seu acesso no painel, sua carteira individual de leads será sincronizada automaticamente.
                 </p>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] px-6 py-2.5 rounded-lg text-sm font-semibold hover:border-[#B14432] transition-all cursor-pointer"
+                  className="bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] px-6 py-2.5 rounded-lg text-sm font-semibold hover:border-[#B14432] transition-all cursor-pointer"
                 >
                   Trocar de Conta / Sair
                 </button>
@@ -2158,7 +2158,7 @@ export default function App() {
             />
 
             {/* Quick Action & Search Controls */}
-            <div className="bg-[#111827] border border-[#25334A] rounded-xl p-3 sm:p-4 shadow-md space-y-3">
+            <div className="bg-[#111D3E] border border-[#263B6E] rounded-xl p-3 sm:p-4 shadow-md space-y-3">
               <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
                 {/* Search Bar */}
                 <div className="relative flex-1">
@@ -2169,13 +2169,13 @@ export default function App() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Buscar por nome, WhatsApp, e-mail, curso ou notas..."
-                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-4 py-2 text-xs sm:text-sm text-[#F8FAFC] placeholder-[#94A3B8] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg pl-9 pr-4 py-2 text-xs sm:text-sm text-[#FFFFFF] placeholder-[#94A3B8] focus:outline-none focus:border-[#2563EB] transition-colors"
                   />
                   {searchTerm && (
                     <button
                       type="button"
                       onClick={() => setSearchTerm('')}
-                      className="absolute right-3 top-2.5 text-xs text-[#94A3B8] hover:text-[#F8FAFC]"
+                      className="absolute right-3 top-2.5 text-xs text-[#94A3B8] hover:text-[#FFFFFF]"
                     >
                       ✕
                     </button>
@@ -2183,14 +2183,14 @@ export default function App() {
                 </div>
 
                 {/* Status Tabs: Novos Recebidos, Pendentes, Contatados, Todos */}
-                <div className="flex items-center rounded-lg bg-[#0A0E17] p-1 border border-[#25334A] self-start md:self-auto shrink-0 flex-wrap gap-1">
+                <div className="flex items-center rounded-lg bg-[#0B132B] p-1 border border-[#263B6E] self-start md:self-auto shrink-0 flex-wrap gap-1">
                   {newReceivedContacts.length > 0 && (
                     <button
                       type="button"
                       onClick={() => setTabFilter('novos')}
                       className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
                         tabFilter === 'novos'
-                          ? 'bg-emerald-500 text-[#0A0E17] shadow-sm font-black'
+                          ? 'bg-emerald-500 text-[#0B132B] shadow-sm font-black'
                           : 'text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30'
                       }`}
                     >
@@ -2199,7 +2199,7 @@ export default function App() {
                       <span
                         className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                           tabFilter === 'novos'
-                            ? 'bg-[#0A0E17]/30 text-[#0A0E17]'
+                            ? 'bg-[#0B132B]/30 text-[#0B132B]'
                             : 'bg-emerald-500/20 text-emerald-300'
                         }`}
                       >
@@ -2213,16 +2213,16 @@ export default function App() {
                     onClick={() => setTabFilter('pendente')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
                       tabFilter === 'pendente'
-                        ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm font-bold'
-                        : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                        ? 'bg-[#2563EB] text-[#0B132B] shadow-sm font-bold'
+                        : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                     }`}
                   >
                     <span>Pendentes</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                         tabFilter === 'pendente'
-                          ? 'bg-[#0A0E17]/30 text-[#0A0E17]'
-                          : 'bg-[#111827] text-[#94A3B8]'
+                          ? 'bg-[#0B132B]/30 text-[#0B132B]'
+                          : 'bg-[#111D3E] text-[#94A3B8]'
                       }`}
                     >
                       {pendingContacts.length}
@@ -2234,16 +2234,16 @@ export default function App() {
                     onClick={() => setTabFilter('enviado')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
                       tabFilter === 'enviado'
-                        ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm font-bold'
-                        : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                        ? 'bg-[#2563EB] text-[#0B132B] shadow-sm font-bold'
+                        : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                     }`}
                   >
                     <span>Contatados</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                         tabFilter === 'enviado'
-                          ? 'bg-[#0A0E17]/30 text-[#0A0E17]'
-                          : 'bg-[#111827] text-[#94A3B8]'
+                          ? 'bg-[#0B132B]/30 text-[#0B132B]'
+                          : 'bg-[#111D3E] text-[#94A3B8]'
                       }`}
                     >
                       {contactedContacts.length}
@@ -2255,16 +2255,16 @@ export default function App() {
                     onClick={() => setTabFilter('todos')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
                       tabFilter === 'todos'
-                        ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm font-bold'
-                        : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                        ? 'bg-[#2563EB] text-[#0B132B] shadow-sm font-bold'
+                        : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                     }`}
                   >
                     <span>Todos</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                         tabFilter === 'todos'
-                          ? 'bg-[#0A0E17]/30 text-[#0A0E17]'
-                          : 'bg-[#111827] text-[#94A3B8]'
+                          ? 'bg-[#0B132B]/30 text-[#0B132B]'
+                          : 'bg-[#111D3E] text-[#94A3B8]'
                       }`}
                     >
                       {contacts.length}
@@ -2279,10 +2279,10 @@ export default function App() {
                       type="button"
                       id="roleta-quick-access-btn"
                       onClick={() => setActiveView('admin')}
-                      className="flex items-center justify-center gap-1.5 bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#FCD34D] border border-[#D4AF37]/50 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
+                      className="flex items-center justify-center gap-1.5 bg-[#2563EB]/20 hover:bg-[#2563EB]/30 text-[#FCD34D] border border-[#2563EB]/50 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0 shadow-sm"
                       title="Abrir Central de Divisão & Roleta de Leads para liberar contatos de forma igualitária"
                     >
-                      <Zap className="w-4 h-4 text-[#D4AF37]" />
+                      <Zap className="w-4 h-4 text-[#2563EB]" />
                       <span>⚡ Liberar Contatos (Roleta)</span>
                     </button>
                   )}
@@ -2324,27 +2324,27 @@ export default function App() {
                     type="button"
                     id="add-contact-btn"
                     onClick={() => setShowAddForm(true)}
-                    className="flex items-center justify-center gap-1.5 bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] hover:text-[#D4AF37] border border-[#25334A] font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0"
+                    className="flex items-center justify-center gap-1.5 bg-[#1C2C55] hover:bg-[#263B6E] text-[#FFFFFF] hover:text-[#2563EB] border border-[#263B6E] font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer shrink-0"
                   >
-                    <UserPlus className="w-4 h-4 text-[#D4AF37]" />
+                    <UserPlus className="w-4 h-4 text-[#2563EB]" />
                     <span>+ Novo Manual</span>
                   </button>
                 </div>
               </div>
 
               {/* Filters Row: Curso, Temperatura, Ordenação */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#25334A]/50 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#263B6E]/50 text-xs">
                 {/* Filter Curso */}
                 <div className="flex items-center gap-2">
                   <span className="text-[#94A3B8] text-[11px] uppercase font-semibold tracking-wider shrink-0 flex items-center gap-1">
-                    <Filter className="w-3 h-3 text-[#D4AF37]" />
+                    <Filter className="w-3 h-3 text-[#2563EB]" />
                     Curso:
                   </span>
                   <select
                     id="filter-curso"
                     value={filterCurso}
                     onChange={(e) => setFilterCurso(e.target.value)}
-                    className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#2563EB]"
                   >
                     <option value="">Todos os Cursos ({uniqueCourses.length})</option>
                     {uniqueCourses.map((c) => (
@@ -2364,7 +2364,7 @@ export default function App() {
                     id="filter-temp"
                     value={filterTemp}
                     onChange={(e) => setFilterTemp(e.target.value)}
-                    className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#2563EB]"
                   >
                     <option value="">Todas as Temperaturas</option>
                     <option value="Quente">🔥 Quente (Fecha rápido)</option>
@@ -2378,14 +2378,14 @@ export default function App() {
                 {/* Order / Sort criteria */}
                 <div className="flex items-center gap-2">
                   <span className="text-[#94A3B8] text-[11px] uppercase font-semibold tracking-wider shrink-0 flex items-center gap-1">
-                    <ArrowUpDown className="w-3 h-3 text-[#D4AF37]" />
+                    <ArrowUpDown className="w-3 h-3 text-[#2563EB]" />
                     Ordem:
                   </span>
                   <select
                     id="sort-by"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="w-full bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#2563EB]"
                   >
                     <option value="curso">Agrupar por Curso (A-Z) [Padrão]</option>
                     <option value="nome">Nome do Aluno (A-Z)</option>
@@ -2426,7 +2426,7 @@ export default function App() {
                   <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 border border-emerald-500/40">
                     ✓
                   </div>
-                  <div className="text-xs text-[#F8FAFC] truncate">
+                  <div className="text-xs text-[#FFFFFF] truncate">
                     <strong className="text-emerald-300">{recentlyContactedNotice.contactName}</strong> foi registrado com sucesso como <b>Contatado Hoje</b>!
                     {tabFilter === 'pendente' && (
                       <span className="text-emerald-400/90 ml-1.5 hidden sm:inline">
@@ -2443,7 +2443,7 @@ export default function App() {
                         setTabFilter('enviado');
                         setRecentlyContactedNotice(null);
                       }}
-                      className="bg-emerald-500 hover:bg-emerald-400 text-[#0A0E17] text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-xs active:scale-95"
+                      className="bg-emerald-500 hover:bg-emerald-400 text-[#0B132B] text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-xs active:scale-95"
                     >
                       Ver na aba Contatados
                     </button>
@@ -2451,7 +2451,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setRecentlyContactedNotice(null)}
-                    className="text-[#94A3B8] hover:text-[#F8FAFC] text-xs px-1.5 py-1 rounded hover:bg-[#111827] cursor-pointer"
+                    className="text-[#94A3B8] hover:text-[#FFFFFF] text-xs px-1.5 py-1 rounded hover:bg-[#111D3E] cursor-pointer"
                     title="Fechar aviso"
                   >
                     ✕
@@ -2463,9 +2463,9 @@ export default function App() {
             {/* Contacts Cards Stream */}
             <div className="space-y-3">
               {filteredContacts.length === 0 ? (
-                <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-12 text-center">
+                <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-12 text-center">
                   <Users className="w-12 h-12 text-[#94A3B8] mx-auto mb-3 opacity-40" />
-                  <h3 className="text-base font-semibold text-[#F8FAFC]">Nenhum contato encontrado</h3>
+                  <h3 className="text-base font-semibold text-[#FFFFFF]">Nenhum contato encontrado</h3>
                   <p className="text-xs text-[#94A3B8] mt-1 max-w-md mx-auto">
                     Não há contatos cadastrados para os filtros selecionados. Tente importar uma planilha ou adicionar um novo lead.
                   </p>
@@ -2477,7 +2477,7 @@ export default function App() {
                         setFilterCurso('');
                         setFilterTemp('');
                       }}
-                      className="mt-4 text-xs font-semibold text-[#D4AF37] hover:underline cursor-pointer"
+                      className="mt-4 text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer"
                     >
                       Limpar filtros aplicados
                     </button>
@@ -2492,13 +2492,13 @@ export default function App() {
                   return (
                     <React.Fragment key={c.id}>
                       {showCourseHeader && (
-                        <div className="pt-3 pb-1 flex items-center justify-between border-b border-[#25334A] mb-1">
+                        <div className="pt-3 pb-1 flex items-center justify-between border-b border-[#263B6E] mb-1">
                           <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]" />
-                            <h3 className="text-sm sm:text-base font-bold font-serif text-[#F8FAFC] tracking-wide">
+                            <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />
+                            <h3 className="text-sm sm:text-base font-bold font-serif text-[#FFFFFF] tracking-wide">
                               {c.curso || 'Sem Curso Informado'}
                             </h3>
-                            <span className="text-[11px] font-sans text-[#94A3B8] bg-[#111827] px-2 py-0.5 rounded-full border border-[#25334A]">
+                            <span className="text-[11px] font-sans text-[#94A3B8] bg-[#111D3E] px-2 py-0.5 rounded-full border border-[#263B6E]">
                               {filteredContacts.filter((item) => (item.curso || '') === (c.curso || '')).length} aluno(s)
                             </span>
                           </div>
@@ -2515,7 +2515,7 @@ export default function App() {
                                   `Curso: ${c.curso || 'Sem Curso'}`
                                 );
                               }}
-                              className="text-[11px] font-semibold text-[#94A3B8] hover:text-[#4ADE80] flex items-center gap-1 bg-[#0A0E17] border border-[#25334A] hover:border-[#6E8F5C]/50 px-2 py-1 rounded cursor-pointer transition-colors"
+                              className="text-[11px] font-semibold text-[#94A3B8] hover:text-[#4ADE80] flex items-center gap-1 bg-[#0B132B] border border-[#263B6E] hover:border-[#6E8F5C]/50 px-2 py-1 rounded cursor-pointer transition-colors"
                               title="Marcar todos os alunos deste curso como contatados após disparo"
                             >
                               <CheckCircle2 className="w-3 h-3 text-[#4ADE80]" />
@@ -2525,7 +2525,7 @@ export default function App() {
                             <button
                               type="button"
                               onClick={() => setMessageModalContact(c)}
-                              className="text-[11px] font-semibold text-[#6E8F5C] hover:text-[#4ADE80] flex items-center gap-1 bg-[#0A0E17] border border-[#6E8F5C]/40 px-2.5 py-1 rounded cursor-pointer transition-colors"
+                              className="text-[11px] font-semibold text-[#6E8F5C] hover:text-[#4ADE80] flex items-center gap-1 bg-[#0B132B] border border-[#6E8F5C]/40 px-2.5 py-1 rounded cursor-pointer transition-colors"
                               title={`Iniciar disparos a partir deste curso`}
                             >
                               <Send className="w-3 h-3" />

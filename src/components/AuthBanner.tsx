@@ -24,9 +24,9 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
 }) => {
   if (loading) {
     return (
-      <div className="bg-[#111827] border border-[#25334A] rounded-xl p-3 mb-4 flex items-center justify-between text-xs text-[#94A3B8] animate-pulse">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-xl p-3 mb-4 flex items-center justify-between text-xs text-[#94A3B8] animate-pulse">
         <div className="flex items-center gap-2">
-          <RefreshCw className="w-4 h-4 text-[#D4AF37] animate-spin" />
+          <RefreshCw className="w-4 h-4 text-[#2563EB] animate-spin" />
           <span>Verificando sessão e permissões de acesso...</span>
         </div>
       </div>
@@ -46,7 +46,7 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
               <AlertOctagon className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-[#F8FAFC]">Acesso Bloqueado ({profile.displayName || profile.email})</h4>
+              <h4 className="text-sm font-bold text-[#FFFFFF]">Acesso Bloqueado ({profile.displayName || profile.email})</h4>
               <p className="text-xs text-[#94A3B8]">
                 Sua conta foi temporariamente desativada pelo administrador. Entre em contato com a gerência.
               </p>
@@ -55,7 +55,7 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
           <button
             type="button"
             onClick={onSignOut}
-            className="text-xs text-[#94A3B8] hover:text-white bg-[#0A0E17] border border-[#25334A] px-3 py-1.5 rounded-lg transition-colors cursor-pointer self-end sm:self-auto"
+            className="text-xs text-[#94A3B8] hover:text-white bg-[#0B132B] border border-[#263B6E] px-3 py-1.5 rounded-lg transition-colors cursor-pointer self-end sm:self-auto"
           >
             Trocar de Conta / Sair
           </button>
@@ -65,17 +65,17 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
 
     if (isPending) {
       return (
-        <div className="bg-[#D4AF37]/15 border border-[#D4AF37] rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+        <div className="bg-[#2563EB]/15 border border-[#2563EB] rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shrink-0 animate-pulse">
+            <div className="w-9 h-9 rounded-full bg-[#2563EB]/20 border border-[#2563EB] flex items-center justify-center text-[#2563EB] shrink-0 animate-pulse">
               <Clock className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-[#F8FAFC]">
+                <h4 className="text-sm font-bold text-[#FFFFFF]">
                   Atendente: {profile.displayName || profile.email}
                 </h4>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 uppercase">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#2563EB]/20 text-[#2563EB] border border-[#2563EB]/40 uppercase">
                   Aguardando Liberação do Admin
                 </span>
               </div>
@@ -88,7 +88,7 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
             <button
               type="button"
               onClick={onSignOut}
-              className="text-xs text-[#94A3B8] hover:text-white bg-[#0A0E17] border border-[#25334A] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              className="text-xs text-[#94A3B8] hover:text-white bg-[#0B132B] border border-[#263B6E] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
             >
               Sair
             </button>
@@ -99,27 +99,27 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
 
     // Approved User / Admin
     return (
-      <div className="bg-[#111827] border border-[#6E8F5C]/40 rounded-xl px-4 py-2.5 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      <div className="bg-[#111D3E] border border-[#6E8F5C]/40 rounded-xl px-4 py-2.5 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-            <div className={`w-9 h-9 rounded-full ${isAdmin ? 'bg-[#D4AF37]/20 border-[#D4AF37]' : 'bg-[#6E8F5C]/20 border-[#6E8F5C]'} border flex items-center justify-center ${isAdmin ? 'text-[#D4AF37]' : 'text-[#6E8F5C]'}`}>
+            <div className={`w-9 h-9 rounded-full ${isAdmin ? 'bg-[#2563EB]/20 border-[#2563EB]' : 'bg-[#6E8F5C]/20 border-[#6E8F5C]'} border flex items-center justify-center ${isAdmin ? 'text-[#2563EB]' : 'text-[#6E8F5C]'}`}>
               {isAdmin ? <Shield className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
             </div>
             <span
               className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${
-                syncing ? 'bg-[#D4AF37] animate-ping' : 'bg-[#6E8F5C]'
-              } border-2 border-[#111827]`}
+                syncing ? 'bg-[#2563EB] animate-ping' : 'bg-[#6E8F5C]'
+              } border-2 border-[#111D3E]`}
               title={syncing ? 'Sincronizando dados...' : 'Nuvem Conectada'}
             />
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-[#F8FAFC] truncate">
+              <span className="text-xs sm:text-sm font-bold text-[#FFFFFF] truncate">
                 {profile.displayName || profile.email}
               </span>
               {isAdmin ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2563EB]/20 text-[#2563EB] border border-[#2563EB]/40">
                   <Shield className="w-3 h-3" />
                   Administrador Master
                 </span>
@@ -142,7 +142,7 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
           <button
             type="button"
             onClick={onSignOut}
-            className="flex items-center gap-1.5 text-xs text-[#94A3B8] hover:text-[#B14432] bg-[#0A0E17] hover:bg-[#0A0E17]/80 border border-[#25334A] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-xs text-[#94A3B8] hover:text-[#B14432] bg-[#0B132B] hover:bg-[#0B132B]/80 border border-[#263B6E] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
             title="Sair da conta"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -155,15 +155,15 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
 
   // Not logged in banner with Simple Login button
   return (
-    <div className="bg-[#111827] border border-[#D4AF37]/40 rounded-xl p-3.5 sm:p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md bg-gradient-to-r from-[#111827] to-[#1a2c4e]">
+    <div className="bg-[#111D3E] border border-[#2563EB]/40 rounded-xl p-3.5 sm:p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md bg-gradient-to-r from-[#111D3E] to-[#1a2c4e]">
       <div className="flex items-start sm:items-center gap-3">
-        <div className="p-1 bg-[#0A0E17] border border-[#25334A] rounded-lg shrink-0 mt-0.5 sm:mt-0 shadow-sm flex items-center justify-center">
+        <div className="p-1 bg-[#0B132B] border border-[#263B6E] rounded-lg shrink-0 mt-0.5 sm:mt-0 shadow-sm flex items-center justify-center">
           <PortalLogo size={32} />
         </div>
         <div>
-          <div className="text-xs sm:text-sm font-semibold text-[#F8FAFC] flex items-center gap-2">
+          <div className="text-xs sm:text-sm font-semibold text-[#FFFFFF] flex items-center gap-2">
             Portal Concursos e OAB • Acesso da Equipe
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#2563EB]/20 text-[#2563EB] border border-[#2563EB]/30 uppercase">
               Oficial
             </span>
           </div>
@@ -178,7 +178,7 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
           type="button"
           id="btn-simple-login"
           onClick={onOpenLogin}
-          className="flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
+          className="flex items-center justify-center gap-2 bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
         >
           <LogIn className="w-4 h-4" />
           Entrar / Cadastrar

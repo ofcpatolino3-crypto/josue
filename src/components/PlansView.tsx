@@ -49,11 +49,11 @@ export const PlansView: React.FC<PlansProps> = ({
     <div className="animate-fadeIn">
       {/* Header */}
       <div className="mb-6">
-        <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#D4AF37] mb-1 flex items-center gap-1.5">
+        <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#2563EB] mb-1 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" />
           Portal Concurso
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC]">
+        <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#FFFFFF]">
           Assinaturas Premium
         </h2>
         <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
@@ -70,20 +70,20 @@ export const PlansView: React.FC<PlansProps> = ({
           return (
             <div
               key={plan.id}
-              className={`bg-[#111827] border rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-md transition-all duration-200 ${
+              className={`bg-[#111D3E] border rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-md transition-all duration-200 ${
                 isHighlight
-                  ? 'border-[#D4AF37] shadow-[0_0_16px_rgba(201,162,39,0.1)]'
-                  : 'border-[#25334A]'
+                  ? 'border-[#2563EB] shadow-[0_0_16px_rgba(201,162,39,0.1)]'
+                  : 'border-[#263B6E]'
               }`}
             >
               <div>
                 {/* Plan Header */}
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <h3 className="font-serif font-bold text-lg sm:text-xl text-[#F8FAFC]">
+                  <h3 className="font-serif font-bold text-lg sm:text-xl text-[#FFFFFF]">
                     {plan.nome}
                   </h3>
                   {isHighlight && (
-                    <span className="flex items-center gap-1 bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 bg-[#2563EB]/15 text-[#2563EB] border border-[#2563EB]/40 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full">
                       <Star className="w-3 h-3 fill-current" />
                       Mais Completo
                     </span>
@@ -99,7 +99,7 @@ export const PlansView: React.FC<PlansProps> = ({
                     type="text"
                     defaultValue={plan.preco}
                     onBlur={(e) => onUpdatePlanPrice(plan.id, e.target.value.trim())}
-                    className="w-full bg-[#0A0E17] border border-dashed border-[#25334A] focus:border-[#D4AF37] text-[#D4AF37] font-serif font-semibold text-sm sm:text-base px-3 py-2 rounded-lg transition-colors"
+                    className="w-full bg-[#0B132B] border border-dashed border-[#263B6E] focus:border-[#2563EB] text-[#2563EB] font-serif font-semibold text-sm sm:text-base px-3 py-2 rounded-lg transition-colors"
                     title="Clique para editar a condição comercial"
                   />
                 </div>
@@ -113,10 +113,10 @@ export const PlansView: React.FC<PlansProps> = ({
                     {plan.beneficios.map((benefit, index) => (
                       <li
                         key={index}
-                        className="flex items-start justify-between gap-2.5 text-xs sm:text-[13px] text-[#F8FAFC] leading-relaxed group"
+                        className="flex items-start justify-between gap-2.5 text-xs sm:text-[13px] text-[#FFFFFF] leading-relaxed group"
                       >
                         <div className="flex items-start gap-2 flex-1">
-                          <Check className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5 stroke-[2.5]" />
+                          <Check className="w-4 h-4 text-[#2563EB] shrink-0 mt-0.5 stroke-[2.5]" />
                           <span>{benefit}</span>
                         </div>
                         <button
@@ -134,7 +134,7 @@ export const PlansView: React.FC<PlansProps> = ({
               </div>
 
               {/* Add Benefit Row & Copy Button */}
-              <div className="mt-3 pt-3 border-t border-[#25334A] space-y-3">
+              <div className="mt-3 pt-3 border-t border-[#263B6E] space-y-3">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -147,12 +147,12 @@ export const PlansView: React.FC<PlansProps> = ({
                       }
                     }}
                     placeholder="Adicionar novo benefício..."
-                    className="flex-1 bg-[#0A0E17] border border-[#25334A] text-[#F8FAFC] placeholder-[#94A3B8]/60 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#D4AF37]"
+                    className="flex-1 bg-[#0B132B] border border-[#263B6E] text-[#FFFFFF] placeholder-[#94A3B8]/60 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#2563EB]"
                   />
                   <button
                     type="button"
                     onClick={() => handleAddBenefitSubmit(plan.id)}
-                    className="bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] border border-[#25334A] px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                    className="bg-[#1C2C55] hover:bg-[#263B6E] text-[#FFFFFF] border border-[#263B6E] px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                   </button>
@@ -163,8 +163,8 @@ export const PlansView: React.FC<PlansProps> = ({
                   onClick={() => handleCopyFormatted(plan)}
                   className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-sm cursor-pointer ${
                     isCopied
-                      ? 'bg-[#6E8F5C] text-[#F8FAFC]'
-                      : 'bg-[#D4AF37] hover:bg-[#E5C04A] active:scale-[0.99] text-[#0A0E17]'
+                      ? 'bg-[#6E8F5C] text-[#FFFFFF]'
+                      : 'bg-[#2563EB] hover:bg-[#3B82F6] active:scale-[0.99] text-[#0B132B]'
                   }`}
                 >
                   {isCopied ? (

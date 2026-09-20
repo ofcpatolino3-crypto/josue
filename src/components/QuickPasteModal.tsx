@@ -117,15 +117,15 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-[#111827] border border-[#D4AF37]/50 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      <div className="bg-[#111D3E] border border-[#2563EB]/50 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#25334A] bg-[#121E33]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#263B6E] bg-[#121E33]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#D4AF37]/20 rounded-xl border border-[#D4AF37]/40 text-[#D4AF37]">
+            <div className="p-2.5 bg-[#2563EB]/20 rounded-xl border border-[#2563EB]/40 text-[#2563EB]">
               <Clipboard className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-[#F8FAFC] flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-[#FFFFFF] flex items-center gap-2">
                 <span>Colar Contatos & Salvar Tudo</span>
                 <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 bg-[#22C55E]/20 text-[#4ADE80] rounded-full border border-[#22C55E]/30">
                   Instantâneo
@@ -139,7 +139,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg hover:bg-[#1E293B] transition-colors cursor-pointer"
+            className="text-[#94A3B8] hover:text-[#FFFFFF] p-1.5 rounded-lg hover:bg-[#1C2C55] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -157,7 +157,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
                 <button
                   type="button"
                   onClick={handlePasteFromClipboard}
-                  className="flex items-center gap-1 text-xs bg-[#1E293B] hover:bg-[#25334A] text-[#D4AF37] px-2.5 py-1 rounded-md border border-[#25334A] transition-colors cursor-pointer font-semibold"
+                  className="flex items-center gap-1 text-xs bg-[#1C2C55] hover:bg-[#263B6E] text-[#2563EB] px-2.5 py-1 rounded-md border border-[#263B6E] transition-colors cursor-pointer font-semibold"
                 >
                   <ClipboardCheck className="w-3.5 h-3.5" />
                   <span>Colar da Área de Transferência</span>
@@ -171,15 +171,15 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
               value={rawText}
               onChange={(e) => processText(e.target.value)}
               placeholder={`Exemplos aceitos (pode colar como quiser):\n\n1) Apenas números:\n85999887766\n11988887777\n\n2) Nome e WhatsApp:\nCarlos Silva - (85) 99988-7766\nMariana Souza - 11988887777 - TJ-SP\n\n3) Copiado direto do Excel ou WhatsApp:`}
-              className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] placeholder-[#94A3B8]/40 rounded-xl p-3.5 text-xs font-mono outline-none transition-colors resize-none leading-relaxed"
+              className="w-full bg-[#0B132B] border border-[#263B6E] focus:border-[#2563EB] text-[#FFFFFF] placeholder-[#94A3B8]/40 rounded-xl p-3.5 text-xs font-mono outline-none transition-colors resize-none leading-relaxed"
             />
           </div>
 
           {/* Quick Options (Course & Temp fallback) */}
-          <div className="bg-[#121E33] border border-[#25334A] rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="bg-[#121E33] border border-[#263B6E] rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
               <label className="block text-[11px] font-bold text-[#94A3B8] mb-1 flex items-center gap-1">
-                <BookOpen className="w-3 h-3 text-[#D4AF37]" />
+                <BookOpen className="w-3 h-3 text-[#2563EB]" />
                 <span>Curso padrão (caso não esteja no texto):</span>
               </label>
               <input
@@ -188,7 +188,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
                 value={defaultCourse}
                 onChange={(e) => setDefaultCourse(e.target.value)}
                 placeholder="Ex: TJ-SP, PF, OAB..."
-                className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] rounded-lg px-2.5 py-1.5 text-xs outline-none"
+                className="w-full bg-[#0B132B] border border-[#263B6E] focus:border-[#2563EB] text-[#FFFFFF] rounded-lg px-2.5 py-1.5 text-xs outline-none"
               />
               <datalist id="quick-courses">
                 {suggestedCourses.map((c) => (
@@ -205,7 +205,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
               <select
                 value={defaultTemp}
                 onChange={(e) => setDefaultTemp(e.target.value as Temperature)}
-                className="w-full bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC] rounded-lg px-2.5 py-1.5 text-xs outline-none cursor-pointer"
+                className="w-full bg-[#0B132B] border border-[#263B6E] focus:border-[#2563EB] text-[#FFFFFF] rounded-lg px-2.5 py-1.5 text-xs outline-none cursor-pointer"
               >
                 {TEMP_ORDER.map((t) => (
                   <option key={t} value={t}>
@@ -218,7 +218,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
 
           {/* Real-time Parsed Preview */}
           {parsedContacts.length > 0 ? (
-            <div className="border border-[#22C55E]/40 rounded-xl overflow-hidden bg-[#0A0E17]">
+            <div className="border border-[#22C55E]/40 rounded-xl overflow-hidden bg-[#0B132B]">
               <div className="px-3.5 py-2.5 bg-[#14261C] border-b border-[#22C55E]/30 text-xs font-bold text-[#4ADE80] flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
@@ -226,27 +226,27 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
                 </span>
                 <span className="text-[11px] text-[#94A3B8]">Formato validado</span>
               </div>
-              <div className="max-h-52 overflow-y-auto divide-y divide-[#25334A]/40">
+              <div className="max-h-52 overflow-y-auto divide-y divide-[#263B6E]/40">
                 {parsedContacts.map((c, i) => (
-                  <div key={i} className="p-2.5 flex items-center justify-between text-xs gap-2 hover:bg-[#111827]/40">
+                  <div key={i} className="p-2.5 flex items-center justify-between text-xs gap-2 hover:bg-[#111D3E]/40">
                     <div className="truncate flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-[#1E293B] text-[#D4AF37] font-bold text-[10px] flex items-center justify-center shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-[#1C2C55] text-[#2563EB] font-bold text-[10px] flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
-                      <span className="font-semibold text-[#F8FAFC]">{c.nome}</span>
+                      <span className="font-semibold text-[#FFFFFF]">{c.nome}</span>
                       {c.whatsapp && (
-                        <span className="text-[#4ADE80] font-mono text-[11px] bg-[#111827] px-1.5 py-0.5 rounded border border-[#25334A]">
+                        <span className="text-[#4ADE80] font-mono text-[11px] bg-[#111D3E] px-1.5 py-0.5 rounded border border-[#263B6E]">
                           {formatPhoneDisplay(c.whatsapp)}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {(c.curso || defaultCourse) && (
-                        <span className="text-[10px] bg-[#1E293B] text-[#D4AF37] px-2 py-0.5 rounded border border-[#25334A]">
+                        <span className="text-[10px] bg-[#1C2C55] text-[#2563EB] px-2 py-0.5 rounded border border-[#263B6E]">
                           {c.curso || defaultCourse}
                         </span>
                       )}
-                      <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#111827] text-[#F8FAFC]">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#111D3E] text-[#FFFFFF]">
                         {c.temperatura || defaultTemp}
                       </span>
                     </div>
@@ -263,7 +263,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-t border-[#25334A] bg-[#121E33]">
+        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-t border-[#263B6E] bg-[#121E33]">
           <button
             type="button"
             onClick={() => {
@@ -271,7 +271,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
               setParsedContacts([]);
               onClose();
             }}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B] transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-[#1C2C55] transition-colors cursor-pointer"
           >
             Cancelar
           </button>
@@ -284,7 +284,7 @@ export const QuickPasteModal: React.FC<QuickPasteModalProps> = ({
                   setRawText('');
                   setParsedContacts([]);
                 }}
-                className="px-3 py-2 rounded-xl text-xs text-[#94A3B8] hover:text-red-400 hover:bg-[#1E293B] transition-colors cursor-pointer flex items-center gap-1"
+                className="px-3 py-2 rounded-xl text-xs text-[#94A3B8] hover:text-red-400 hover:bg-[#1C2C55] transition-colors cursor-pointer flex items-center gap-1"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Limpar</span>

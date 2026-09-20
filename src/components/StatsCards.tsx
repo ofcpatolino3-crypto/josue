@@ -14,28 +14,28 @@ export const StatsCards: React.FC<StatsProps> = ({ total, pending, contacted, ov
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3.5">
       {/* Total Card */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-3.5 flex items-center justify-between shadow-sm">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-xl p-3.5 flex items-center justify-between shadow-sm">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-[#8C98B4]">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
             Total de Alunos
           </span>
-          <div id="stat-total" className="text-2xl font-serif font-bold text-[#EDE6D6] mt-0.5">
+          <div id="stat-total" className="text-2xl font-serif font-bold text-[#FFFFFF] mt-0.5">
             {total}
           </div>
-          <span className="text-[11px] text-[#8C98B4]">cadastrados na sua base</span>
+          <span className="text-[11px] text-[#94A3B8]">cadastrados na sua base</span>
         </div>
-        <div className="w-10 h-10 rounded-xl bg-[#101B2D] border border-[#2B3D63] flex items-center justify-center text-[#8C98B4]">
+        <div className="w-10 h-10 rounded-xl bg-[#0B132B] border border-[#263B6E] flex items-center justify-center text-[#94A3B8]">
           <Users className="w-5 h-5" />
         </div>
       </div>
 
       {/* A contatar Card */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-3.5 flex items-center justify-between shadow-sm">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-xl p-3.5 flex items-center justify-between shadow-sm">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-[#C9A227]">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-[#2563EB]">
             Pendentes a Contatar
           </span>
-          <div id="stat-pend" className="text-2xl font-serif font-bold text-[#C9A227] mt-0.5">
+          <div id="stat-pend" className="text-2xl font-serif font-bold text-[#2563EB] mt-0.5">
             {pending}
           </div>
           {overdue > 0 ? (
@@ -44,16 +44,16 @@ export const StatsCards: React.FC<StatsProps> = ({ total, pending, contacted, ov
               {overdue} atrasado{overdue > 1 ? 's' : ''}
             </span>
           ) : (
-            <span className="text-[11px] text-[#8C98B4]">aguardando primeiro envio</span>
+            <span className="text-[11px] text-[#94A3B8]">aguardando primeiro envio</span>
           )}
         </div>
-        <div className="w-10 h-10 rounded-xl bg-[#C9A227]/10 border border-[#C9A227]/30 flex items-center justify-center text-[#C9A227]">
+        <div className="w-10 h-10 rounded-xl bg-[#2563EB]/10 border border-[#2563EB]/30 flex items-center justify-center text-[#2563EB]">
           <PhoneCall className="w-5 h-5" />
         </div>
       </div>
 
       {/* Já contatados Card */}
-      <div className="bg-[#172644] border border-[#2B3D63] rounded-xl p-3.5 flex items-center justify-between shadow-sm">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-xl p-3.5 flex items-center justify-between shadow-sm">
         <div className="flex-1 mr-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] uppercase font-bold tracking-wider text-[#4ADE80]">
@@ -65,7 +65,7 @@ export const StatsCards: React.FC<StatsProps> = ({ total, pending, contacted, ov
             {contacted}
           </div>
           {/* Progress bar */}
-          <div className="w-full bg-[#101B2D] h-1.5 rounded-full mt-1.5 overflow-hidden border border-[#2B3D63]/50">
+          <div className="w-full bg-[#0B132B] h-1.5 rounded-full mt-1.5 overflow-hidden border border-[#263B6E]/50">
             <div
               className="bg-[#16A34A] h-full rounded-full transition-all duration-300"
               style={{ width: `${Math.min(contactedPercent, 100)}%` }}

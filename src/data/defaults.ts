@@ -2,7 +2,7 @@ import { Contact, Objection, Plan, Temperature, MessageTemplate } from '../types
 
 export const TEMP_COLORS: Record<Temperature, string> = {
   Frio: '#DC2626', // 🔴 Vermelho
-  Morno: '#C9A227', // 🟡 Amarelo / Dourado
+  Morno: '#2563EB', // 🟡 Amarelo / Dourado
   Potencial: '#2563EB', // 🔵 Azul
   Quente: '#EA580C', // 🔥 Laranja / Fogo
   Pagou: '#16A34A', // 🟢 Verde

@@ -22,10 +22,10 @@ export const ToastContainer: React.FC<Props> = ({ toasts, onDismiss }) => {
             id={`toast-${toast.id}`}
             className={`pointer-events-auto flex items-start justify-between gap-3 p-3.5 rounded-lg border shadow-xl backdrop-blur-md transition-all duration-200 ${
               isErr
-                ? 'bg-[#172644]/95 border-[#B14432] text-[#EDE6D6]'
+                ? 'bg-[#111D3E]/95 border-[#B14432] text-[#FFFFFF]'
                 : isInfo
-                ? 'bg-[#172644]/95 border-[#5C7A9E] text-[#EDE6D6]'
-                : 'bg-[#172644]/95 border-[#6E8F5C] text-[#EDE6D6]'
+                ? 'bg-[#111D3E]/95 border-[#5C7A9E] text-[#FFFFFF]'
+                : 'bg-[#111D3E]/95 border-[#6E8F5C] text-[#FFFFFF]'
             }`}
           >
             <div className="flex items-start gap-2.5">
@@ -40,7 +40,7 @@ export const ToastContainer: React.FC<Props> = ({ toasts, onDismiss }) => {
             </div>
             <button
               onClick={() => onDismiss(toast.id)}
-              className="text-[#8C98B4] hover:text-[#EDE6D6] p-0.5 transition-colors"
+              className="text-[#94A3B8] hover:text-[#FFFFFF] p-0.5 transition-colors"
               title="Fechar"
             >
               <X className="w-4 h-4" />

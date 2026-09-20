@@ -741,11 +741,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       )}
 
       {/* 1. Header & Quick Actions Bar */}
-      <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-5 shadow-lg">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-5 shadow-lg">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/50 px-3 py-1 rounded-full uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold bg-[#2563EB]/20 text-[#2563EB] border border-[#2563EB]/50 px-3 py-1 rounded-full uppercase tracking-wider">
                 <Shield className="w-3.5 h-3.5" />
                 👑 Painel Administrativo — Lucas Henrique
               </span>
@@ -753,7 +753,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 • Administrador Master: <strong className="text-white">Lucas Henrique</strong>
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#F8FAFC] tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#FFFFFF] tracking-tight">
               Painel Administrativo Lucas Henrique · Gestão de Leads & Vendas
             </h2>
             <p className="text-xs text-[#94A3B8]">
@@ -766,7 +766,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <button
               type="button"
               onClick={() => setShowSmartImportModal(true)}
-              className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#8C6D1F] text-[#0A0E17] px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer active:scale-95"
+              className="flex items-center gap-2 bg-[#2563EB] hover:bg-[#8C6D1F] text-[#0B132B] px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer active:scale-95"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Importar Planilha (Excel / CSV)</span>
@@ -776,17 +776,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               type="button"
               onClick={handleExportSupervisorAll}
               disabled={isProcessing || globalContacts.length === 0}
-              className="flex items-center gap-1.5 bg-[#0A0E17] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-[#0B132B] hover:bg-[#1C2C55] text-[#FFFFFF] border border-[#263B6E] px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
               title="Exportar planilha Excel completa de supervisão"
             >
-              <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <Download className="w-3.5 h-3.5 text-[#2563EB]" />
               <span>Exportar Base Completa</span>
             </button>
           </div>
         </div>
 
         {/* Executive KPI Summary Counters - High Contrast Color-Coded Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4 pt-4 border-t border-[#25334A]/70">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4 pt-4 border-t border-[#263B6E]/70">
           {/* Card 1: Piscina de Leads Livres (Estoque do Admin) */}
           <div
             onClick={() => {
@@ -795,20 +795,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             }}
             className={`p-3.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
               unassignedContacts.length > 0
-                ? 'bg-[#D4AF37]/15 border-[#D4AF37] shadow-[0_0_15px_rgba(201,162,39,0.15)] ring-1 ring-[#D4AF37]/50'
-                : 'bg-[#0A0E17] border-[#25334A]'
+                ? 'bg-[#2563EB]/15 border-[#2563EB] shadow-[0_0_15px_rgba(201,162,39,0.15)] ring-1 ring-[#2563EB]/50'
+                : 'bg-[#0B132B] border-[#263B6E]'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-[#FCD34D] uppercase tracking-wider flex items-center gap-1">
-                <Zap className="w-3.5 h-3.5 text-[#D4AF37]" /> Estoque Admin
+                <Zap className="w-3.5 h-3.5 text-[#2563EB]" /> Estoque Admin
               </span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
               <span className="text-2xl sm:text-3xl font-extrabold text-white">
                 {unassignedContacts.length}
               </span>
-              <span className="text-[11px] text-[#D4AF37] font-semibold">
+              <span className="text-[11px] text-[#2563EB] font-semibold">
                 livres p/ envio
               </span>
             </div>
@@ -820,7 +820,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             className={`p-3.5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${
               activeTab === 'sent_leads'
                 ? 'bg-[#10B981]/25 border-[#10B981] ring-2 ring-[#10B981]'
-                : 'bg-[#0A0E17] border-[#25334A] hover:border-[#10B981]'
+                : 'bg-[#0B132B] border-[#263B6E] hover:border-[#10B981]'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -844,7 +844,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
               inactiveAlertContacts.length > 0
                 ? 'bg-[#DC2626]/20 border-[#DC2626] shadow-[0_0_15px_rgba(220,38,38,0.2)] ring-1 ring-[#DC2626]/60'
-                : 'bg-[#0A0E17] border-[#25334A]'
+                : 'bg-[#0B132B] border-[#263B6E]'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -867,7 +867,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {/* Card 4: Interações Hoje */}
           <div
             onClick={() => setActiveTab('activity')}
-            className="p-3.5 rounded-xl border border-[#25334A] bg-[#0A0E17] hover:border-[#10B981] transition-all cursor-pointer"
+            className="p-3.5 rounded-xl border border-[#263B6E] bg-[#0B132B] hover:border-[#10B981] transition-all cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-[#86EFAC] uppercase tracking-wider flex items-center gap-1">
@@ -885,15 +885,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {/* Card 5: Equipe de Atendentes */}
           <div
             onClick={() => setActiveTab('users')}
-            className="p-3.5 rounded-xl border border-[#25334A] bg-[#0A0E17] hover:border-[#D4AF37] transition-all cursor-pointer col-span-2 sm:col-span-1"
+            className="p-3.5 rounded-xl border border-[#263B6E] bg-[#0B132B] hover:border-[#2563EB] transition-all cursor-pointer col-span-2 sm:col-span-1"
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-[#D4AF37]" /> Atendentes Ativos
+                <Users className="w-3.5 h-3.5 text-[#2563EB]" /> Atendentes Ativos
               </span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC]">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#FFFFFF]">
                 {attendants.length}
               </span>
               {pendingUsers.length > 0 ? (
@@ -909,20 +909,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       </div>
 
       {/* 2. Visual Top Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#25334A] pb-2 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#263B6E] pb-2 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('distribution')}
           className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shadow-sm ${
             activeTab === 'distribution'
-              ? 'bg-[#D4AF37] text-[#0A0E17] shadow-md ring-2 ring-[#D4AF37]/40'
-              : 'text-[#94A3B8] hover:text-white hover:bg-[#111827]'
+              ? 'bg-[#2563EB] text-[#0B132B] shadow-md ring-2 ring-[#2563EB]/40'
+              : 'text-[#94A3B8] hover:text-white hover:bg-[#111D3E]'
           }`}
         >
           <Share2 className="w-4 h-4" />
           <span>Estoque da Planilha & Envio de Leads</span>
           {unassignedContacts.length > 0 && (
-            <span className="bg-[#0A0E17] text-[#D4AF37] text-[11px] px-2 py-0.5 rounded-full font-extrabold">
+            <span className="bg-[#0B132B] text-[#2563EB] text-[11px] px-2 py-0.5 rounded-full font-extrabold">
               {unassignedContacts.length} livres
             </span>
           )}
@@ -933,15 +933,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onClick={() => setActiveTab('sent_leads')}
           className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shadow-sm ${
             activeTab === 'sent_leads'
-              ? 'bg-[#10B981] text-[#0A0E17] shadow-md ring-2 ring-[#10B981]/40'
-              : 'text-[#94A3B8] hover:text-white hover:bg-[#111827]'
+              ? 'bg-[#10B981] text-[#0B132B] shadow-md ring-2 ring-[#10B981]/40'
+              : 'text-[#94A3B8] hover:text-white hover:bg-[#111D3E]'
           }`}
         >
           <UserCheck className="w-4 h-4" />
           <span>Contatos Enviados (Destino dos Leads)</span>
           {sentContacts.length > 0 && (
             <span className={`text-[11px] px-2 py-0.5 rounded-full font-extrabold ${
-              activeTab === 'sent_leads' ? 'bg-[#0A0E17] text-[#10B981]' : 'bg-[#10B981]/20 text-[#34D399]'
+              activeTab === 'sent_leads' ? 'bg-[#0B132B] text-[#10B981]' : 'bg-[#10B981]/20 text-[#34D399]'
             }`}>
               {sentContacts.length}
             </span>
@@ -954,7 +954,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'alerts'
               ? 'bg-[#DC2626] text-white shadow-md ring-2 ring-[#DC2626]/40'
-              : 'text-[#94A3B8] hover:text-white hover:bg-[#111827]'
+              : 'text-[#94A3B8] hover:text-white hover:bg-[#111D3E]'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -972,7 +972,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'activity'
               ? 'bg-[#10B981] text-white shadow-md'
-              : 'text-[#94A3B8] hover:text-white hover:bg-[#111827]'
+              : 'text-[#94A3B8] hover:text-white hover:bg-[#111D3E]'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -984,8 +984,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onClick={() => setActiveTab('users')}
           className={`flex items-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'users'
-              ? 'bg-[#1E293B] text-[#F8FAFC] border border-[#D4AF37]/50 shadow-md'
-              : 'text-[#94A3B8] hover:text-white hover:bg-[#111827]'
+              ? 'bg-[#1C2C55] text-[#FFFFFF] border border-[#2563EB]/50 shadow-md'
+              : 'text-[#94A3B8] hover:text-white hover:bg-[#111D3E]'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -1004,11 +1004,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {activeTab === 'distribution' && (
         <div className="space-y-5">
           {/* Sub-modes selector */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-4 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#25334A] pb-3">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-4 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#263B6E] pb-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Share2 className="w-4 h-4 text-[#D4AF37]" />
+                  <Share2 className="w-4 h-4 text-[#2563EB]" />
                   Como você deseja fazer a distribuição agora?
                 </h3>
                 <p className="text-xs text-[#94A3B8]">
@@ -1019,7 +1019,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               {/* Badges */}
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-[#94A3B8]">Leads Livres:</span>
-                <span className="text-sm font-extrabold text-[#D4AF37] bg-[#0A0E17] border border-[#D4AF37]/40 px-2.5 py-1 rounded-lg">
+                <span className="text-sm font-extrabold text-[#2563EB] bg-[#0B132B] border border-[#2563EB]/40 px-2.5 py-1 rounded-lg">
                   {unassignedContacts.length} disponíveis
                 </span>
               </div>
@@ -1032,12 +1032,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setDistributionMode('round_robin')}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   distributionMode === 'round_robin'
-                    ? 'bg-[#D4AF37]/20 border-[#D4AF37] ring-1 ring-[#D4AF37]'
-                    : 'bg-[#0A0E17] border-[#25334A] hover:border-[#94A3B8]'
+                    ? 'bg-[#2563EB]/20 border-[#2563EB] ring-1 ring-[#2563EB]'
+                    : 'bg-[#0B132B] border-[#263B6E] hover:border-[#94A3B8]'
                 }`}
               >
                 <div className="flex items-center gap-2 font-bold text-xs text-white">
-                  <Zap className={`w-4 h-4 ${distributionMode === 'round_robin' ? 'text-[#D4AF37]' : 'text-[#94A3B8]'}`} />
+                  <Zap className={`w-4 h-4 ${distributionMode === 'round_robin' ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`} />
                   <span>1. Roleta Equitativa</span>
                 </div>
                 <p className="text-[11px] text-[#94A3B8] mt-1">
@@ -1050,12 +1050,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setDistributionMode('by_course')}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   distributionMode === 'by_course'
-                    ? 'bg-[#D4AF37]/20 border-[#D4AF37] ring-1 ring-[#D4AF37]'
-                    : 'bg-[#0A0E17] border-[#25334A] hover:border-[#94A3B8]'
+                    ? 'bg-[#2563EB]/20 border-[#2563EB] ring-1 ring-[#2563EB]'
+                    : 'bg-[#0B132B] border-[#263B6E] hover:border-[#94A3B8]'
                 }`}
               >
                 <div className="flex items-center gap-2 font-bold text-xs text-white">
-                  <Briefcase className={`w-4 h-4 ${distributionMode === 'by_course' ? 'text-[#D4AF37]' : 'text-[#94A3B8]'}`} />
+                  <Briefcase className={`w-4 h-4 ${distributionMode === 'by_course' ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`} />
                   <span>2. Por Concurso / Cargo</span>
                 </div>
                 <p className="text-[11px] text-[#94A3B8] mt-1">
@@ -1068,12 +1068,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 onClick={() => setDistributionMode('manual_select')}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   distributionMode === 'manual_select'
-                    ? 'bg-[#D4AF37]/20 border-[#D4AF37] ring-1 ring-[#D4AF37]'
-                    : 'bg-[#0A0E17] border-[#25334A] hover:border-[#94A3B8]'
+                    ? 'bg-[#2563EB]/20 border-[#2563EB] ring-1 ring-[#2563EB]'
+                    : 'bg-[#0B132B] border-[#263B6E] hover:border-[#94A3B8]'
                 }`}
               >
                 <div className="flex items-center gap-2 font-bold text-xs text-white">
-                  <Send className={`w-4 h-4 ${distributionMode === 'manual_select' ? 'text-[#D4AF37]' : 'text-[#94A3B8]'}`} />
+                  <Send className={`w-4 h-4 ${distributionMode === 'manual_select' ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`} />
                   <span>3. Lote por Quantidade</span>
                 </div>
                 <p className="text-[11px] text-[#94A3B8] mt-1">
@@ -1087,7 +1087,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   distributionMode === 'transfer_portfolio'
                     ? 'bg-[#DC2626]/20 border-[#DC2626] ring-1 ring-[#DC2626]'
-                    : 'bg-[#0A0E17] border-[#25334A] hover:border-[#94A3B8]'
+                    : 'bg-[#0B132B] border-[#263B6E] hover:border-[#94A3B8]'
                 }`}
               >
                 <div className="flex items-center gap-2 font-bold text-xs text-white">
@@ -1102,11 +1102,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* --- TOOL PANEL: 1. ROLETA EQUITATIVA (ROUND ROBIN) --- */}
             {distributionMode === 'round_robin' && (
-              <div className="bg-[#0A0E17] border border-[#D4AF37]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#25334A]">
+              <div className="bg-[#0B132B] border border-[#2563EB]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#263B6E]">
                   <div>
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-[#D4AF37]" />
+                      <Zap className="w-4 h-4 text-[#2563EB]" />
                       Liberação de Contatos Igualitária / Roleta Automática
                     </h4>
                     <p className="text-xs text-[#94A3B8] mt-0.5">
@@ -1118,11 +1118,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <button
                       type="button"
                       onClick={selectAllAttendantsInRoleta}
-                      className="text-xs text-[#D4AF37] hover:underline font-semibold cursor-pointer"
+                      className="text-xs text-[#2563EB] hover:underline font-semibold cursor-pointer"
                     >
                       Selecionar Todos ({attendants.length})
                     </button>
-                    <span className="text-[#25334A]">|</span>
+                    <span className="text-[#263B6E]">|</span>
                     <button
                       type="button"
                       onClick={clearAllAttendantsInRoleta}
@@ -1134,7 +1134,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 {/* 1. Escolha da Fonte dos Contatos & Modo de Cota */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#111827]/70 p-3.5 rounded-xl border border-[#25334A]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#111D3E]/70 p-3.5 rounded-xl border border-[#263B6E]">
                   {/* Fonte */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-white block">
@@ -1146,8 +1146,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={() => setRoletaLeadSource('admin_stock')}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                           roletaLeadSource === 'admin_stock'
-                            ? 'bg-[#D4AF37] text-[#0A0E17] border-[#D4AF37] font-bold shadow-xs'
-                            : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-white'
+                            ? 'bg-[#2563EB] text-[#0B132B] border-[#2563EB] font-bold shadow-xs'
+                            : 'bg-[#0B132B] text-[#94A3B8] border-[#263B6E] hover:text-white'
                         }`}
                         title="Desconta da conta do Administrador e transfere para os atendentes"
                       >
@@ -1159,8 +1159,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={() => setRoletaLeadSource('unassigned')}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                           roletaLeadSource === 'unassigned'
-                            ? 'bg-[#D4AF37] text-[#0A0E17] border-[#D4AF37] font-bold shadow-xs'
-                            : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-white'
+                            ? 'bg-[#2563EB] text-[#0B132B] border-[#2563EB] font-bold shadow-xs'
+                            : 'bg-[#0B132B] text-[#94A3B8] border-[#263B6E] hover:text-white'
                         }`}
                       >
                         👥 Leads Sem Atendente ({unassignedContacts.length})
@@ -1172,8 +1172,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           onClick={() => setRoletaLeadSource('batch')}
                           className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                             roletaLeadSource === 'batch'
-                              ? 'bg-[#D4AF37] text-[#0A0E17] border-[#D4AF37] font-bold shadow-xs'
-                              : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-white'
+                              ? 'bg-[#2563EB] text-[#0B132B] border-[#2563EB] font-bold shadow-xs'
+                              : 'bg-[#0B132B] text-[#94A3B8] border-[#263B6E] hover:text-white'
                           }`}
                         >
                           📁 Por Lote / Planilha ({availableBatches.length})
@@ -1185,8 +1185,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={() => setRoletaLeadSource('all')}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                           roletaLeadSource === 'all'
-                            ? 'bg-[#D4AF37] text-[#0A0E17] border-[#D4AF37] font-bold shadow-xs'
-                            : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-white'
+                            ? 'bg-[#2563EB] text-[#0B132B] border-[#2563EB] font-bold shadow-xs'
+                            : 'bg-[#0B132B] text-[#94A3B8] border-[#263B6E] hover:text-white'
                         }`}
                       >
                         🌐 Toda a Base ({globalContacts.length})
@@ -1198,7 +1198,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <select
                           value={roletaSelectedBatch}
                           onChange={(e) => setRoletaSelectedBatch(e.target.value)}
-                          className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                          className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-[#2563EB]"
                         >
                           <option value="todos">Todos os Lotes ({availableBatches.reduce((acc, b) => acc + b.count, 0)} leads)</option>
                           {availableBatches.map((b) => (
@@ -1222,8 +1222,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={() => setRoletaQuotaMode('all_equal')}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                           roletaQuotaMode === 'all_equal'
-                            ? 'bg-[#38BDF8] text-[#0A0E17] border-[#38BDF8] font-bold shadow-xs'
-                            : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-white'
+                            ? 'bg-[#38BDF8] text-[#0B132B] border-[#38BDF8] font-bold shadow-xs'
+                            : 'bg-[#0B132B] text-[#94A3B8] border-[#263B6E] hover:text-white'
                         }`}
                       >
                         ⚖️ Dividir Todos Igualmente
@@ -1234,8 +1234,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         onClick={() => setRoletaQuotaMode('fixed_per_attendant')}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
                           roletaQuotaMode === 'fixed_per_attendant'
-                            ? 'bg-[#38BDF8] text-[#0A0E17] border-[#38BDF8] font-bold shadow-xs'
-                            : 'bg-[#0A0E17] text-[#94A3B8] border-[#25334A] hover:text-white'
+                            ? 'bg-[#38BDF8] text-[#0B132B] border-[#38BDF8] font-bold shadow-xs'
+                            : 'bg-[#0B132B] text-[#94A3B8] border-[#263B6E] hover:text-white'
                         }`}
                       >
                         🎯 Cota Fixa por Atendente
@@ -1251,7 +1251,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           max={1000}
                           value={roletaFixedAmount}
                           onChange={(e) => setRoletaFixedAmount(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-20 bg-[#0A0E17] border border-[#25334A] rounded-lg px-2 py-1 text-xs text-white text-center font-bold focus:outline-none focus:border-[#38BDF8]"
+                          className="w-20 bg-[#0B132B] border border-[#263B6E] rounded-lg px-2 py-1 text-xs text-white text-center font-bold focus:outline-none focus:border-[#38BDF8]"
                         />
                         <span className="text-xs text-[#94A3B8]">contatos para cada atendente selecionado</span>
                       </div>
@@ -1281,13 +1281,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             onClick={() => toggleAttendantInRoleta(a.uid)}
                             className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 select-none ${
                               isChecked
-                                ? 'bg-[#D4AF37]/15 border-[#D4AF37] text-white shadow-sm'
-                                : 'bg-[#111827] border-[#25334A] text-[#94A3B8] opacity-50 hover:opacity-90'
+                                ? 'bg-[#2563EB]/15 border-[#2563EB] text-white shadow-sm'
+                                : 'bg-[#111D3E] border-[#263B6E] text-[#94A3B8] opacity-50 hover:opacity-90'
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               {isChecked ? (
-                                <CheckSquare className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                                <CheckSquare className="w-4 h-4 text-[#2563EB] shrink-0" />
                               ) : (
                                 <Square className="w-4 h-4 text-[#94A3B8] shrink-0" />
                               )}
@@ -1296,7 +1296,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                   {a.displayName || a.email}
                                 </div>
                                 <div className="text-[10px] text-[#94A3B8]">
-                                  Carteira atual: <strong className="text-[#D4AF37]">{myCount} contatos</strong>
+                                  Carteira atual: <strong className="text-[#2563EB]">{myCount} contatos</strong>
                                 </div>
                               </div>
                             </div>
@@ -1321,11 +1321,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   }
 
                   return (
-                    <div className="bg-[#111827] p-4 rounded-xl border border-[#25334A] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="bg-[#111D3E] p-4 rounded-xl border border-[#263B6E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="space-y-1">
                         <div className="text-xs text-[#94A3B8] font-semibold">Resumo da Liberação Igualitária:</div>
                         <div className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
-                          <span className="text-[#D4AF37] font-extrabold">{effectiveTotal} contatos a liberar</span>
+                          <span className="text-[#2563EB] font-extrabold">{effectiveTotal} contatos a liberar</span>
                           <span>÷</span>
                           <span className="text-[#38BDF8] font-extrabold">{selCount} atendente(s)</span>
                           <span>=</span>
@@ -1342,7 +1342,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="button"
                         onClick={handleExecuteRoletaDistribution}
                         disabled={isProcessing || availableTotal === 0 || selCount === 0 || effectiveTotal === 0}
-                        className="bg-[#D4AF37] hover:bg-[#8C6D1F] text-[#0A0E17] font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                        className="bg-[#2563EB] hover:bg-[#8C6D1F] text-[#0B132B] font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
                       >
                         <Zap className="w-4 h-4" />
                         <span>⚡ Liberar e Distribuir Contatos Igualmente Agora</span>
@@ -1355,10 +1355,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* --- TOOL PANEL: 2. POR CONCURSO / CARGO --- */}
             {distributionMode === 'by_course' && (
-              <div className="bg-[#0A0E17] border border-[#D4AF37]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
+              <div className="bg-[#0B132B] border border-[#2563EB]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-[#D4AF37]" />
+                    <Briefcase className="w-4 h-4 text-[#2563EB]" />
                     Distribuição Especializada por Concurso
                   </h4>
                   <p className="text-xs text-[#94A3B8] mt-0.5">
@@ -1374,7 +1374,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <select
                       value={selectedCourseForRouting}
                       onChange={(e) => setSelectedCourseForRouting(e.target.value)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#2563EB]"
                     >
                       <option value="">Selecione o concurso...</option>
                       {unassignedCoursesList.map((c) => (
@@ -1392,7 +1392,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <select
                       value={targetAttendantForCourse}
                       onChange={(e) => setTargetAttendantForCourse(e.target.value)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#2563EB]"
                     >
                       <option value="">Selecione o atendente...</option>
                       {attendants.map((a) => (
@@ -1409,7 +1409,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     type="button"
                     onClick={handleExecuteCourseRouting}
                     disabled={isProcessing || !selectedCourseForRouting || !targetAttendantForCourse}
-                    className="bg-[#D4AF37] hover:bg-[#8C6D1F] text-[#0A0E17] font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="bg-[#2563EB] hover:bg-[#8C6D1F] text-[#0B132B] font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Send className="w-4 h-4" />
                     <span>Atribuir Todos Deste Concurso</span>
@@ -1420,10 +1420,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* --- TOOL PANEL: 3. LOTE POR QUANTIDADE --- */}
             {distributionMode === 'manual_select' && (
-              <div className="bg-[#0A0E17] border border-[#D4AF37]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
+              <div className="bg-[#0B132B] border border-[#2563EB]/40 rounded-xl p-4.5 space-y-4 animate-fade-in">
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Send className="w-4 h-4 text-[#D4AF37]" />
+                    <Send className="w-4 h-4 text-[#2563EB]" />
                     Atribuição por Quantidade Específica
                   </h4>
                   <p className="text-xs text-[#94A3B8] mt-0.5">
@@ -1443,7 +1443,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         max={unassignedContacts.length || 1}
                         value={customAmountToDistribute}
                         onChange={(e) => setCustomAmountToDistribute(Number(e.target.value))}
-                        className="w-full bg-[#111827] border border-[#25334A] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#D4AF37] font-bold"
+                        className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#2563EB] font-bold"
                       />
                       <div className="flex gap-1">
                         {[10, 25, 50, 100].map((num) => (
@@ -1451,7 +1451,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             key={num}
                             type="button"
                             onClick={() => setCustomAmountToDistribute(num)}
-                            className="text-[10px] bg-[#111827] hover:bg-[#25334A] text-[#F8FAFC] px-2 py-1.5 rounded border border-[#25334A] cursor-pointer"
+                            className="text-[10px] bg-[#111D3E] hover:bg-[#263B6E] text-[#FFFFFF] px-2 py-1.5 rounded border border-[#263B6E] cursor-pointer"
                           >
                             +{num}
                           </button>
@@ -1467,7 +1467,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <select
                       value={targetAttendantForCustom}
                       onChange={(e) => setTargetAttendantForCustom(e.target.value)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#2563EB]"
                     >
                       <option value="">Selecione o atendente...</option>
                       {attendants.map((a) => (
@@ -1495,7 +1495,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* --- TOOL PANEL: 4. TRANSFERIR CARTEIRA --- */}
             {distributionMode === 'transfer_portfolio' && (
-              <div className="bg-[#0A0E17] border border-[#DC2626]/50 rounded-xl p-4.5 space-y-4 animate-fade-in">
+              <div className="bg-[#0B132B] border border-[#DC2626]/50 rounded-xl p-4.5 space-y-4 animate-fade-in">
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <RotateCcw className="w-4 h-4 text-[#F87171]" />
@@ -1514,7 +1514,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <select
                       value={portfolioSourceUser}
                       onChange={(e) => setPortfolioSourceUser(e.target.value)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#DC2626]"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#DC2626]"
                     >
                       <option value="">Selecione o vendedor de origem...</option>
                       {attendants.map((a) => {
@@ -1529,7 +1529,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   <div className="sm:col-span-2 flex items-center justify-center pt-5">
-                    <ArrowRight className="w-6 h-6 text-[#D4AF37] hidden sm:block" />
+                    <ArrowRight className="w-6 h-6 text-[#2563EB] hidden sm:block" />
                   </div>
 
                   <div className="sm:col-span-5">
@@ -1539,7 +1539,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <select
                       value={portfolioTargetUser}
                       onChange={(e) => setPortfolioTargetUser(e.target.value)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#10B981]"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-[#10B981]"
                     >
                       <option value="">Selecione o destino...</option>
                       <option value="ROULETTE_EQUIP">⚡ Dividir Igualmente entre Todos os Outros Atendentes</option>
@@ -1570,11 +1570,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           {/* Table Controls & Filter Bar */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-4 shadow-sm space-y-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-[#D4AF37]" />
+                  <Filter className="w-4 h-4 text-[#2563EB]" />
                   Tabela Geral de Leads & Seleção Manual
                 </h3>
                 <p className="text-xs text-[#94A3B8]">
@@ -1583,13 +1583,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
 
               {/* Status Filter Pills */}
-              <div className="flex flex-wrap items-center gap-1.5 bg-[#0A0E17] p-1 rounded-xl border border-[#25334A]">
+              <div className="flex flex-wrap items-center gap-1.5 bg-[#0B132B] p-1 rounded-xl border border-[#263B6E]">
                 <button
                   type="button"
                   onClick={() => setActionFilter('unassigned')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     actionFilter === 'unassigned'
-                      ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                      ? 'bg-[#2563EB] text-[#0B132B] shadow-sm'
                       : 'text-[#94A3B8] hover:text-white'
                   }`}
                 >
@@ -1601,7 +1601,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   onClick={() => setActionFilter('assigned')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     actionFilter === 'assigned'
-                      ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                      ? 'bg-[#2563EB] text-[#0B132B] shadow-sm'
                       : 'text-[#94A3B8] hover:text-white'
                   }`}
                 >
@@ -1625,7 +1625,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   onClick={() => setActionFilter('todos')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     actionFilter === 'todos'
-                      ? 'bg-[#D4AF37] text-[#0A0E17] shadow-sm'
+                      ? 'bg-[#2563EB] text-[#0B132B] shadow-sm'
                       : 'text-[#94A3B8] hover:text-white'
                   }`}
                 >
@@ -1635,7 +1635,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
 
             {/* Search & Actions on Selected */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2 border-t border-[#25334A]">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2 border-t border-[#263B6E]">
               <div className="sm:col-span-5 relative">
                 <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-3 top-3" />
                 <input
@@ -1643,7 +1643,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   placeholder="Buscar por nome, telefone, curso ou atendente..."
                   value={distributionSearch}
                   onChange={(e) => setDistributionSearch(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
 
@@ -1651,7 +1651,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={selectedBatchFilter}
                   onChange={(e) => setSelectedBatchFilter(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#2563EB]"
                 >
                   <option value="todos">Todos os Lotes / Origens</option>
                   {batches.map((b) => (
@@ -1666,7 +1666,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={selectedTargetUser}
                   onChange={(e) => setSelectedTargetUser(e.target.value)}
-                  className="flex-1 bg-[#0A0E17] border border-[#25334A] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#D4AF37]"
+                  className="flex-1 bg-[#0B132B] border border-[#263B6E] text-xs text-white rounded-lg p-2 focus:outline-none focus:border-[#2563EB]"
                 >
                   <option value="">Atendente de Destino...</option>
                   {attendants.map((a) => (
@@ -1689,13 +1689,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           {/* Distribution Contacts Table */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-3 bg-[#0A0E17] border-b border-[#25334A] flex items-center justify-between text-xs">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-3 bg-[#0B132B] border-b border-[#263B6E] flex items-center justify-between text-xs">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={handleSelectAllFiltered}
-                  className="text-xs font-semibold text-[#D4AF37] hover:underline cursor-pointer flex items-center gap-1.5"
+                  className="text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   {selectedContactIds.length === filteredContactsForDistribution.length &&
@@ -1727,7 +1727,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <div className="overflow-x-auto max-h-[550px] overflow-y-auto">
               <table className="w-full text-left text-xs text-white">
-                <thead className="bg-[#0A0E17] text-[#94A3B8] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#25334A] z-10">
+                <thead className="bg-[#0B132B] text-[#94A3B8] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#263B6E] z-10">
                   <tr>
                     <th className="py-2.5 px-3 w-10 text-center">Sel.</th>
                     <th className="py-2.5 px-3">Nome / Aluno</th>
@@ -1737,7 +1737,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="py-2.5 px-3">Atendente Atual</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#25334A]/50">
+                <tbody className="divide-y divide-[#263B6E]/50">
                   {filteredContactsForDistribution.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-10 text-center text-[#94A3B8]">
@@ -1756,7 +1756,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             );
                           }}
                           className={`cursor-pointer transition-colors ${
-                            isSelected ? 'bg-[#D4AF37]/15' : 'hover:bg-[#1E293B]/40'
+                            isSelected ? 'bg-[#2563EB]/15' : 'hover:bg-[#1C2C55]/40'
                           }`}
                         >
                           <td className="py-2.5 px-3 text-center">
@@ -1764,7 +1764,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => {}}
-                              className="rounded border-[#25334A] text-[#D4AF37] focus:ring-0 cursor-pointer"
+                              className="rounded border-[#263B6E] text-[#2563EB] focus:ring-0 cursor-pointer"
                             />
                           </td>
                           <td className="py-2.5 px-3 font-semibold text-white">
@@ -1774,7 +1774,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <td className="py-2.5 px-3 font-mono text-[#94A3B8] whitespace-nowrap">
                             {c.whatsapp}
                           </td>
-                          <td className="py-2.5 px-3 text-[#D4AF37] font-medium">{c.curso || '—'}</td>
+                          <td className="py-2.5 px-3 text-[#2563EB] font-medium">{c.curso || '—'}</td>
                           <td className="py-2.5 px-3 text-[#94A3B8]">{c.batchName || 'Importação Direta'}</td>
                           <td className="py-2.5 px-3">
                             {c.assignedToEmail ? (
@@ -1806,7 +1806,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {activeTab === 'sent_leads' && (
         <div className="space-y-4">
           {/* Header Description Card */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-4 shadow-sm space-y-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -1828,9 +1828,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* Quick Attendant Breakdown Grid */}
             {sentBreakdownByAttendant.length > 0 && (
-              <div className="pt-3 border-t border-[#25334A]/70">
+              <div className="pt-3 border-t border-[#263B6E]/70">
                 <div className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <Users className="w-3.5 h-3.5 text-[#2563EB]" />
                   <span>Distribuição por Atendente (Clique para filtrar):</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
@@ -1843,14 +1843,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-[#10B981]/20 border-[#10B981] ring-1 ring-[#10B981]'
-                            : 'bg-[#0A0E17] border-[#25334A] hover:border-[#10B981]/60'
+                            : 'bg-[#0B132B] border-[#263B6E] hover:border-[#10B981]/60'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-1">
                           <span className="text-xs font-bold text-white truncate" title={attendant.displayName || attendant.email}>
                             {attendant.displayName || attendant.email.split('@')[0]}
                           </span>
-                          <span className="text-xs font-extrabold text-[#34D399] bg-[#111827] px-1.5 py-0.5 rounded border border-[#10B981]/30">
+                          <span className="text-xs font-extrabold text-[#34D399] bg-[#111D3E] px-1.5 py-0.5 rounded border border-[#10B981]/30">
                             {totalSent}
                           </span>
                         </div>
@@ -1866,7 +1866,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             )}
 
             {/* Search and Filters Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-3 border-t border-[#25334A]">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-3 border-t border-[#263B6E]">
               <div className="sm:col-span-4 relative">
                 <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-2.5" />
                 <input
@@ -1874,7 +1874,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   placeholder="Buscar por aluno, whatsapp, curso ou atendente..."
                   value={sentSearch}
                   onChange={(e) => setSentSearch(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
@@ -1882,7 +1882,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={sentAttendantFilter}
                   onChange={(e) => setSentAttendantFilter(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="todos">Todos os Atendentes ({sentContacts.length})</option>
                   {attendants.map((a) => {
@@ -1900,7 +1900,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={sentBatchFilter}
                   onChange={(e) => setSentBatchFilter(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="todos">Todas as Planilhas ({availableBatches.length})</option>
                   {availableBatches.map((b) => (
@@ -1915,7 +1915,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={sentStatusFilter}
                   onChange={(e) => setSentStatusFilter(e.target.value as any)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#10B981]"
                 >
                   <option value="todos">Status: Todos</option>
                   <option value="novo">Aguardando Contato</option>
@@ -1926,8 +1926,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           {/* Table of Sent Contacts */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-3 bg-[#0A0E17] border-b border-[#25334A] flex flex-wrap items-center justify-between gap-2 text-xs text-[#94A3B8]">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-3 bg-[#0B132B] border-b border-[#263B6E] flex flex-wrap items-center justify-between gap-2 text-xs text-[#94A3B8]">
               <div className="flex items-center gap-2">
                 <span>Exibindo <b>{filteredSentContacts.length}</b> de <b>{sentContacts.length}</b> contato(s) enviados</span>
                 {sentAttendantFilter !== 'todos' && (
@@ -1947,7 +1947,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <div className="overflow-x-auto max-h-[650px] overflow-y-auto">
               <table className="w-full text-left text-xs text-white">
-                <thead className="bg-[#0A0E17] text-[#94A3B8] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#25334A] z-10">
+                <thead className="bg-[#0B132B] text-[#94A3B8] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#263B6E] z-10">
                   <tr>
                     <th className="py-2.5 px-3">Aluno / Lead</th>
                     <th className="py-2.5 px-3">WhatsApp</th>
@@ -1959,12 +1959,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="py-2.5 px-3 text-right">Ação / Reatribuir</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#25334A]">
+                <tbody className="divide-y divide-[#263B6E]">
                   {filteredSentContacts.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-12 text-center text-[#94A3B8]">
                         <UserCheck className="w-10 h-10 text-[#94A3B8]/40 mx-auto mb-2" />
-                        <p className="font-semibold text-sm text-[#F8FAFC]">Nenhum contato enviado com os filtros atuais.</p>
+                        <p className="font-semibold text-sm text-[#FFFFFF]">Nenhum contato enviado com os filtros atuais.</p>
                         <p className="text-xs text-[#94A3B8] mt-1">
                           Vá até a aba "Estoque da Planilha & Envio de Leads" para distribuir contatos para os atendentes.
                         </p>
@@ -1985,7 +1985,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       const sendDateText = formatDateTime(c.sentByAdminAt || c.assignedAt || c.createdAt);
 
                       return (
-                        <tr key={c.id} className="hover:bg-[#1E293B]/60 transition-colors">
+                        <tr key={c.id} className="hover:bg-[#1C2C55]/60 transition-colors">
                           {/* Aluno / Lead */}
                           <td className="py-2.5 px-3">
                             <div className="font-bold text-white text-sm">{c.nome}</div>
@@ -2026,15 +2026,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                           {/* Concurso / Curso */}
                           <td className="py-2.5 px-3">
-                            <span className="text-xs text-[#F8FAFC] font-medium">
+                            <span className="text-xs text-[#FFFFFF] font-medium">
                               {c.curso || 'Geral / Não especificado'}
                             </span>
                           </td>
 
                           {/* Planilha de Origem */}
                           <td className="py-2.5 px-3">
-                            <span className="inline-flex items-center gap-1 bg-[#0A0E17] border border-[#25334A] text-[#94A3B8] text-[11px] px-2 py-0.5 rounded">
-                              <FileSpreadsheet className="w-3 h-3 text-[#D4AF37]" />
+                            <span className="inline-flex items-center gap-1 bg-[#0B132B] border border-[#263B6E] text-[#94A3B8] text-[11px] px-2 py-0.5 rounded">
+                              <FileSpreadsheet className="w-3 h-3 text-[#2563EB]" />
                               <span className="truncate max-w-[140px]" title={c.batchName || 'Importação'}>
                                 {c.batchName || 'Planilha Importada'}
                               </span>
@@ -2065,8 +2065,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                           {/* Data do Envio */}
                           <td className="py-2.5 px-3">
-                            <div className="text-xs text-[#F8FAFC] font-medium flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-[#D4AF37]" />
+                            <div className="text-xs text-[#FFFFFF] font-medium flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-[#2563EB]" />
                               <span>{sendDateText}</span>
                             </div>
                             <span className="text-[10px] text-[#94A3B8]">Descontado do Admin</span>
@@ -2098,7 +2098,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                     [c.id]: e.target.value,
                                   }))
                                 }
-                                className="bg-[#0A0E17] border border-[#25334A] text-white text-[11px] p-1.5 rounded focus:outline-none focus:border-[#D4AF37] max-w-[130px]"
+                                className="bg-[#0B132B] border border-[#263B6E] text-white text-[11px] p-1.5 rounded focus:outline-none focus:border-[#2563EB] max-w-[130px]"
                               >
                                 <option value="">Mudar atendente...</option>
                                 {attendants
@@ -2115,7 +2115,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                   type="button"
                                   onClick={() => handleReassignFromSentTable(c, reassignSentTargetByContact[c.id])}
                                   disabled={isProcessing}
-                                  className="bg-[#D4AF37] hover:bg-[#C59B27] text-[#0A0E17] font-bold text-[11px] px-2 py-1.5 rounded transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                                  className="bg-[#2563EB] hover:bg-[#1D4ED8] text-[#0B132B] font-bold text-[11px] px-2 py-1.5 rounded transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                                   title="Transferir para o atendente selecionado"
                                 >
                                   Mover
@@ -2139,7 +2139,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'alerts' && (
         <div className="space-y-4">
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-4 shadow-sm space-y-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -2165,7 +2165,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
 
             {/* Filters Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#25334A]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#263B6E]">
               <div className="relative">
                 <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-3 top-3" />
                 <input
@@ -2173,7 +2173,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   placeholder="Buscar por aluno, telefone ou curso..."
                   value={alertSearch}
                   onChange={(e) => setAlertSearch(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs pl-8 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#2563EB]"
                 />
               </div>
 
@@ -2181,7 +2181,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={alertAttendantFilter}
                   onChange={(e) => setAlertAttendantFilter(e.target.value)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#2563EB]"
                 >
                   <option value="todos">Todos os Atendentes ({inactiveAlertContacts.length} alertas)</option>
                   <option value="unassigned">Sem Atendente Atribuído</option>
@@ -2200,7 +2200,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <select
                   value={alertDaysFilter}
                   onChange={(e) => setAlertDaysFilter(e.target.value as any)}
-                  className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs p-2 rounded-lg focus:outline-none focus:border-[#2563EB]"
                 >
                   <option value="all">Qualquer Inatividade (+3 dias)</option>
                   <option value="3to5">Parados entre 3 e 5 dias</option>
@@ -2212,15 +2212,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           {/* Alert Leads Table */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-3 bg-[#0A0E17] border-b border-[#25334A] flex items-center justify-between text-xs text-[#94A3B8]">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-3 bg-[#0B132B] border-b border-[#263B6E] flex items-center justify-between text-xs text-[#94A3B8]">
               <span>Mostrando <b>{filteredAlertContacts.length}</b> lead(s) em alerta</span>
-              <span className="text-[#D4AF37]">Ordenado pelo maior tempo parado</span>
+              <span className="text-[#2563EB]">Ordenado pelo maior tempo parado</span>
             </div>
 
             <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
               <table className="w-full text-left text-xs text-white">
-                <thead className="bg-[#0A0E17] text-[#94A3B8] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#25334A] z-10">
+                <thead className="bg-[#0B132B] text-[#94A3B8] uppercase text-[10px] font-semibold sticky top-0 border-b border-[#263B6E] z-10">
                   <tr>
                     <th className="py-2.5 px-3">Tempo Parado</th>
                     <th className="py-2.5 px-3">Aluno / Lead</th>
@@ -2230,7 +2230,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="py-2.5 px-3 text-right">Ações Rápidas</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#25334A]/50">
+                <tbody className="divide-y divide-[#263B6E]/50">
                   {filteredAlertContacts.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-12 text-center text-[#94A3B8]">
@@ -2253,7 +2253,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       const isCopied = copiedMessageId === c.id;
 
                       return (
-                        <tr key={c.id} className="hover:bg-[#1E293B]/40 transition-colors">
+                        <tr key={c.id} className="hover:bg-[#1C2C55]/40 transition-colors">
                           <td className="py-3 px-3 whitespace-nowrap">
                             <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded border ${inactivity.badgeClass}`}>
                               <Clock className="w-3 h-3 shrink-0" />
@@ -2286,14 +2286,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             </div>
                           </td>
 
-                          <td className="py-3 px-3 text-[#D4AF37] font-medium whitespace-nowrap">
+                          <td className="py-3 px-3 text-[#2563EB] font-medium whitespace-nowrap">
                             {c.curso || '—'}
                           </td>
 
                           <td className="py-3 px-3 whitespace-nowrap">
                             {c.assignedTo ? (
                               <div className="flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-full bg-[#0A0E17] border border-[#D4AF37]/60 flex items-center justify-center text-[10px] font-bold text-[#D4AF37]">
+                                <span className="w-6 h-6 rounded-full bg-[#0B132B] border border-[#2563EB]/60 flex items-center justify-center text-[10px] font-bold text-[#2563EB]">
                                   {attendantName[0]?.toUpperCase() || 'A'}
                                 </span>
                                 <div>
@@ -2317,11 +2317,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                   className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer border ${
                                     isCopied
                                       ? 'bg-[#10B981]/20 border-[#10B981] text-[#10B981]'
-                                      : 'bg-[#0A0E17] border-[#25334A] text-white hover:border-[#D4AF37] hover:text-[#D4AF37]'
+                                      : 'bg-[#0B132B] border-[#263B6E] text-white hover:border-[#2563EB] hover:text-[#2563EB]'
                                   }`}
                                   title="Copiar texto pronto para cobrar o vendedor no WhatsApp"
                                 >
-                                  {isCopied ? <Check className="w-3.5 h-3.5" /> : <Bell className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                                  {isCopied ? <Check className="w-3.5 h-3.5" /> : <Bell className="w-3.5 h-3.5 text-[#2563EB]" />}
                                   <span>{isCopied ? 'Copiado!' : 'Cobrar'}</span>
                                 </button>
                               )}
@@ -2331,7 +2331,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 onChange={(e) =>
                                   setReassignTargetByContact((prev) => ({ ...prev, [c.id]: e.target.value }))
                                 }
-                                className="bg-[#0A0E17] border border-[#25334A] text-xs text-white rounded-lg p-1.5 focus:outline-none focus:border-[#D4AF37] max-w-[130px]"
+                                className="bg-[#0B132B] border border-[#263B6E] text-xs text-white rounded-lg p-1.5 focus:outline-none focus:border-[#2563EB] max-w-[130px]"
                               >
                                 <option value="">Mudar para...</option>
                                 {attendants
@@ -2347,7 +2347,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 type="button"
                                 onClick={() => handleReassignSingle(c.id)}
                                 disabled={!selectedTarget || isProcessing}
-                                className="bg-[#D4AF37] hover:bg-[#8C6D1F] text-[#0A0E17] font-bold px-2.5 py-1.5 rounded-lg text-xs transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1"
+                                className="bg-[#2563EB] hover:bg-[#8C6D1F] text-[#0B132B] font-bold px-2.5 py-1.5 rounded-lg text-xs transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1"
                               >
                                 <Share2 className="w-3 h-3" />
                                 <span>Transferir</span>
@@ -2370,10 +2370,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'activity' && (
         <div className="space-y-4">
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#D4AF37]" />
+                <TrendingUp className="w-4 h-4 text-[#2563EB]" />
                 Desempenho & Cobertura dos Vendedores
               </h3>
               <p className="text-xs text-[#94A3B8]">
@@ -2394,12 +2394,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               return (
                 <div
                   key={a.uid}
-                  className={`bg-[#111827] border rounded-2xl p-4 shadow-md transition-all ${
+                  className={`bg-[#111D3E] border rounded-2xl p-4 shadow-md transition-all ${
                     item.statusTier === 'danger'
                       ? 'border-[#DC2626]/70 shadow-[0_0_12px_rgba(220,38,38,0.12)]'
                       : item.statusTier === 'warning'
-                      ? 'border-[#D4AF37]/60'
-                      : 'border-[#25334A] hover:border-[#10B981]/50'
+                      ? 'border-[#2563EB]/60'
+                      : 'border-[#263B6E] hover:border-[#10B981]/50'
                   }`}
                 >
                   {/* Top Profile Header */}
@@ -2410,10 +2410,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           src={a.photoURL}
                           alt={a.displayName}
                           referrerPolicy="no-referrer"
-                          className="w-10 h-10 rounded-full border border-[#D4AF37] object-cover"
+                          className="w-10 h-10 rounded-full border border-[#2563EB] object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-[#0A0E17] border border-[#25334A] flex items-center justify-center font-bold text-[#D4AF37]">
+                        <div className="w-10 h-10 rounded-full bg-[#0B132B] border border-[#263B6E] flex items-center justify-center font-bold text-[#2563EB]">
                           {(a.displayName || a.email || 'A')[0]?.toUpperCase()}
                         </div>
                       )}
@@ -2430,7 +2430,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         🚨 {item.inactive3Days} Parados
                       </span>
                     ) : item.statusTier === 'warning' ? (
-                      <span className="text-[10px] font-bold bg-[#D4AF37]/20 text-[#FCD34D] border border-[#D4AF37]/40 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold bg-[#2563EB]/20 text-[#FCD34D] border border-[#2563EB]/40 px-2 py-0.5 rounded-full">
                         ⚠️ {item.inactive3Days} Parado
                       </span>
                     ) : (
@@ -2442,17 +2442,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   {/* Metrics 3-Col Box */}
                   <div className="grid grid-cols-3 gap-2 text-center my-3">
-                    <div className="bg-[#0A0E17] p-2 rounded-xl border border-[#25334A]">
+                    <div className="bg-[#0B132B] p-2 rounded-xl border border-[#263B6E]">
                       <span className="text-[10px] text-[#94A3B8] block font-medium">Total Leads</span>
                       <span className="text-sm font-bold text-white">{item.totalLeads}</span>
                     </div>
-                    <div className="bg-[#0A0E17] p-2 rounded-xl border border-[#25334A]">
+                    <div className="bg-[#0B132B] p-2 rounded-xl border border-[#263B6E]">
                       <span className="text-[10px] text-[#34D399] block font-medium">Hoje</span>
                       <span className="text-sm font-bold text-[#34D399]">{item.contactedToday}</span>
                     </div>
-                    <div className="bg-[#0A0E17] p-2 rounded-xl border border-[#25334A]">
-                      <span className="text-[10px] text-[#D4AF37] block font-medium">Vendas (Pagou)</span>
-                      <span className="text-sm font-bold text-[#D4AF37]">{item.paidCount}</span>
+                    <div className="bg-[#0B132B] p-2 rounded-xl border border-[#263B6E]">
+                      <span className="text-[10px] text-[#2563EB] block font-medium">Vendas (Pagou)</span>
+                      <span className="text-sm font-bold text-[#2563EB]">{item.paidCount}</span>
                     </div>
                   </div>
 
@@ -2462,10 +2462,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <span className="text-[#94A3B8]">Cobertura dos Leads</span>
                       <span className="font-bold text-white">{item.coverageRate}%</span>
                     </div>
-                    <div className="w-full bg-[#0A0E17] rounded-full h-1.5 overflow-hidden border border-[#25334A]">
+                    <div className="w-full bg-[#0B132B] rounded-full h-1.5 overflow-hidden border border-[#263B6E]">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${
-                          item.coverageRate >= 80 ? 'bg-[#10B981]' : item.coverageRate >= 50 ? 'bg-[#D4AF37]' : 'bg-[#DC2626]'
+                          item.coverageRate >= 80 ? 'bg-[#10B981]' : item.coverageRate >= 50 ? 'bg-[#2563EB]' : 'bg-[#DC2626]'
                         }`}
                         style={{ width: `${item.coverageRate}%` }}
                       />
@@ -2473,7 +2473,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   {/* Bottom Action / View */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[#25334A] text-xs">
+                  <div className="flex items-center justify-between pt-2 border-t border-[#263B6E] text-xs">
                     <button
                       type="button"
                       onClick={() => {
@@ -2516,7 +2516,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'users' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#111827] p-4 rounded-2xl border border-[#25334A]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#111D3E] p-4 rounded-2xl border border-[#263B6E]">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-3" />
               <input
@@ -2524,7 +2524,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 placeholder="Buscar usuário por nome ou email..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
-                className="w-full bg-[#0A0E17] border border-[#25334A] text-white text-xs sm:text-sm pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-[#0B132B] border border-[#263B6E] text-white text-xs sm:text-sm pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-[#2563EB]"
               />
             </div>
             <div className="flex items-center gap-3">
@@ -2534,7 +2534,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   setCreateUserError('');
                   setShowAddUserModal(true);
                 }}
-                className="bg-[#D4AF37] hover:bg-[#8C6D1F] text-[#0A0E17] font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="bg-[#2563EB] hover:bg-[#8C6D1F] text-[#0B132B] font-bold text-xs px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Adicionar Novo Membro</span>
@@ -2556,10 +2556,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 {pendingUsers.map((u) => (
                   <div
                     key={u.uid}
-                    className="bg-[#0A0E17] border border-[#25334A] rounded-xl p-3.5 flex items-center justify-between gap-3"
+                    className="bg-[#0B132B] border border-[#263B6E] rounded-xl p-3.5 flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-[#111827] border border-[#25334A] flex items-center justify-center font-bold text-[#D4AF37]">
+                      <div className="w-9 h-9 rounded-full bg-[#111D3E] border border-[#263B6E] flex items-center justify-center font-bold text-[#2563EB]">
                         {(u.displayName || u.email || 'U')[0]?.toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -2595,13 +2595,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           )}
 
           {/* All Users Table */}
-          <div className="bg-[#111827] border border-[#25334A] rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-3 bg-[#0A0E17] border-b border-[#25334A] text-xs font-semibold text-[#94A3B8]">
+          <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-3 bg-[#0B132B] border-b border-[#263B6E] text-xs font-semibold text-[#94A3B8]">
               Lista Completa de Usuários ({filteredUsers.length})
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-white">
-                <thead className="bg-[#0A0E17] text-[#94A3B8] uppercase text-[10px] font-semibold border-b border-[#25334A]">
+                <thead className="bg-[#0B132B] text-[#94A3B8] uppercase text-[10px] font-semibold border-b border-[#263B6E]">
                   <tr>
                     <th className="py-2.5 px-3">Usuário</th>
                     <th className="py-2.5 px-3">E-mail / Login</th>
@@ -2611,20 +2611,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="py-2.5 px-3 text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#25334A]/50">
+                <tbody className="divide-y divide-[#263B6E]/50">
                   {filteredUsers.map((u) => {
                     const assignedCount = globalContacts.filter((c) => c.assignedTo === u.uid).length;
                     const isSelf = u.uid === currentProfile?.uid;
 
                     return (
-                      <tr key={u.uid} className="hover:bg-[#1E293B]/40 transition-colors">
+                      <tr key={u.uid} className="hover:bg-[#1C2C55]/40 transition-colors">
                         <td className="py-3 px-3 flex items-center gap-2.5 font-medium">
-                          <div className="w-7 h-7 rounded-full bg-[#0A0E17] border border-[#25334A] flex items-center justify-center font-bold text-[#D4AF37] text-xs">
+                          <div className="w-7 h-7 rounded-full bg-[#0B132B] border border-[#263B6E] flex items-center justify-center font-bold text-[#2563EB] text-xs">
                             {(u.displayName || u.email || 'U')[0]?.toUpperCase()}
                           </div>
                           <span className="truncate max-w-[150px]">{u.displayName || 'Sem Nome'}</span>
                           {isSelf && (
-                            <span className="bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] px-1.5 py-0.2 rounded font-bold">
+                            <span className="bg-[#2563EB]/20 text-[#2563EB] text-[10px] px-1.5 py-0.2 rounded font-bold">
                               Você
                             </span>
                           )}
@@ -2636,7 +2636,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               <CheckCircle2 className="w-3 h-3" /> Ativo
                             </span>
                           ) : u.status === 'pending' ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] text-[#D4AF37] bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2 py-0.5 rounded font-semibold">
+                            <span className="inline-flex items-center gap-1 text-[11px] text-[#2563EB] bg-[#2563EB]/15 border border-[#2563EB]/30 px-2 py-0.5 rounded font-semibold">
                               <Clock className="w-3 h-3" /> Pendente
                             </span>
                           ) : (
@@ -2650,7 +2650,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             value={u.role}
                             disabled={isSelf}
                             onChange={(e) => onChangeUserRole(u.uid, e.target.value as UserRole)}
-                            className="bg-[#0A0E17] border border-[#25334A] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#D4AF37] disabled:opacity-50"
+                            className="bg-[#0B132B] border border-[#263B6E] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#2563EB] disabled:opacity-50"
                           >
                             <option value="attendant">Atendente (Vendedor)</option>
                             <option value="supervisor">Supervisor (Divisão de Leads)</option>
@@ -2694,10 +2694,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {/* Add User Modal */}
           {showAddUserModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-              <div className="bg-[#111827] border border-[#25334A] rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#25334A]">
+              <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#263B6E]">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <UserPlus className="w-4 h-4 text-[#D4AF37]" />
+                    <UserPlus className="w-4 h-4 text-[#2563EB]" />
                     Cadastrar Novo Membro da Equipe
                   </h3>
                   <button
@@ -2723,7 +2723,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Ex: Carlos Silva"
                       value={newUserName}
                       onChange={(e) => setNewUserName(e.target.value)}
-                      className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#2563EB]"
                     />
                   </div>
 
@@ -2734,7 +2734,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       placeholder="Ex: carlos@portal.com ou carlos.vendas"
                       value={newUserEmail}
                       onChange={(e) => setNewUserEmail(e.target.value)}
-                      className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#2563EB]"
                     />
                   </div>
 
@@ -2744,7 +2744,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       type="text"
                       value={newUserPass}
                       onChange={(e) => setNewUserPass(e.target.value)}
-                      className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg p-2.5 text-white focus:outline-none focus:border-[#2563EB]"
                     />
                   </div>
 
@@ -2753,7 +2753,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <select
                       value={newUserRole}
                       onChange={(e) => setNewUserRole(e.target.value as UserRole)}
-                      className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg p-2 text-white focus:outline-none focus:border-[#D4AF37]"
+                      className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg p-2 text-white focus:outline-none focus:border-[#2563EB]"
                     >
                       <option value="attendant">Atendente (Vendedor - Acesso operacional)</option>
                       <option value="supervisor">Supervisor (Divisão de Leads e Gestão)</option>
@@ -2762,7 +2762,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#25334A]">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#263B6E]">
                   <button
                     type="button"
                     onClick={() => setShowAddUserModal(false)}

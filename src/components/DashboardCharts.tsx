@@ -151,7 +151,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
         etapa: '3. Qualificados',
         qtd: hotAndPotentialLeads,
         taxa: totalLeads > 0 ? Math.round((hotAndPotentialLeads / totalLeads) * 100) : 0,
-        fill: '#D4AF37',
+        fill: '#2563EB',
         descricao: 'Temperatura Quente ou Potencial',
       },
       {
@@ -195,18 +195,18 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-[#0A0E17] border border-[#25334A] p-3 rounded-lg shadow-xl text-xs space-y-1.5 min-w-[170px]">
-          <div className="font-bold text-[#F8FAFC] border-b border-[#25334A] pb-1 flex items-center justify-between">
+        <div className="bg-[#0B132B] border border-[#263B6E] p-3 rounded-lg shadow-xl text-xs space-y-1.5 min-w-[170px]">
+          <div className="font-bold text-[#FFFFFF] border-b border-[#263B6E] pb-1 flex items-center justify-between">
             <span>📅 {data.displayDate}</span>
             <span className="text-[10px] text-[#94A3B8] font-normal">{data.dateStr}</span>
           </div>
           <div className="flex items-center justify-between text-[#5C7A9E]">
             <span>💬 Atendimentos:</span>
-            <span className="font-bold text-[#F8FAFC]">{data.atendimentos}</span>
+            <span className="font-bold text-[#FFFFFF]">{data.atendimentos}</span>
           </div>
           <div className="flex items-center justify-between text-[#94A3B8]">
             <span>📥 Novos Cadastros:</span>
-            <span className="font-bold text-[#F8FAFC]">{data.novosLeads}</span>
+            <span className="font-bold text-[#FFFFFF]">{data.novosLeads}</span>
           </div>
           <div className="flex items-center justify-between text-[#6E8F5C]">
             <span>💰 Conversões (Pagou):</span>
@@ -222,18 +222,18 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-[#0A0E17] border border-[#25334A] p-3 rounded-lg shadow-xl text-xs space-y-1 min-w-[180px]">
-          <div className="font-bold text-[#F8FAFC] border-b border-[#25334A] pb-1">
+        <div className="bg-[#0B132B] border border-[#263B6E] p-3 rounded-lg shadow-xl text-xs space-y-1 min-w-[180px]">
+          <div className="font-bold text-[#FFFFFF] border-b border-[#263B6E] pb-1">
             {data.etapa}
           </div>
           <p className="text-[11px] text-[#94A3B8]">{data.descricao}</p>
           <div className="flex items-center justify-between pt-1">
             <span className="text-[#94A3B8]">Quantidade:</span>
-            <span className="font-bold text-[#F8FAFC]">{data.qtd} leads</span>
+            <span className="font-bold text-[#FFFFFF]">{data.qtd} leads</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[#94A3B8]">Taxa de Conversão:</span>
-            <span className="font-bold text-[#D4AF37]">{data.taxa}%</span>
+            <span className="font-bold text-[#2563EB]">{data.taxa}%</span>
           </div>
         </div>
       );
@@ -242,13 +242,13 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
   };
 
   return (
-    <div className="bg-[#111827] border border-[#25334A] rounded-xl p-4 sm:p-5 mb-5 shadow-sm space-y-5">
+    <div className="bg-[#111D3E] border border-[#263B6E] rounded-xl p-4 sm:p-5 mb-5 shadow-sm space-y-5">
       {/* Top Header & Fast KPIs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#25334A] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#263B6E] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[#D4AF37]" />
-            <h3 className="font-serif font-bold text-base sm:text-lg text-[#F8FAFC]">
+            <TrendingUp className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="font-serif font-bold text-base sm:text-lg text-[#FFFFFF]">
               Dashboard de Atendimentos & Taxa de Conversão
             </h3>
           </div>
@@ -263,14 +263,14 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
             <button
               type="button"
               onClick={onOpenDailyExport}
-              className="flex items-center gap-1.5 bg-[#0A0E17] hover:bg-[#1E293B] text-[#D4AF37] hover:text-[#F8FAFC] border border-[#25334A] hover:border-[#D4AF37] px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 bg-[#0B132B] hover:bg-[#1C2C55] text-[#2563EB] hover:text-[#FFFFFF] border border-[#263B6E] hover:border-[#2563EB] px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               Exportar Fechamento
             </button>
           )}
 
-          <div className="flex items-center gap-1 bg-[#0A0E17] p-1 rounded-lg border border-[#25334A]">
+          <div className="flex items-center gap-1 bg-[#0B132B] p-1 rounded-lg border border-[#263B6E]">
             {(
               [
                 { id: '7d', label: '7 Dias' },
@@ -285,8 +285,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
                 onClick={() => setPeriod(p.id)}
                 className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer ${
                   period === p.id
-                    ? 'bg-[#D4AF37] text-[#0A0E17] shadow-xs'
-                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#2563EB] text-[#0B132B] shadow-xs'
+                    : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
               >
                 {p.label}
@@ -298,7 +298,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
 
       {/* Mini KPI Highlights */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <div className="bg-[#0A0E17]/90 border border-[#25334A] rounded-lg p-3">
+        <div className="bg-[#0B132B]/90 border border-[#263B6E] rounded-lg p-3">
           <div className="text-[10px] uppercase font-bold tracking-wider text-[#6E8F5C] flex items-center justify-between">
             <span>Taxa de Conversão</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -311,12 +311,12 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
           </div>
         </div>
 
-        <div className="bg-[#0A0E17]/90 border border-[#25334A] rounded-lg p-3">
+        <div className="bg-[#0B132B]/90 border border-[#263B6E] rounded-lg p-3">
           <div className="text-[10px] uppercase font-bold tracking-wider text-[#5C7A9E] flex items-center justify-between">
             <span>Eficiência do Contato</span>
             <CheckCircle2 className="w-3.5 h-3.5" />
           </div>
-          <div className="text-xl sm:text-2xl font-serif font-bold text-[#F8FAFC] mt-1">
+          <div className="text-xl sm:text-2xl font-serif font-bold text-[#FFFFFF] mt-1">
             {contactedRate}%
           </div>
           <div className="text-[10px] text-[#94A3B8] mt-0.5">
@@ -324,23 +324,23 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
           </div>
         </div>
 
-        <div className="bg-[#0A0E17]/90 border border-[#25334A] rounded-lg p-3">
-          <div className="text-[10px] uppercase font-bold tracking-wider text-[#D4AF37] flex items-center justify-between">
+        <div className="bg-[#0B132B]/90 border border-[#263B6E] rounded-lg p-3">
+          <div className="text-[10px] uppercase font-bold tracking-wider text-[#2563EB] flex items-center justify-between">
             <span>Pipeline Quente</span>
             <Flame className="w-3.5 h-3.5" />
           </div>
-          <div className="text-xl sm:text-2xl font-serif font-bold text-[#D4AF37] mt-1">
+          <div className="text-xl sm:text-2xl font-serif font-bold text-[#2563EB] mt-1">
             {hotAndPotentialLeads}
           </div>
           <div className="text-[10px] text-[#94A3B8] mt-0.5">leads prontos para fechamento</div>
         </div>
 
-        <div className="bg-[#0A0E17]/90 border border-[#25334A] rounded-lg p-3">
+        <div className="bg-[#0B132B]/90 border border-[#263B6E] rounded-lg p-3">
           <div className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8] flex items-center justify-between">
             <span>Volume Total</span>
             <Users className="w-3.5 h-3.5" />
           </div>
-          <div className="text-xl sm:text-2xl font-serif font-bold text-[#F8FAFC] mt-1">
+          <div className="text-xl sm:text-2xl font-serif font-bold text-[#FFFFFF] mt-1">
             {totalLeads}
           </div>
           <div className="text-[10px] text-[#94A3B8] mt-0.5">cadastros sincronizados</div>
@@ -350,11 +350,11 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-1">
         {/* CHART 1: Volume de Atendimentos por Dia (8 cols) */}
-        <div className="lg:col-span-7 bg-[#0A0E17]/80 border border-[#25334A] rounded-xl p-4 flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-[#0B132B]/80 border border-[#263B6E] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="text-xs uppercase tracking-wider font-bold text-[#F8FAFC] flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="text-xs uppercase tracking-wider font-bold text-[#FFFFFF] flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[#2563EB]" />
                 Volume de Atendimentos Diários
               </div>
               <p className="text-[11px] text-[#94A3B8]">
@@ -371,20 +371,20 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid stroke="#25334A" strokeDasharray="3 3" vertical={false} />
+                  <CartesianGrid stroke="#263B6E" strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="displayDate"
                     stroke="#94A3B8"
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: '#25334A' }}
+                    axisLine={{ stroke: '#263B6E' }}
                   />
                   <YAxis
                     stroke="#94A3B8"
                     fontSize={10}
                     allowDecimals={false}
                     tickLine={false}
-                    axisLine={{ stroke: '#25334A' }}
+                    axisLine={{ stroke: '#263B6E' }}
                   />
                   <Tooltip content={<CustomDailyTooltip />} />
                   <Legend
@@ -415,9 +415,9 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
         </div>
 
         {/* CHART 2: Funil de Conversão de Leads (5 cols) */}
-        <div className="lg:col-span-5 bg-[#0A0E17]/80 border border-[#25334A] rounded-xl p-4 flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-[#0B132B]/80 border border-[#263B6E] rounded-xl p-4 flex flex-col justify-between">
           <div className="mb-3">
-            <div className="text-xs uppercase tracking-wider font-bold text-[#F8FAFC] flex items-center gap-1.5">
+            <div className="text-xs uppercase tracking-wider font-bold text-[#FFFFFF] flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-[#6E8F5C]" />
               Funil de Conversão de Leads
             </div>
@@ -438,21 +438,21 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
                   layout="vertical"
                   margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
                 >
-                  <CartesianGrid stroke="#25334A" strokeDasharray="3 3" horizontal={false} />
+                  <CartesianGrid stroke="#263B6E" strokeDasharray="3 3" horizontal={false} />
                   <XAxis
                     type="number"
                     stroke="#94A3B8"
                     fontSize={10}
                     allowDecimals={false}
-                    axisLine={{ stroke: '#25334A' }}
+                    axisLine={{ stroke: '#263B6E' }}
                   />
                   <YAxis
                     type="category"
                     dataKey="etapa"
-                    stroke="#F8FAFC"
+                    stroke="#FFFFFF"
                     fontSize={10}
                     tickLine={false}
-                    axisLine={{ stroke: '#25334A' }}
+                    axisLine={{ stroke: '#263B6E' }}
                     width={85}
                   />
                   <Tooltip content={<CustomFunnelTooltip />} />
@@ -470,10 +470,10 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
 
       {/* Conversion by Course Ranking bar (Compact) */}
       {coursePerformance.length > 0 && (
-        <div className="border-t border-[#25334A] pt-3.5">
+        <div className="border-t border-[#263B6E] pt-3.5">
           <div className="text-[11px] uppercase tracking-wider font-bold text-[#94A3B8] mb-2 flex items-center justify-between">
             <span>Conversão por Curso de Origem (Top {coursePerformance.length})</span>
-            <span className="text-[10px] text-[#D4AF37] font-normal">
+            <span className="text-[10px] text-[#2563EB] font-normal">
               Aproveitamento de leads de cursos isolados
             </span>
           </div>
@@ -482,10 +482,10 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
             {coursePerformance.map((cp, idx) => (
               <div
                 key={idx}
-                className="bg-[#0A0E17] border border-[#25334A] rounded-lg p-2.5 flex items-center justify-between"
+                className="bg-[#0B132B] border border-[#263B6E] rounded-lg p-2.5 flex items-center justify-between"
               >
                 <div className="min-w-0 pr-2">
-                  <div className="font-semibold text-[#F8FAFC] truncate" title={cp.fullName}>
+                  <div className="font-semibold text-[#FFFFFF] truncate" title={cp.fullName}>
                     {cp.fullName}
                   </div>
                   <div className="text-[10px] text-[#94A3B8]">
@@ -497,7 +497,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ contacts, onOp
                     className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded ${
                       cp.conversao > 0
                         ? 'bg-[#6E8F5C]/20 text-[#6E8F5C] border border-[#6E8F5C]/30'
-                        : 'bg-[#25334A]/50 text-[#94A3B8]'
+                        : 'bg-[#263B6E]/50 text-[#94A3B8]'
                     }`}
                   >
                     {cp.conversao}%

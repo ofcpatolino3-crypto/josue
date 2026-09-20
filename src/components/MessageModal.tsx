@@ -328,63 +328,63 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     switch (cat) {
       case 'roteiro_audio':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#38BDF8] border border-[#38BDF8]/50 text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-sm">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#38BDF8] border border-[#38BDF8]/50 text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-sm">
             <Mic className="w-3 h-3 text-[#38BDF8]" />
             🎙️ Roteiro de Áudio
           </span>
         );
       case 'pos_prova':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#D4AF37] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
-            <Check className="w-3 h-3 text-[#D4AF37]" />
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#2563EB] border border-[#263B6E] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <Check className="w-3 h-3 text-[#2563EB]" />
             Pós-Prova
           </span>
         );
       case 'pre_prova':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#5C7A9E] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#5C7A9E] border border-[#263B6E] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Clock className="w-3 h-3 text-[#5C7A9E]" />
             Pré-Prova / Rotina
           </span>
         );
       case 'migracao':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#D97C3A] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#D97C3A] border border-[#263B6E] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <ArrowRightLeft className="w-3 h-3 text-[#D97C3A]" />
             Migração p/ Assinatura 1.0
           </span>
         );
       case 'fechamento_pix':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#16A34A] border border-[#16A34A]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#16A34A] border border-[#16A34A]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Sparkles className="w-3 h-3 text-[#16A34A]" />
             Fechamento & PIX
           </span>
         );
       case 'recuperacao_sumidos':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#E11D48] border border-[#E11D48]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
-            <RefreshCw className="w-3 h-3 text-[#E11D48]" />
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#2563EB] border border-[#2563EB]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+            <RefreshCw className="w-3 h-3 text-[#2563EB]" />
             Resgate / Sumidos
           </span>
         );
       case 'renovacao':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#6E8F5C] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#6E8F5C] border border-[#263B6E] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <RefreshCw className="w-3 h-3 text-[#6E8F5C]" />
             Renovação
           </span>
         );
       case 'boas_vindas':
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#38BDF8] border border-[#38BDF8]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#38BDF8] border border-[#38BDF8]/40 text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             <Sparkles className="w-3 h-3 text-[#38BDF8]" />
             Boas-Vindas & Diagnóstico
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 bg-[#0A0E17] text-[#94A3B8] border border-[#25334A] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+          <span className="inline-flex items-center gap-1 bg-[#0B132B] text-[#94A3B8] border border-[#263B6E] text-[10px] uppercase font-bold px-2 py-0.5 rounded">
             Geral
           </span>
         );
@@ -402,19 +402,19 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#111827] border border-[#25334A] rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Top Queue / Course Progress Bar */}
         {contactsQueue.length > 1 && (
-          <div className="bg-[#0A0E17] px-4 py-2 border-b border-[#25334A] flex items-center justify-between gap-2 text-xs">
+          <div className="bg-[#0B132B] px-4 py-2 border-b border-[#263B6E] flex items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 font-bold px-2 py-0.5 rounded text-[11px] flex items-center gap-1">
+              <span className="bg-[#2563EB]/20 text-[#2563EB] border border-[#2563EB]/40 font-bold px-2 py-0.5 rounded text-[11px] flex items-center gap-1">
                 <BookOpen className="w-3 h-3" />
                 {currentCourse}
               </span>
               <span className="text-[#94A3B8] text-[11px]">
                 {sameCourseContacts.length > 1 ? (
                   <span>
-                    Aluno <b className="text-[#F8FAFC]">{indexInCourse + 1} de {sameCourseContacts.length}</b> deste curso
+                    Aluno <b className="text-[#FFFFFF]">{indexInCourse + 1} de {sameCourseContacts.length}</b> deste curso
                   </span>
                 ) : (
                   <span>1 aluno neste curso</span>
@@ -429,8 +429,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 onClick={() => handleNavigate(currentIndex - 1)}
                 className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-all ${
                   hasPrevious
-                    ? 'border-[#25334A] text-[#F8FAFC] hover:bg-[#1E293B] cursor-pointer'
-                    : 'border-[#25334A]/40 text-[#94A3B8]/40 cursor-not-allowed'
+                    ? 'border-[#263B6E] text-[#FFFFFF] hover:bg-[#1C2C55] cursor-pointer'
+                    : 'border-[#263B6E]/40 text-[#94A3B8]/40 cursor-not-allowed'
                 }`}
                 title="Aluno anterior"
               >
@@ -448,8 +448,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 onClick={() => handleNavigate(currentIndex + 1)}
                 className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-all ${
                   hasNext
-                    ? 'border-[#25334A] text-[#F8FAFC] hover:bg-[#1E293B] cursor-pointer'
-                    : 'border-[#25334A]/40 text-[#94A3B8]/40 cursor-not-allowed'
+                    ? 'border-[#263B6E] text-[#FFFFFF] hover:bg-[#1C2C55] cursor-pointer'
+                    : 'border-[#263B6E]/40 text-[#94A3B8]/40 cursor-not-allowed'
                 }`}
                 title="Próximo aluno"
               >
@@ -461,16 +461,16 @@ export const MessageModal: React.FC<MessageModalProps> = ({
         )}
 
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#25334A] flex items-start justify-between bg-[#0A0E17]/50 gap-3">
+        <div className="p-4 sm:p-5 border-b border-[#263B6E] flex items-start justify-between bg-[#0B132B]/50 gap-3">
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] uppercase font-semibold text-[#D4AF37] tracking-wider flex items-center gap-1.5 mb-0.5">
+            <div className="text-[11px] uppercase font-semibold text-[#2563EB] tracking-wider flex items-center gap-1.5 mb-0.5">
               <MessageSquare className="w-3.5 h-3.5" />
               Fila de Envio por Ordem de Curso
             </div>
-            <h2 className="text-lg sm:text-xl font-bold font-serif text-[#F8FAFC] flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg sm:text-xl font-bold font-serif text-[#FFFFFF] flex items-center gap-2 flex-wrap">
               <span>{contact.nome}</span>
               {contact.curso && (
-                <span className="text-xs font-sans font-medium text-[#D4AF37] border-l border-[#25334A] pl-2">
+                <span className="text-xs font-sans font-medium text-[#2563EB] border-l border-[#263B6E] pl-2">
                   {contact.curso}
                 </span>
               )}
@@ -484,8 +484,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               )}
               {contact.email && (
                 <span className="flex items-center gap-1">
-                  <Mail className="w-3 h-3 text-[#D4AF37]" />
-                  <a href={`mailto:${contact.email}`} className="hover:text-[#F8FAFC] underline">
+                  <Mail className="w-3 h-3 text-[#2563EB]" />
+                  <a href={`mailto:${contact.email}`} className="hover:text-[#FFFFFF] underline">
                     {contact.email}
                   </a>
                 </span>
@@ -522,7 +522,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                   className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border cursor-pointer transition-all active:scale-95 ${
                     isMarkedToday || contact.ultimoContato === todayStr()
                       ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/50'
-                      : 'bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] border-[#D4AF37] shadow-sm'
+                      : 'bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] border-[#2563EB] shadow-sm'
                   }`}
                   title="Marcar contato realizado hoje"
                 >
@@ -539,7 +539,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1 rounded-lg transition-colors cursor-pointer shrink-0"
+            className="text-[#94A3B8] hover:text-[#FFFFFF] p-1 rounded-lg transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -555,14 +555,14 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               </label>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex items-center gap-1 bg-[#0A0E17] p-0.5 rounded-lg border border-[#25334A]">
+                <div className="flex items-center gap-1 bg-[#0B132B] p-0.5 rounded-lg border border-[#263B6E]">
                   <button
                     type="button"
                     onClick={() => setTemplateFilter('all')}
                     className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
                       templateFilter === 'all'
-                        ? 'bg-[#1E293B] text-[#F8FAFC]'
-                        : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                        ? 'bg-[#1C2C55] text-[#FFFFFF]'
+                        : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                     }`}
                   >
                     Todos ({templates.length})
@@ -572,8 +572,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     onClick={() => setTemplateFilter('audio')}
                     className={`px-2 py-0.5 text-[11px] font-bold rounded cursor-pointer transition-all flex items-center gap-1 ${
                       templateFilter === 'audio'
-                        ? 'bg-[#38BDF8] text-[#0A0E17]'
-                        : 'text-[#38BDF8] hover:text-[#F8FAFC]'
+                        ? 'bg-[#38BDF8] text-[#0B132B]'
+                        : 'text-[#38BDF8] hover:text-[#FFFFFF]'
                     }`}
                   >
                     <Mic className="w-3 h-3" />
@@ -584,8 +584,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     onClick={() => setTemplateFilter('text')}
                     className={`px-2 py-0.5 text-[11px] font-semibold rounded cursor-pointer transition-all ${
                       templateFilter === 'text'
-                        ? 'bg-[#1E293B] text-[#F8FAFC]'
-                        : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                        ? 'bg-[#1C2C55] text-[#FFFFFF]'
+                        : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                     }`}
                   >
                     Textos
@@ -595,7 +595,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowInlineNewScript(!showInlineNewScript)}
-                  className="flex items-center gap-1 bg-[#D4AF37]/20 hover:bg-[#D4AF37]/30 text-[#D4AF37] border border-[#D4AF37]/40 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  className="flex items-center gap-1 bg-[#2563EB]/20 hover:bg-[#2563EB]/30 text-[#2563EB] border border-[#2563EB]/40 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Colocar Novo Script</span>
@@ -607,17 +607,17 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             {showInlineNewScript && (
               <form
                 onSubmit={handleCreateInlineScript}
-                className="bg-[#0A0E17] border-2 border-[#D4AF37]/60 rounded-xl p-3.5 mb-3 space-y-3 animate-fadeIn shadow-lg"
+                className="bg-[#0B132B] border-2 border-[#2563EB]/60 rounded-xl p-3.5 mb-3 space-y-3 animate-fadeIn shadow-lg"
               >
-                <div className="flex items-center justify-between border-b border-[#25334A] pb-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#D4AF37]">
+                <div className="flex items-center justify-between border-b border-[#263B6E] pb-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#2563EB]">
                     <BookmarkPlus className="w-4 h-4" />
                     <span>Cadastrar Novo Script no Sistema</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowInlineNewScript(false)}
-                    className="text-[#94A3B8] hover:text-[#F8FAFC] text-xs cursor-pointer"
+                    className="text-[#94A3B8] hover:text-[#FFFFFF] text-xs cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -633,7 +633,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                       value={newScriptTitle}
                       onChange={(e) => setNewScriptTitle(e.target.value)}
                       placeholder="Ex: Oferta Relâmpago PF com Abatimento"
-                      className="w-full bg-[#111827] border border-[#25334A] focus:border-[#D4AF37] text-xs text-[#F8FAFC] rounded-lg p-2"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] focus:border-[#2563EB] text-xs text-[#FFFFFF] rounded-lg p-2"
                       required
                     />
                   </div>
@@ -642,12 +642,12 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     <label className="text-[10px] font-semibold text-[#94A3B8] block mb-1">
                       Tipo do Script:
                     </label>
-                    <div className="grid grid-cols-2 gap-1 bg-[#111827] p-1 rounded-lg border border-[#25334A]">
+                    <div className="grid grid-cols-2 gap-1 bg-[#111D3E] p-1 rounded-lg border border-[#263B6E]">
                       <button
                         type="button"
                         onClick={() => setNewScriptType('texto')}
                         className={`py-1 text-[11px] font-semibold rounded cursor-pointer ${
-                          newScriptType === 'texto' ? 'bg-[#1E293B] text-[#F8FAFC]' : 'text-[#94A3B8]'
+                          newScriptType === 'texto' ? 'bg-[#1C2C55] text-[#FFFFFF]' : 'text-[#94A3B8]'
                         }`}
                       >
                         Texto
@@ -656,7 +656,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                         type="button"
                         onClick={() => setNewScriptType('audio')}
                         className={`py-1 text-[11px] font-bold rounded cursor-pointer flex items-center justify-center gap-1 ${
-                          newScriptType === 'audio' ? 'bg-[#38BDF8] text-[#0A0E17]' : 'text-[#38BDF8]'
+                          newScriptType === 'audio' ? 'bg-[#38BDF8] text-[#0B132B]' : 'text-[#38BDF8]'
                         }`}
                       >
                         <Mic className="w-3 h-3" />
@@ -674,7 +674,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     <select
                       value={newScriptCategory}
                       onChange={(e) => setNewScriptCategory(e.target.value as MessageTemplateCategory)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-[#F8FAFC] rounded-lg p-2"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-[#FFFFFF] rounded-lg p-2"
                     >
                       <option value="roteiro_audio">🎙️ Roteiro de Áudio</option>
                       <option value="pos_prova">Pós-Prova</option>
@@ -696,7 +696,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                       value={newScriptGatilho}
                       onChange={(e) => setNewScriptGatilho(e.target.value)}
                       placeholder="Ex: Abatimento de 100% + Urgência"
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-[#F8FAFC] rounded-lg p-2"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-[#FFFFFF] rounded-lg p-2"
                     />
                   </div>
                 </div>
@@ -704,20 +704,20 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[10px] font-semibold text-[#94A3B8]">
-                      Texto do Script: (Use <code className="text-[#D4AF37]">{"{nome}"}</code> e <code className="text-[#D4AF37]">{"{curso}"}</code>)
+                      Texto do Script: (Use <code className="text-[#2563EB]">{"{nome}"}</code> e <code className="text-[#2563EB]">{"{curso}"}</code>)
                     </label>
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => setNewScriptText((prev) => prev + ' {nome}')}
-                        className="text-[10px] bg-[#111827] text-[#D4AF37] px-1.5 py-0.5 rounded hover:bg-[#1E293B] cursor-pointer"
+                        className="text-[10px] bg-[#111D3E] text-[#2563EB] px-1.5 py-0.5 rounded hover:bg-[#1C2C55] cursor-pointer"
                       >
                         +{"{nome}"}
                       </button>
                       <button
                         type="button"
                         onClick={() => setNewScriptText((prev) => prev + ' {curso}')}
-                        className="text-[10px] bg-[#111827] text-[#D4AF37] px-1.5 py-0.5 rounded hover:bg-[#1E293B] cursor-pointer"
+                        className="text-[10px] bg-[#111D3E] text-[#2563EB] px-1.5 py-0.5 rounded hover:bg-[#1C2C55] cursor-pointer"
                       >
                         +{"{curso}"}
                       </button>
@@ -728,7 +728,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     value={newScriptText}
                     onChange={(e) => setNewScriptText(e.target.value)}
                     placeholder="Digite o script com as tags {nome} e {curso}..."
-                    className="w-full bg-[#111827] border border-[#25334A] text-xs text-[#F8FAFC] rounded-lg p-2 font-sans"
+                    className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-[#FFFFFF] rounded-lg p-2 font-sans"
                     required
                   />
                 </div>
@@ -737,13 +737,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowInlineNewScript(false)}
-                    className="px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#F8FAFC]"
+                    className="px-3 py-1.5 text-xs text-[#94A3B8] hover:text-[#FFFFFF]"
                   >
                     Fechar
                   </button>
                   <button
                     type="submit"
-                    className="flex items-center gap-1.5 bg-[#D4AF37] hover:bg-[#B89220] text-[#0A0E17] font-bold text-xs px-4 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm"
+                    className="flex items-center gap-1.5 bg-[#2563EB] hover:bg-[#B89220] text-[#0B132B] font-bold text-xs px-4 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Salvar e Usar Este Script</span>
@@ -765,15 +765,15 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
                         ? isTmplAudio
-                          ? 'bg-[#142944] border-[#38BDF8] text-[#F8FAFC] shadow-sm ring-1 ring-[#38BDF8]/50'
-                          : 'bg-[#1E293B] border-[#D4AF37] text-[#F8FAFC] shadow-sm ring-1 ring-[#D4AF37]/50'
+                          ? 'bg-[#142944] border-[#38BDF8] text-[#FFFFFF] shadow-sm ring-1 ring-[#38BDF8]/50'
+                          : 'bg-[#1C2C55] border-[#2563EB] text-[#FFFFFF] shadow-sm ring-1 ring-[#2563EB]/50'
                         : isTmplAudio
-                        ? 'bg-[#0A0E17]/90 border-[#38BDF8]/30 text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#38BDF8]'
-                        : 'bg-[#0A0E17]/70 border-[#25334A] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#94A3B8]/50'
+                        ? 'bg-[#0B132B]/90 border-[#38BDF8]/30 text-[#94A3B8] hover:text-[#FFFFFF] hover:border-[#38BDF8]'
+                        : 'bg-[#0B132B]/70 border-[#263B6E] text-[#94A3B8] hover:text-[#FFFFFF] hover:border-[#94A3B8]/50'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1 mb-1">
-                      <div className="font-semibold text-xs leading-snug text-[#F8FAFC] line-clamp-1">
+                      <div className="font-semibold text-xs leading-snug text-[#FFFFFF] line-clamp-1">
                         {tmpl.titulo}
                       </div>
                       {isTmplAudio && (
@@ -783,7 +783,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                       )}
                     </div>
                     {tmpl.gatilho && (
-                      <div className="text-[10px] text-[#D4AF37] line-clamp-1 font-medium">
+                      <div className="text-[10px] text-[#2563EB] line-clamp-1 font-medium">
                         ⚡ {tmpl.gatilho}
                       </div>
                     )}
@@ -795,13 +795,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
           {/* Audio Teleprompter & Voice Tone Guidance Box */}
           {isAudio && (
-            <div className="bg-gradient-to-br from-[#0A0E17] to-[#12233C] border border-[#38BDF8]/50 rounded-xl p-3.5 space-y-2.5 text-xs shadow-sm">
-              <div className="flex items-center justify-between border-b border-[#25334A] pb-2 flex-wrap gap-2">
+            <div className="bg-gradient-to-br from-[#0B132B] to-[#12233C] border border-[#38BDF8]/50 rounded-xl p-3.5 space-y-2.5 text-xs shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#263B6E] pb-2 flex-wrap gap-2">
                 <div className="flex items-center gap-2 font-bold text-[#38BDF8] text-xs uppercase tracking-wide">
                   <Mic className="w-4 h-4 text-[#38BDF8] animate-pulse" />
                   <span>Teleprompter de Gravação no WhatsApp</span>
                 </div>
-                <div className="flex items-center gap-3 text-[11px] text-[#F8FAFC]">
+                <div className="flex items-center gap-3 text-[11px] text-[#FFFFFF]">
                   {currentTemplate?.duracaoEstimada && (
                     <span className="flex items-center gap-1 bg-[#38BDF8]/20 border border-[#38BDF8]/40 px-2 py-0.5 rounded text-[#38BDF8] font-semibold">
                       <Timer className="w-3 h-3" />
@@ -818,9 +818,9 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               </div>
 
               {currentTemplate?.dicasGravacao && currentTemplate.dicasGravacao.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#F8FAFC]/90">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#FFFFFF]/90">
                   {currentTemplate.dicasGravacao.map((dica, idx) => (
-                    <div key={idx} className="flex items-start gap-1.5 bg-[#111827]/70 p-1.5 rounded">
+                    <div key={idx} className="flex items-start gap-1.5 bg-[#111D3E]/70 p-1.5 rounded">
                       <span className="text-[#38BDF8] font-bold">•</span>
                       <span>{dica}</span>
                     </div>
@@ -832,30 +832,30 @@ export const MessageModal: React.FC<MessageModalProps> = ({
 
           {/* Emotion & Logic Strategic Context for Text Scripts */}
           {!isAudio && currentTemplate && (currentTemplate.emocao || currentTemplate.logica || currentTemplate.gatilho) && (
-            <div className="bg-[#0A0E17] border border-[#D4AF37]/30 rounded-xl p-3 space-y-2 text-xs">
+            <div className="bg-[#0B132B] border border-[#2563EB]/30 rounded-xl p-3 space-y-2 text-xs">
               {currentTemplate.gatilho && (
-                <div className="text-[11px] font-bold text-[#D4AF37] flex items-center gap-1.5 border-b border-[#25334A] pb-1.5">
+                <div className="text-[11px] font-bold text-[#2563EB] flex items-center gap-1.5 border-b border-[#263B6E] pb-1.5">
                   <span>⚡ Gatilho do Script:</span>
-                  <span className="text-[#F8FAFC] font-normal">{currentTemplate.gatilho}</span>
+                  <span className="text-[#FFFFFF] font-normal">{currentTemplate.gatilho}</span>
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {currentTemplate.emocao && (
-                  <div className="bg-[#111827]/60 border border-[#B14432]/30 rounded-lg p-2">
+                  <div className="bg-[#111D3E]/60 border border-[#B14432]/30 rounded-lg p-2">
                     <span className="text-[10px] font-bold uppercase text-[#B14432] block mb-0.5">
                       ❤️ Conexão Emocional:
                     </span>
-                    <p className="text-[11px] text-[#F8FAFC]/90 leading-snug">
+                    <p className="text-[11px] text-[#FFFFFF]/90 leading-snug">
                       {currentTemplate.emocao}
                     </p>
                   </div>
                 )}
                 {currentTemplate.logica && (
-                  <div className="bg-[#111827]/60 border border-[#5C7A9E]/40 rounded-lg p-2">
+                  <div className="bg-[#111D3E]/60 border border-[#5C7A9E]/40 rounded-lg p-2">
                     <span className="text-[10px] font-bold uppercase text-[#5C7A9E] block mb-0.5">
                       🧠 Fundamento Lógico:
                     </span>
-                    <p className="text-[11px] text-[#F8FAFC]/90 leading-snug">
+                    <p className="text-[11px] text-[#FFFFFF]/90 leading-snug">
                       {currentTemplate.logica}
                     </p>
                   </div>
@@ -868,7 +868,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between mb-1">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
-                <Edit3 className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <Edit3 className="w-3.5 h-3.5 text-[#2563EB]" />
                 {isAudio ? 'Roteiro de Fala Personalizado:' : `Mensagem Personalizada para ${contact.nome}:`}
               </label>
               
@@ -876,7 +876,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowSaveCurrentAsScript(!showSaveCurrentAsScript)}
-                  className="text-[11px] text-[#D4AF37] hover:bg-[#D4AF37]/10 px-2 py-0.5 rounded border border-[#D4AF37]/30 cursor-pointer flex items-center gap-1 transition-colors"
+                  className="text-[11px] text-[#2563EB] hover:bg-[#2563EB]/10 px-2 py-0.5 rounded border border-[#2563EB]/30 cursor-pointer flex items-center gap-1 transition-colors"
                   title="Salvar esta mensagem editada como um modelo permanente"
                 >
                   <BookmarkPlus className="w-3 h-3" />
@@ -886,7 +886,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 <button
                   type="button"
                   onClick={handleResetToTemplate}
-                  className="text-[11px] text-[#94A3B8] hover:text-[#F8FAFC] hover:underline cursor-pointer flex items-center gap-1"
+                  className="text-[11px] text-[#94A3B8] hover:text-[#FFFFFF] hover:underline cursor-pointer flex items-center gap-1"
                   title="Recarregar texto original do modelo"
                 >
                   <RefreshCw className="w-3 h-3" />
@@ -899,17 +899,17 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             {showSaveCurrentAsScript && (
               <form
                 onSubmit={handleSaveCurrentAsScript}
-                className="bg-[#0A0E17] border border-[#D4AF37] rounded-xl p-3 space-y-2.5 animate-fadeIn shadow-md"
+                className="bg-[#0B132B] border border-[#2563EB] rounded-xl p-3 space-y-2.5 animate-fadeIn shadow-md"
               >
-                <div className="flex items-center justify-between border-b border-[#25334A] pb-1.5">
-                  <span className="text-xs font-bold text-[#D4AF37] flex items-center gap-1">
+                <div className="flex items-center justify-between border-b border-[#263B6E] pb-1.5">
+                  <span className="text-xs font-bold text-[#2563EB] flex items-center gap-1">
                     <Save className="w-3.5 h-3.5" />
                     Salvar Mensagem Editada na Biblioteca de Scripts
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowSaveCurrentAsScript(false)}
-                    className="text-[#94A3B8] hover:text-[#F8FAFC] text-xs"
+                    className="text-[#94A3B8] hover:text-[#FFFFFF] text-xs"
                   >
                     ✕
                   </button>
@@ -922,7 +922,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                       value={saveCurrentTitle}
                       onChange={(e) => setSaveCurrentTitle(e.target.value)}
                       placeholder="Nome do Novo Script (Ex: Oferta Fechamento Especial)"
-                      className="w-full bg-[#111827] border border-[#25334A] focus:border-[#D4AF37] text-xs text-[#F8FAFC] rounded-lg p-2"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] focus:border-[#2563EB] text-xs text-[#FFFFFF] rounded-lg p-2"
                       required
                     />
                   </div>
@@ -930,7 +930,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     <select
                       value={saveCurrentCategory}
                       onChange={(e) => setSaveCurrentCategory(e.target.value as MessageTemplateCategory)}
-                      className="w-full bg-[#111827] border border-[#25334A] text-xs text-[#F8FAFC] rounded-lg p-2"
+                      className="w-full bg-[#111D3E] border border-[#263B6E] text-xs text-[#FFFFFF] rounded-lg p-2"
                     >
                       <option value="fechamento_pix">Fechamento & PIX</option>
                       <option value="migracao">Migração 1.0</option>
@@ -950,7 +950,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                   </span>
                   <button
                     type="submit"
-                    className="bg-[#D4AF37] hover:bg-[#B89220] text-[#0A0E17] font-bold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer transition-colors shrink-0 flex items-center gap-1"
+                    className="bg-[#2563EB] hover:bg-[#B89220] text-[#0B132B] font-bold text-xs px-3.5 py-1.5 rounded-lg cursor-pointer transition-colors shrink-0 flex items-center gap-1"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Salvar Script</span>
@@ -962,13 +962,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             {/* Quick Variable & Offer Snippets Bar */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] scrollbar-thin">
               <span className="text-[10px] uppercase font-bold text-[#94A3B8] flex items-center gap-1 shrink-0">
-                <Tag className="w-3 h-3 text-[#D4AF37]" />
+                <Tag className="w-3 h-3 text-[#2563EB]" />
                 Inserir no Script:
               </span>
               <button
                 type="button"
                 onClick={() => insertSnippet(contact.nome ? (contact.nome.split(' ')[0] || contact.nome) : '{nome}')}
-                className="bg-[#111827] hover:bg-[#1E293B] text-[#D4AF37] border border-[#25334A] px-2 py-0.5 rounded cursor-pointer shrink-0 font-medium transition-colors"
+                className="bg-[#111D3E] hover:bg-[#1C2C55] text-[#2563EB] border border-[#263B6E] px-2 py-0.5 rounded cursor-pointer shrink-0 font-medium transition-colors"
                 title="Inserir primeiro nome do aluno"
               >
                 + {contact.nome ? contact.nome.split(' ')[0] : 'Nome'}
@@ -976,7 +976,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               <button
                 type="button"
                 onClick={() => insertSnippet(contact.curso ? contact.curso : '{curso}')}
-                className="bg-[#111827] hover:bg-[#1E293B] text-[#D4AF37] border border-[#25334A] px-2 py-0.5 rounded cursor-pointer shrink-0 font-medium transition-colors"
+                className="bg-[#111D3E] hover:bg-[#1C2C55] text-[#2563EB] border border-[#263B6E] px-2 py-0.5 rounded cursor-pointer shrink-0 font-medium transition-colors"
                 title="Inserir concurso de interesse"
               >
                 + {contact.curso ? contact.curso.slice(0, 16) : 'Curso'}
@@ -984,7 +984,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               <button
                 type="button"
                 onClick={() => insertSnippet('A gente abate 100% do valor que você já investiu no seu curso isolado!')}
-                className="bg-[#111827] hover:bg-[#1E293B] text-[#38BDF8] border border-[#25334A] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+                className="bg-[#111D3E] hover:bg-[#1C2C55] text-[#38BDF8] border border-[#263B6E] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
                 title="Inserir benefício do abatimento integral"
               >
                 + Abatimento 100%
@@ -992,21 +992,21 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               <button
                 type="button"
                 onClick={() => insertSnippet('Você terá acesso a mais de 180.000 questões comentadas e simulados semanais.')}
-                className="bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+                className="bg-[#111D3E] hover:bg-[#1C2C55] text-[#FFFFFF] border border-[#263B6E] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
               >
                 + 180k Questões
               </button>
               <button
                 type="button"
                 onClick={() => insertSnippet('Chave PIX Oficial (CNPJ): 00.000.000/0001-00 (Portal Concursos)')}
-                className="bg-[#111827] hover:bg-[#1E293B] text-[#4ADE80] border border-[#25334A] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+                className="bg-[#111D3E] hover:bg-[#1C2C55] text-[#4ADE80] border border-[#263B6E] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
               >
                 + Chave PIX
               </button>
               <button
                 type="button"
                 onClick={() => insertSnippet('https://portalconcursos.com.br/assinatura')}
-                className="bg-[#111827] hover:bg-[#1E293B] text-[#38BDF8] border border-[#25334A] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
+                className="bg-[#111D3E] hover:bg-[#1C2C55] text-[#38BDF8] border border-[#263B6E] px-2 py-0.5 rounded cursor-pointer shrink-0 transition-colors"
               >
                 + Link Assinatura
               </button>
@@ -1019,13 +1019,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               placeholder="Digite ou ajuste a mensagem..."
               className={`w-full rounded-xl p-3 sm:p-3.5 text-xs sm:text-[14px] leading-relaxed resize-y font-sans shadow-inner ${
                 isAudio
-                  ? 'bg-[#0E1726] border-2 border-[#38BDF8]/40 focus:border-[#38BDF8] text-[#F8FAFC] font-medium tracking-wide'
-                  : 'bg-[#0A0E17] border border-[#25334A] focus:border-[#D4AF37] text-[#F8FAFC]'
+                  ? 'bg-[#0E1726] border-2 border-[#38BDF8]/40 focus:border-[#38BDF8] text-[#FFFFFF] font-medium tracking-wide'
+                  : 'bg-[#0B132B] border border-[#263B6E] focus:border-[#2563EB] text-[#FFFFFF]'
               }`}
             />
             <div className="text-[11px] text-[#94A3B8] mt-1 flex items-center justify-between gap-1 flex-wrap">
               <div className="flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                <Sparkles className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
                 <span>
                   Tags <b>{'{nome}'}</b> e <b>{'{curso}'}</b> são substituídas por <b>{contact.nome}</b> e <b>{contact.curso || 'Portal Concurso'}</b>.
                 </span>
@@ -1037,9 +1037,9 @@ export const MessageModal: React.FC<MessageModalProps> = ({
           </div>
 
           {/* WhatsApp Destination Switcher */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 rounded-xl bg-[#0A0E17] border border-[#25334A]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 rounded-xl bg-[#0B132B] border border-[#263B6E]">
             <div className="flex items-center gap-2 text-xs">
-              <span className="font-semibold text-[#F8FAFC]">Abrir onde:</span>
+              <span className="font-semibold text-[#FFFFFF]">Abrir onde:</span>
               <span className="text-[11px] text-[#94A3B8]">
                 {waTargetMode === 'desktop_app'
                   ? '📱 Programa WhatsApp do Computador / App Celular'
@@ -1047,14 +1047,14 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               </span>
             </div>
 
-            <div className="flex items-center gap-1 bg-[#111827] p-0.5 rounded-lg border border-[#25334A] self-start sm:self-auto">
+            <div className="flex items-center gap-1 bg-[#111D3E] p-0.5 rounded-lg border border-[#263B6E] self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => handleUpdateWaMode('desktop_app')}
                 className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                   waTargetMode === 'desktop_app'
-                    ? 'bg-[#25D366] text-[#0A0E17] shadow-sm'
-                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#25D366] text-[#0B132B] shadow-sm'
+                    : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
                 title="Abre direto no Aplicativo WhatsApp instalado no seu computador ou celular (recomendado)"
               >
@@ -1067,8 +1067,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                 onClick={() => handleUpdateWaMode('same_tab')}
                 className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   waTargetMode !== 'desktop_app'
-                    ? 'bg-[#1E293B] text-[#F8FAFC] shadow-sm'
-                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#1C2C55] text-[#FFFFFF] shadow-sm'
+                    : 'text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
                 title="Abre no WhatsApp Web no navegador"
               >
@@ -1079,12 +1079,12 @@ export const MessageModal: React.FC<MessageModalProps> = ({
           </div>
 
           {/* Auto mark option */}
-          <label className="flex items-center gap-2.5 text-xs text-[#F8FAFC] cursor-pointer select-none bg-[#0A0E17]/40 p-2.5 rounded-lg border border-[#25334A]/50">
+          <label className="flex items-center gap-2.5 text-xs text-[#FFFFFF] cursor-pointer select-none bg-[#0B132B]/40 p-2.5 rounded-lg border border-[#263B6E]/50">
             <input
               type="checkbox"
               checked={autoMarkContacted}
               onChange={(e) => handleToggleAutoMark(e.target.checked)}
-              className="rounded accent-[#D4AF37] w-4 h-4 cursor-pointer"
+              className="rounded accent-[#2563EB] w-4 h-4 cursor-pointer"
             />
             <span>Marcar automaticamente como <b>"Contatado Hoje"</b> ao enviar pelo WhatsApp ou copiar</span>
           </label>
@@ -1132,7 +1132,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
                     setIsMarkedToday(true);
                     onToast(`✓ ${contact.nome} marcado como Contatado Hoje!`, 'success');
                   }}
-                  className="bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] text-xs font-extrabold px-3 py-1.5 rounded-lg transition-transform active:scale-95 cursor-pointer shrink-0 shadow-sm"
+                  className="bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] text-xs font-extrabold px-3 py-1.5 rounded-lg transition-transform active:scale-95 cursor-pointer shrink-0 shadow-sm"
                 >
                   Marcar Agora
                 </button>
@@ -1142,7 +1142,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
         </div>
 
         {/* Modal Footer with Queue Flow Actions */}
-        <div className="p-4 sm:p-5 border-t border-[#25334A] bg-[#0A0E17]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-[#263B6E] bg-[#0B132B]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
@@ -1150,7 +1150,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 copied
                   ? 'bg-[#6E8F5C]/20 border-[#6E8F5C] text-[#6E8F5C]'
-                  : 'border-[#25334A] hover:border-[#F8FAFC] text-[#F8FAFC] hover:bg-[#1E293B]'
+                  : 'border-[#263B6E] hover:border-[#FFFFFF] text-[#FFFFFF] hover:bg-[#1C2C55]'
               }`}
             >
               {copied ? (
@@ -1169,7 +1169,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-3 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0A0E17] rounded-lg transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-3 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-[#0B132B] rounded-lg transition-colors cursor-pointer"
             >
               Fechar
             </button>
@@ -1180,7 +1180,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               <button
                 type="button"
                 onClick={handleSendWhatsAppOnly}
-                className="w-full sm:w-auto px-3 py-2 text-xs font-semibold text-[#F8FAFC] border border-[#25334A] hover:bg-[#1E293B] rounded-lg transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-3 py-2 text-xs font-semibold text-[#FFFFFF] border border-[#263B6E] hover:bg-[#1C2C55] rounded-lg transition-colors cursor-pointer"
                 title="Apenas abre o WhatsApp sem avançar na fila"
               >
                 {isAudio ? 'Gravar Só Este' : 'Enviar Só Este'}
@@ -1192,8 +1192,8 @@ export const MessageModal: React.FC<MessageModalProps> = ({
               onClick={handleSendWhatsAppAndNext}
               className={`w-full sm:w-auto flex items-center justify-center gap-2 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-md transition-all cursor-pointer whitespace-nowrap ${
                 isAudio
-                  ? 'bg-[#38BDF8] hover:bg-[#2bb2ee] text-[#0A0E17]'
-                  : 'bg-[#25D366] hover:bg-[#20ba5a] text-[#0A0E17]'
+                  ? 'bg-[#38BDF8] hover:bg-[#2bb2ee] text-[#0B132B]'
+                  : 'bg-[#25D366] hover:bg-[#20ba5a] text-[#0B132B]'
               }`}
             >
               {isAudio ? <Mic className="w-4 h-4" /> : <Send className="w-4 h-4 fill-current" />}

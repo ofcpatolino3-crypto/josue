@@ -87,19 +87,19 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center py-6 px-4">
-      <div className="w-full max-w-md bg-[#111827] border border-[#25334A] rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
+      <div className="w-full max-w-md bg-[#111D3E] border border-[#263B6E] rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
         {/* Top Branding Header */}
-        <div className="bg-[#0A0E17] p-6 border-b border-[#25334A] text-center relative">
+        <div className="bg-[#0B132B] p-6 border-b border-[#263B6E] text-center relative">
           <div className="flex justify-center mb-3">
-            <div className="p-2 bg-[#111827] border border-[#25334A] rounded-2xl shadow-lg flex items-center justify-center">
+            <div className="p-2 bg-[#111D3E] border border-[#263B6E] rounded-2xl shadow-lg flex items-center justify-center">
               <PortalLogo size={52} />
             </div>
           </div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] uppercase tracking-wider mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2563EB] uppercase tracking-wider mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
             Portal Concursos e OAB
           </div>
-          <h2 className="text-xl font-black text-[#F8FAFC] tracking-tight">
+          <h2 className="text-xl font-black text-[#FFFFFF] tracking-tight">
             Acesso ao Sistema de Atendimento
           </h2>
           <p className="text-xs text-[#94A3B8] mt-1">
@@ -108,15 +108,15 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
         </div>
 
         {/* Security / Privacy Assurance Notice */}
-        <div className="bg-[#0A0E17]/80 border-b border-[#25334A] px-4 py-2.5 flex items-center gap-2.5 text-xs text-[#94A3B8]">
+        <div className="bg-[#0B132B]/80 border-b border-[#263B6E] px-4 py-2.5 flex items-center gap-2.5 text-xs text-[#94A3B8]">
           <ShieldCheck className="w-4 h-4 text-[#6E8F5C] shrink-0" />
           <span>
-            <strong className="text-[#F8FAFC]">Privacidade Total:</strong> Cada atendente acessa exclusivamente sua própria carteira de contatos atribuída.
+            <strong className="text-[#FFFFFF]">Privacidade Total:</strong> Cada atendente acessa exclusivamente sua própria carteira de contatos atribuída.
           </span>
         </div>
 
         {/* Tabs: Entrar vs Cadastrar */}
-        <div className="grid grid-cols-2 bg-[#0A0E17]/60 p-1.5 border-b border-[#25334A] text-xs font-semibold">
+        <div className="grid grid-cols-2 bg-[#0B132B]/60 p-1.5 border-b border-[#263B6E] text-xs font-semibold">
           <button
             type="button"
             id="tab-login"
@@ -127,8 +127,8 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
             }}
             className={`py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-all ${
               tab === 'login'
-                ? 'bg-[#D4AF37] text-[#0A0E17] font-bold shadow-md'
-                : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                ? 'bg-[#2563EB] text-[#0B132B] font-bold shadow-md'
+                : 'text-[#94A3B8] hover:text-[#FFFFFF]'
             }`}
           >
             <LogIn className="w-4 h-4" />
@@ -145,8 +145,8 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
             }}
             className={`py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-all ${
               tab === 'register'
-                ? 'bg-[#D4AF37] text-[#0A0E17] font-bold shadow-md'
-                : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                ? 'bg-[#2563EB] text-[#0B132B] font-bold shadow-md'
+                : 'text-[#94A3B8] hover:text-[#FFFFFF]'
             }`}
           >
             <UserPlus className="w-4 h-4" />
@@ -157,14 +157,14 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
         {/* Form Container */}
         <div className="p-6">
           {errorMsg && (
-            <div className="mb-4 bg-[#B14432]/20 border border-[#B14432] text-[#F8FAFC] p-3 rounded-xl flex items-center gap-2.5 text-xs animate-shake">
+            <div className="mb-4 bg-[#B14432]/20 border border-[#B14432] text-[#FFFFFF] p-3 rounded-xl flex items-center gap-2.5 text-xs animate-shake">
               <AlertCircle className="w-4 h-4 text-[#B14432] shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 bg-[#6E8F5C]/20 border border-[#6E8F5C] text-[#F8FAFC] p-3 rounded-xl flex items-center gap-2.5 text-xs">
+            <div className="mb-4 bg-[#6E8F5C]/20 border border-[#6E8F5C] text-[#FFFFFF] p-3 rounded-xl flex items-center gap-2.5 text-xs">
               <CheckCircle2 className="w-4 h-4 text-[#6E8F5C] shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -185,7 +185,7 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     value={emailOrUser}
                     onChange={(e) => setEmailOrUser(e.target.value)}
                     placeholder="Seu usuário ou e-mail cadastrado"
-                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#F8FAFC] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#FFFFFF] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#2563EB] transition-colors"
                   />
                 </div>
               </div>
@@ -203,12 +203,12 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Sua senha"
-                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#F8FAFC] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#FFFFFF] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#2563EB] transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#F8FAFC]"
+                    className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#FFFFFF]"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -219,7 +219,7 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                 type="submit"
                 id="btn-submit-login"
                 disabled={loading}
-                className="w-full bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-black py-3 rounded-lg text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
+                className="w-full bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] font-black py-3 rounded-lg text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 <LogIn className="w-4 h-4" />
                 {loading ? 'Validando acesso...' : 'Entrar no Sistema'}
@@ -233,16 +233,16 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     setTab('register');
                     setErrorMsg('');
                   }}
-                  className="text-[#D4AF37] hover:underline font-bold"
+                  className="text-[#2563EB] hover:underline font-bold"
                 >
                   Cadastre-se aqui
                 </button>
               </div>
 
               {/* Master Admin hint */}
-              <div className="mt-4 pt-3 border-t border-[#25334A]/60 flex items-center justify-between text-[11px] text-[#94A3B8]">
+              <div className="mt-4 pt-3 border-t border-[#263B6E]/60 flex items-center justify-between text-[11px] text-[#94A3B8]">
                 <span className="flex items-center gap-1">
-                  <Shield className="w-3 h-3 text-[#D4AF37]" />
+                  <Shield className="w-3 h-3 text-[#2563EB]" />
                   Acesso Master Administrador
                 </span>
                 <span className="text-[#94A3B8]/80 font-mono text-[10px]">
@@ -265,7 +265,7 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ex: João da Silva"
-                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#F8FAFC] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#FFFFFF] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#2563EB] transition-colors"
                   />
                 </div>
               </div>
@@ -283,7 +283,7 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     value={emailOrUser}
                     onChange={(e) => setEmailOrUser(e.target.value)}
                     placeholder="Ex: joao ou joao@portal.com"
-                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#F8FAFC] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#FFFFFF] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#2563EB] transition-colors"
                   />
                 </div>
               </div>
@@ -301,21 +301,21 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Mínimo 4 caracteres"
-                    className="w-full bg-[#0A0E17] border border-[#25334A] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#F8FAFC] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full bg-[#0B132B] border border-[#263B6E] rounded-lg pl-9 pr-10 py-2.5 text-sm text-[#FFFFFF] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#2563EB] transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#F8FAFC]"
+                    className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#FFFFFF]"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              <div className="bg-[#0A0E17] border border-[#25334A] p-3 rounded-lg text-xs text-[#94A3B8] space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-[#F8FAFC]">
-                  <Users className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="bg-[#0B132B] border border-[#263B6E] p-3 rounded-lg text-xs text-[#94A3B8] space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-[#FFFFFF]">
+                  <Users className="w-3.5 h-3.5 text-[#2563EB]" />
                   Como funciona a carteira de contatos?
                 </div>
                 <p className="text-[11px] leading-relaxed">
@@ -327,7 +327,7 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                 type="submit"
                 id="btn-submit-register"
                 disabled={loading}
-                className="w-full bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] font-black py-3 rounded-lg text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
+                className="w-full bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] font-black py-3 rounded-lg text-sm transition-all shadow-md active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 <UserPlus className="w-4 h-4" />
                 {loading ? 'Cadastrando...' : 'Criar Conta de Atendente'}
@@ -341,7 +341,7 @@ export const AuthGateway: React.FC<AuthGatewayProps> = ({
                     setTab('login');
                     setErrorMsg('');
                   }}
-                  className="text-[#D4AF37] hover:underline font-bold"
+                  className="text-[#2563EB] hover:underline font-bold"
                 >
                   Entrar com usuário
                 </button>

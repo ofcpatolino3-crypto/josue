@@ -88,13 +88,13 @@ export const Dropzone: React.FC<DropzoneProps> = ({
 
       {hasContacts && !isExpanded ? (
         /* Compact bar when contacts already exist */
-        <div className="flex flex-wrap items-center justify-between gap-2 bg-[#111827]/80 border border-[#25334A] rounded-lg px-3 py-2 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-[#111D3E]/80 border border-[#263B6E] rounded-lg px-3 py-2 text-xs">
           <div className="flex flex-wrap items-center gap-2">
             {onOpenSmartImport && (
               <button
                 type="button"
                 onClick={onOpenSmartImport}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-[#D4AF37] to-[#8C6D1F] text-[#0A0E17] px-3 py-1 rounded-md font-bold transition-all shadow-sm cursor-pointer hover:brightness-110"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-[#2563EB] to-[#8C6D1F] text-[#0B132B] px-3 py-1 rounded-md font-bold transition-all shadow-sm cursor-pointer hover:brightness-110"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>⚡ Importar / Divisão Igualitária</span>
@@ -104,9 +104,9 @@ export const Dropzone: React.FC<DropzoneProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] hover:text-[#D4AF37] px-2.5 py-1 rounded-md font-semibold border border-[#25334A] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 bg-[#1C2C55] hover:bg-[#263B6E] text-[#FFFFFF] hover:text-[#2563EB] px-2.5 py-1 rounded-md font-semibold border border-[#263B6E] transition-colors cursor-pointer"
             >
-              <UploadCloud className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <UploadCloud className="w-3.5 h-3.5 text-[#2563EB]" />
               {isAdmin ? 'Importar Planilha Direta' : 'Importar (.xlsx, .csv)'}
             </button>
 
@@ -114,7 +114,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               <button
                 type="button"
                 onClick={onOpenQuickPaste}
-                className="flex items-center gap-1.5 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#4ADE80] px-2.5 py-1 rounded-md font-semibold border border-[#22C55E]/40 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 bg-[#111D3E] hover:bg-[#1C2C55] text-[#FFFFFF] hover:text-[#4ADE80] px-2.5 py-1 rounded-md font-semibold border border-[#22C55E]/40 transition-colors cursor-pointer"
                 title="Colar contatos direto (Ctrl+V)"
               >
                 <Clipboard className="w-3.5 h-3.5 text-[#4ADE80]" />
@@ -126,9 +126,9 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               <button
                 type="button"
                 onClick={onOpenAddManual}
-                className="flex items-center gap-1.5 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#D4AF37] px-2.5 py-1 rounded-md font-semibold border border-[#25334A] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 bg-[#111D3E] hover:bg-[#1C2C55] text-[#FFFFFF] hover:text-[#2563EB] px-2.5 py-1 rounded-md font-semibold border border-[#263B6E] transition-colors cursor-pointer"
               >
-                <UserPlus className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <UserPlus className="w-3.5 h-3.5 text-[#2563EB]" />
                 <span>+ Novo Manual</span>
               </button>
             )}
@@ -136,7 +136,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
             <button
               type="button"
               onClick={() => setIsExpanded(true)}
-              className="text-[#94A3B8] hover:text-[#F8FAFC] underline text-[11px] cursor-pointer"
+              className="text-[#94A3B8] hover:text-[#FFFFFF] underline text-[11px] cursor-pointer"
             >
               Abrir área de arrastar
             </button>
@@ -166,25 +166,25 @@ export const Dropzone: React.FC<DropzoneProps> = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-xl border-1.5 border-dashed transition-all cursor-pointer bg-[#111827] ${
+            className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-xl border-1.5 border-dashed transition-all cursor-pointer bg-[#111D3E] ${
               isDragging
-                ? 'border-[#D4AF37] bg-[#1E293B]'
-                : 'border-[#25334A] hover:border-[#D4AF37]/70'
+                ? 'border-[#2563EB] bg-[#1C2C55]'
+                : 'border-[#263B6E] hover:border-[#2563EB]/70'
             }`}
           >
             <div className="flex items-start gap-3.5 text-center sm:text-left">
-              <div className="w-10 h-10 rounded-lg bg-[#1E293B] text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5 border border-[#25334A]">
+              <div className="w-10 h-10 rounded-lg bg-[#1C2C55] text-[#2563EB] flex items-center justify-center shrink-0 mt-0.5 border border-[#263B6E]">
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-[#F8FAFC] flex items-center justify-center sm:justify-start gap-2">
+                <div className="text-sm font-semibold text-[#FFFFFF] flex items-center justify-center sm:justify-start gap-2">
                   {isAdmin
                     ? 'Importar planilha para distribuir à equipe (.xlsx, .xls, .csv)'
                     : 'Importar planilha (.xlsx, .xls, .csv)'}
                   <UploadCloud className="w-4 h-4 text-[#94A3B8]" />
                 </div>
                 <div className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-                  ✓ Reconhecimento automático em <strong className="text-[#F8FAFC]">qualquer ordem de colunas</strong>: Nome, WhatsApp, E-mail, Curso, Temperatura, Datas, Observações.
+                  ✓ Reconhecimento automático em <strong className="text-[#FFFFFF]">qualquer ordem de colunas</strong>: Nome, WhatsApp, E-mail, Curso, Temperatura, Datas, Observações.
                 </div>
               </div>
             </div>
@@ -197,7 +197,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                     e.stopPropagation();
                     onOpenSmartImport();
                   }}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-[#D4AF37] to-[#8C6D1F] hover:brightness-110 text-[#0A0E17] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-md cursor-pointer whitespace-nowrap"
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-[#2563EB] to-[#8C6D1F] hover:brightness-110 text-[#0B132B] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all shadow-md cursor-pointer whitespace-nowrap"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>⚡ Importar Planilhas (Liberação Imediata)</span>
@@ -211,7 +211,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="bg-[#1E293B] hover:bg-[#25334A] text-[#F8FAFC] hover:text-[#D4AF37] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg border border-[#25334A] transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                className="bg-[#1C2C55] hover:bg-[#263B6E] text-[#FFFFFF] hover:text-[#2563EB] font-bold text-xs sm:text-sm px-4 py-2 rounded-lg border border-[#263B6E] transition-all shadow-sm cursor-pointer whitespace-nowrap"
               >
                 Escolher Planilha
               </button>
@@ -223,7 +223,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                     e.stopPropagation();
                     onOpenQuickPaste();
                   }}
-                  className="flex items-center gap-1.5 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#4ADE80] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-[#22C55E]/40 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                  className="flex items-center gap-1.5 bg-[#111D3E] hover:bg-[#1C2C55] text-[#FFFFFF] hover:text-[#4ADE80] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-[#22C55E]/40 transition-all shadow-sm cursor-pointer whitespace-nowrap"
                   title="Colar contatos do WhatsApp, Excel ou texto (Ctrl+V)"
                 >
                   <Clipboard className="w-4 h-4 text-[#4ADE80]" />
@@ -238,9 +238,9 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                     e.stopPropagation();
                     onOpenAddManual();
                   }}
-                  className="flex items-center gap-1.5 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] hover:text-[#D4AF37] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-[#25334A] transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                  className="flex items-center gap-1.5 bg-[#111D3E] hover:bg-[#1C2C55] text-[#FFFFFF] hover:text-[#2563EB] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-lg border border-[#263B6E] transition-all shadow-sm cursor-pointer whitespace-nowrap"
                 >
-                  <UserPlus className="w-4 h-4 text-[#D4AF37]" />
+                  <UserPlus className="w-4 h-4 text-[#2563EB]" />
                   <span>+ Novo Manual</span>
                 </button>
               )}
@@ -254,7 +254,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsExpanded(false)}
-                  className="text-[#94A3B8] hover:text-[#F8FAFC] text-[11px] cursor-pointer"
+                  className="text-[#94A3B8] hover:text-[#FFFFFF] text-[11px] cursor-pointer"
                 >
                   Ocultar área
                 </button>

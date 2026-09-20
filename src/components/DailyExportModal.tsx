@@ -141,19 +141,19 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="bg-[#111827] border border-[#25334A] rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+      <div className="bg-[#111D3E] border border-[#263B6E] rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#25334A] flex items-center justify-between bg-[#0A0E17]/70">
+        <div className="p-4 sm:p-5 border-b border-[#263B6E] flex items-center justify-between bg-[#0B132B]/70">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+            <div className="w-10 h-10 rounded-xl bg-[#2563EB]/10 border border-[#2563EB]/30 flex items-center justify-center text-[#2563EB]">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] uppercase font-semibold text-[#D4AF37] tracking-wider flex items-center gap-1.5">
+              <div className="text-[11px] uppercase font-semibold text-[#2563EB] tracking-wider flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 Fechamento de Fim de Dia • {formatDateBR(today)}
               </div>
-              <h2 className="text-lg sm:text-xl font-bold font-serif text-[#F8FAFC]">
+              <h2 className="text-lg sm:text-xl font-bold font-serif text-[#FFFFFF]">
                 Exportação Completa e Atualizada
               </h2>
             </div>
@@ -161,7 +161,7 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg transition-colors cursor-pointer"
+            className="text-[#94A3B8] hover:text-[#FFFFFF] p-1.5 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -173,51 +173,51 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
           <div>
             <div className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-2 flex items-center justify-between">
               <span>Status da Base Hoje ({total} leads)</span>
-              <span className="text-[#D4AF37] normal-case">{contactedToday.length} contatados hoje</span>
+              <span className="text-[#2563EB] normal-case">{contactedToday.length} contatados hoje</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              <div className="bg-[#0A0E17] border border-[#16A34A]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
+              <div className="bg-[#0B132B] border border-[#16A34A]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
                 <span className="text-[10px] uppercase font-bold text-[#16A34A] flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
                   Pagou
                 </span>
-                <span className="text-base font-bold text-[#F8FAFC] mt-0.5">{pagouList.length}</span>
+                <span className="text-base font-bold text-[#FFFFFF] mt-0.5">{pagouList.length}</span>
                 <span className="text-[10px] text-[#94A3B8]">
                   {total > 0 ? ((pagouList.length / total) * 100).toFixed(0) : 0}% conv.
                 </span>
               </div>
 
-              <div className="bg-[#0A0E17] border border-[#2563EB]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
+              <div className="bg-[#0B132B] border border-[#2563EB]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
                 <span className="text-[10px] uppercase font-bold text-[#2563EB] flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
                   Potencial
                 </span>
-                <span className="text-base font-bold text-[#F8FAFC] mt-0.5">{potencialList.length}</span>
+                <span className="text-base font-bold text-[#FFFFFF] mt-0.5">{potencialList.length}</span>
                 <span className="text-[10px] text-[#94A3B8]">negociando</span>
               </div>
 
-              <div className="bg-[#0A0E17] border border-[#EA580C]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
+              <div className="bg-[#0B132B] border border-[#EA580C]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
                 <span className="text-[10px] uppercase font-bold text-[#EA580C] flex items-center gap-1">
                   <Flame className="w-3 h-3" />
                   Quente
                 </span>
-                <span className="text-base font-bold text-[#F8FAFC] mt-0.5">{quenteList.length}</span>
+                <span className="text-base font-bold text-[#FFFFFF] mt-0.5">{quenteList.length}</span>
                 <span className="text-[10px] text-[#94A3B8]">alta chance</span>
               </div>
 
-              <div className="bg-[#0A0E17] border border-[#D4AF37]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
-                <span className="text-[10px] uppercase font-bold text-[#D4AF37]">Morno</span>
-                <span className="text-base font-bold text-[#F8FAFC] mt-0.5">{mornoList.length}</span>
+              <div className="bg-[#0B132B] border border-[#2563EB]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
+                <span className="text-[10px] uppercase font-bold text-[#2563EB]">Morno</span>
+                <span className="text-base font-bold text-[#FFFFFF] mt-0.5">{mornoList.length}</span>
                 <span className="text-[10px] text-[#94A3B8]">dúvidas</span>
               </div>
 
-              <div className="col-span-2 sm:col-span-1 bg-[#0A0E17] border border-[#DC2626]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
+              <div className="col-span-2 sm:col-span-1 bg-[#0B132B] border border-[#DC2626]/40 p-2.5 rounded-lg flex flex-col items-center text-center">
                 <span className="text-[10px] uppercase font-bold text-[#DC2626] flex items-center gap-1">
                   <Snowflake className="w-3 h-3" />
                   Frio
                 </span>
-                <span className="text-base font-bold text-[#F8FAFC] mt-0.5">{frioList.length}</span>
+                <span className="text-base font-bold text-[#FFFFFF] mt-0.5">{frioList.length}</span>
                 <span className="text-[10px] text-[#94A3B8]">sem retorno</span>
               </div>
             </div>
@@ -234,15 +234,15 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
                 onClick={() => setFilterType('all')}
                 className={`flex items-center justify-between p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   filterType === 'all'
-                    ? 'bg-[#1E293B] border-[#D4AF37] text-[#F8FAFC]'
-                    : 'bg-[#0A0E17] border-[#25334A] text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#1C2C55] border-[#2563EB] text-[#FFFFFF]'
+                    : 'bg-[#0B132B] border-[#263B6E] text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
               >
                 <div>
-                  <div className="font-semibold text-xs text-[#F8FAFC]">Toda a base atualizada</div>
+                  <div className="font-semibold text-xs text-[#FFFFFF]">Toda a base atualizada</div>
                   <div className="text-[11px] text-[#94A3B8]">Todos os status e temperaturas</div>
                 </div>
-                <span className="font-bold text-xs bg-[#111827] px-2 py-0.5 rounded text-[#D4AF37]">
+                <span className="font-bold text-xs bg-[#111D3E] px-2 py-0.5 rounded text-[#2563EB]">
                   {total}
                 </span>
               </button>
@@ -252,15 +252,15 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
                 onClick={() => setFilterType('today')}
                 className={`flex items-center justify-between p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   filterType === 'today'
-                    ? 'bg-[#1E293B] border-[#D4AF37] text-[#F8FAFC]'
-                    : 'bg-[#0A0E17] border-[#25334A] text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#1C2C55] border-[#2563EB] text-[#FFFFFF]'
+                    : 'bg-[#0B132B] border-[#263B6E] text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
               >
                 <div>
-                  <div className="font-semibold text-xs text-[#F8FAFC]">Contatados Hoje</div>
+                  <div className="font-semibold text-xs text-[#FFFFFF]">Contatados Hoje</div>
                   <div className="text-[11px] text-[#94A3B8]">Atendimentos feitos na data</div>
                 </div>
-                <span className="font-bold text-xs bg-[#111827] px-2 py-0.5 rounded text-[#D4AF37]">
+                <span className="font-bold text-xs bg-[#111D3E] px-2 py-0.5 rounded text-[#2563EB]">
                   {contactedToday.length}
                 </span>
               </button>
@@ -270,15 +270,15 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
                 onClick={() => setFilterType('pagou')}
                 className={`flex items-center justify-between p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   filterType === 'pagou'
-                    ? 'bg-[#1E293B] border-[#6E8F5C] text-[#F8FAFC]'
-                    : 'bg-[#0A0E17] border-[#25334A] text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#1C2C55] border-[#6E8F5C] text-[#FFFFFF]'
+                    : 'bg-[#0B132B] border-[#263B6E] text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
               >
                 <div>
                   <div className="font-semibold text-xs text-[#6E8F5C]">Apenas Alunos que Pagaram</div>
                   <div className="text-[11px] text-[#94A3B8]">Matrículas fechadas</div>
                 </div>
-                <span className="font-bold text-xs bg-[#111827] px-2 py-0.5 rounded text-[#6E8F5C]">
+                <span className="font-bold text-xs bg-[#111D3E] px-2 py-0.5 rounded text-[#6E8F5C]">
                   {pagouList.length}
                 </span>
               </button>
@@ -288,15 +288,15 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
                 onClick={() => setFilterType('quente_potencial')}
                 className={`flex items-center justify-between p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   filterType === 'quente_potencial'
-                    ? 'bg-[#1E293B] border-[#B14432] text-[#F8FAFC]'
-                    : 'bg-[#0A0E17] border-[#25334A] text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#1C2C55] border-[#B14432] text-[#FFFFFF]'
+                    : 'bg-[#0B132B] border-[#263B6E] text-[#94A3B8] hover:text-[#FFFFFF]'
                 }`}
               >
                 <div>
-                  <div className="font-semibold text-xs text-[#F8FAFC]">Quentes & Potenciais</div>
+                  <div className="font-semibold text-xs text-[#FFFFFF]">Quentes & Potenciais</div>
                   <div className="text-[11px] text-[#94A3B8]">Foco em conversão imediata</div>
                 </div>
-                <span className="font-bold text-xs bg-[#111827] px-2 py-0.5 rounded text-[#D4AF37]">
+                <span className="font-bold text-xs bg-[#111D3E] px-2 py-0.5 rounded text-[#2563EB]">
                   {quenteList.length + potencialList.length}
                 </span>
               </button>
@@ -304,16 +304,16 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
           </div>
 
           {/* WhatsApp Text Report Preview & Copy */}
-          <div className="bg-[#0A0E17] border border-[#25334A] rounded-xl p-3.5 space-y-2">
+          <div className="bg-[#0B132B] border border-[#263B6E] rounded-xl p-3.5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span className="text-xs font-semibold text-[#FFFFFF] flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-[#2563EB]" />
                 Resumo Formatado para Enviar no WhatsApp da Equipe
               </span>
               <button
                 type="button"
                 onClick={handleCopySummary}
-                className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:text-[#F8FAFC] bg-[#111827] hover:bg-[#1E293B] px-2.5 py-1 rounded-md border border-[#25334A] transition-colors cursor-pointer font-semibold"
+                className="flex items-center gap-1.5 text-xs text-[#2563EB] hover:text-[#FFFFFF] bg-[#111D3E] hover:bg-[#1C2C55] px-2.5 py-1 rounded-md border border-[#263B6E] transition-colors cursor-pointer font-semibold"
               >
                 {copiedText ? (
                   <>
@@ -328,23 +328,23 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
                 )}
               </button>
             </div>
-            <pre className="text-[11px] text-[#94A3B8] whitespace-pre-wrap font-sans bg-[#111827]/60 p-2.5 rounded-lg border border-[#25334A]/60 max-h-28 overflow-y-auto leading-relaxed">
+            <pre className="text-[11px] text-[#94A3B8] whitespace-pre-wrap font-sans bg-[#111D3E]/60 p-2.5 rounded-lg border border-[#263B6E]/60 max-h-28 overflow-y-auto leading-relaxed">
               {summaryText}
             </pre>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-5 border-t border-[#25334A] bg-[#0A0E17]/80 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-[#263B6E] bg-[#0B132B]/80 flex flex-wrap items-center justify-between gap-3">
           <div className="text-xs text-[#94A3B8]">
-            Selecionado: <strong className="text-[#F8FAFC]">{filteredContacts.length} contatos</strong> ({filterLabel})
+            Selecionado: <strong className="text-[#FFFFFF]">{filteredContacts.length} contatos</strong> ({filterLabel})
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 bg-[#111827] hover:bg-[#1E293B] text-[#F8FAFC] border border-[#25334A] hover:border-[#D4AF37] px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 bg-[#111D3E] hover:bg-[#1C2C55] text-[#FFFFFF] border border-[#263B6E] hover:border-[#2563EB] px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
               title="Baixar formato CSV"
             >
               <Download className="w-3.5 h-3.5" />
@@ -356,7 +356,7 @@ export const DailyExportModal: React.FC<DailyExportModalProps> = ({
               id="btn-confirm-excel-export"
               onClick={handleExportExcel}
               disabled={isExporting}
-              className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#E5C04A] text-[#0A0E17] px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-2 bg-[#2563EB] hover:bg-[#3B82F6] text-[#0B132B] px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4" />
               {isExporting ? 'Formatando Planilha Colorida...' : 'Baixar Planilha Excel Colorida (.xlsx)'}

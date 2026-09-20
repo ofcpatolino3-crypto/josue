@@ -1184,7 +1184,7 @@ export function getContactInactivityStatus(contact: Partial<Contact>): {
       days: 2,
       isCritical: false,
       label: 'Há 2 dias (Atenção)',
-      badgeClass: 'bg-[#C9A227]/20 text-[#FCD34D] border-[#C9A227]/40',
+      badgeClass: 'bg-[#2563EB]/20 text-[#FCD34D] border-[#2563EB]/40',
     };
   }
 

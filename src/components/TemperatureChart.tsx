@@ -33,7 +33,7 @@ export const TemperatureChart: React.FC<ChartProps> = ({
   const gradientStops: string[] = [];
 
   if (total === 0) {
-    gradientStops.push('#2B3D63 0% 100%');
+    gradientStops.push('#263B6E 0% 100%');
   } else {
     tempStats.forEach((stat) => {
       if (stat.count > 0) {
@@ -45,7 +45,7 @@ export const TemperatureChart: React.FC<ChartProps> = ({
 
     // Fallback if 0 items have values
     if (gradientStops.length === 0) {
-      gradientStops.push('#2B3D63 0% 100%');
+      gradientStops.push('#263B6E 0% 100%');
     }
   }
 
@@ -54,14 +54,14 @@ export const TemperatureChart: React.FC<ChartProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 bg-[#172644] border border-[#2B3D63] rounded-xl p-5 mb-5 shadow-sm">
+    <div className="flex flex-col sm:flex-row items-center gap-6 bg-[#111D3E] border border-[#263B6E] rounded-xl p-5 mb-5 shadow-sm">
       {/* Donut graphic */}
       <div className="relative w-36 h-36 rounded-full shrink-0 shadow-inner" style={conicStyle}>
-        <div className="absolute inset-5 rounded-full bg-[#172644] flex flex-col items-center justify-center text-center shadow-md">
-          <div className="font-serif text-2xl font-bold text-[#EDE6D6] leading-none">
+        <div className="absolute inset-5 rounded-full bg-[#111D3E] flex flex-col items-center justify-center text-center shadow-md">
+          <div className="font-serif text-2xl font-bold text-[#FFFFFF] leading-none">
             {total}
           </div>
-          <div className="text-[10px] text-[#8C98B4] uppercase tracking-wider mt-1 font-medium">
+          <div className="text-[10px] text-[#94A3B8] uppercase tracking-wider mt-1 font-medium">
             cadastrados
           </div>
         </div>
@@ -69,12 +69,12 @@ export const TemperatureChart: React.FC<ChartProps> = ({
 
       {/* Legend list */}
       <div className="flex-1 w-full flex flex-col gap-2">
-        <div className="text-xs uppercase tracking-wider text-[#8C98B4] font-semibold mb-1 flex items-center justify-between">
+        <div className="text-xs uppercase tracking-wider text-[#94A3B8] font-semibold mb-1 flex items-center justify-between">
           <span>Distribuição por Temperatura</span>
           {selectedTempFilter && (
             <button
               onClick={() => onSelectTempFilter && onSelectTempFilter('')}
-              className="text-[11px] text-[#C9A227] hover:underline cursor-pointer lowercase"
+              className="text-[11px] text-[#2563EB] hover:underline cursor-pointer lowercase"
             >
               (limpar filtro)
             </button>
@@ -82,7 +82,7 @@ export const TemperatureChart: React.FC<ChartProps> = ({
         </div>
 
         {total === 0 ? (
-          <div className="text-xs text-[#8C98B4] py-2">
+          <div className="text-xs text-[#94A3B8] py-2">
             Importe ou adicione contatos para visualizar o gráfico térmico de conversão.
           </div>
         ) : (
@@ -98,8 +98,8 @@ export const TemperatureChart: React.FC<ChartProps> = ({
                 }}
                 className={`flex items-center gap-3 p-1.5 px-2 rounded-lg text-xs sm:text-sm text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-[#1F3057] ring-1 ring-[#C9A227]'
-                    : 'hover:bg-[#1F3057]/60'
+                    ? 'bg-[#1C2C55] ring-1 ring-[#2563EB]'
+                    : 'hover:bg-[#1C2C55]/60'
                 }`}
                 title={`Filtrar por ${item.label}`}
               >
@@ -107,13 +107,13 @@ export const TemperatureChart: React.FC<ChartProps> = ({
                   className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="flex-1 text-[#EDE6D6] font-medium truncate">
+                <span className="flex-1 text-[#FFFFFF] font-medium truncate">
                   {item.label}
                 </span>
-                <span className="text-xs text-[#8C98B4] w-24 text-right">
+                <span className="text-xs text-[#94A3B8] w-24 text-right">
                   {item.count} contato{item.count !== 1 ? 's' : ''}
                 </span>
-                <span className="font-serif font-bold text-sm text-[#C9A227] w-12 text-right">
+                <span className="font-serif font-bold text-sm text-[#2563EB] w-12 text-right">
                   {Math.round(item.pct)}%
                 </span>
               </button>
